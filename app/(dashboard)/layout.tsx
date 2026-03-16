@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AppShell } from "@/components/layout";
+import { ToastProvider } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: {
@@ -18,5 +19,9 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AppShell>{children}</AppShell>;
+  return (
+    <ToastProvider>
+      <AppShell>{children}</AppShell>
+    </ToastProvider>
+  );
 }

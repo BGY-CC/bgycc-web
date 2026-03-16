@@ -18,6 +18,11 @@ export const metadata: Metadata = {
     default: "BGYCC Admin — School of Leadership",
   },
   description: "BGYCC School of Leadership admin dashboard",
+  icons: {
+    icon: "/bgycc_logo.svg",
+    shortcut: "/bgycc_logo.svg",
+    apple: "/bgycc_logo.svg",
+  },
 };
 
 export default function RootLayout({

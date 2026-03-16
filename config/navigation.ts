@@ -1,14 +1,14 @@
 import type { NavItem } from "@/types";
 
 /**
- * Primary sidebar navigation.
- * Icons are resolved at component level via lucide-react to keep this file
- * free of React imports and safe to import in Server Components.
+ * Primary sidebar navigation — matches the 5 pages in the designs.
+ * Icons are resolved at component level via lucide-react to keep this
+ * file free of React imports and safe for Server Component imports.
  */
 export const primaryNav: Omit<NavItem, "icon">[] = [
   { label: "Dashboard", href: "/dashboard" },
-  { label: "Members", href: "/dashboard/members" },
-  { label: "Events", href: "/dashboard/events" },
-  { label: "Reports", href: "/dashboard/reports" },
-  { label: "Settings", href: "/dashboard/settings" },
+  { label: "Clubs", href: "/clubs" },
+  { label: "Pathway Checklists", href: "/pathway-checklists" },
+  { label: "Onboarding Editor", href: "/onboarding-editor" },
+  { label: "Resources", href: "/resources" },
 ];
