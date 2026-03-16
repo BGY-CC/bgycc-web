@@ -6,7 +6,6 @@ import { Header } from "./header";
 
 interface AppShellProps {
   children: React.ReactNode;
-  title?: string;
 }
 
 /**
@@ -17,7 +16,7 @@ interface AppShellProps {
  * - Tablet (≥768px):  Sidebar is a persistent panel, header hamburger hidden.
  * - Desktop (≥1280px): Same as tablet; main content area gains more horizontal space.
  */
-export function AppShell({ children, title }: AppShellProps) {
+export function AppShell({ children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -31,7 +30,6 @@ export function AppShell({ children, title }: AppShellProps) {
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <Header
           onMenuClick={() => setSidebarOpen(true)}
-          title={title}
         />
         <main className="flex-1 overflow-y-auto">
           <div className="container mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">

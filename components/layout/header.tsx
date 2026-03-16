@@ -1,49 +1,62 @@
 "use client";
 
-import { Menu, Bell, ChevronDown } from "lucide-react";
+import { Menu, Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui";
 
 interface HeaderProps {
   onMenuClick?: () => void;
-  title?: string;
 }
 
-export function Header({ onMenuClick, title }: HeaderProps) {
+export function Header({ onMenuClick }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b border-gray-200 bg-white px-4 md:px-6">
+    <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-gray-200 bg-white px-4 md:px-6">
       {/* Mobile menu toggle */}
       <Button
         variant="ghost"
         size="icon"
         onClick={onMenuClick}
-        className="md:hidden"
+        className="md:hidden shrink-0"
         aria-label="Open navigation menu"
       >
         <Menu className="h-5 w-5" />
       </Button>
 
-      {/* Page title */}
-      {title && (
-        <h1 className="text-base font-semibold text-gray-900 hidden sm:block">
-          {title}
-        </h1>
-      )}
+      {/* Global search */}
+      <div className="flex-1 max-w-md">
+        <div className="relative">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            placeholder="Search..."
+            className="h-9 w-full rounded-lg border border-gray-200 bg-gray-50 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+          />
+        </div>
+      </div>
 
-      {/* Right-side actions */}
+      {/* Right actions */}
       <div className="ml-auto flex items-center gap-2">
-        <Button variant="ghost" size="icon" aria-label="Notifications">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          aria-label="Notifications"
+        >
           <Bell className="h-5 w-5 text-gray-600" />
+          {/* Notification dot */}
+          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
         </Button>
 
-        {/* User menu — placeholder */}
+        {/* User avatar */}
         <button
-          className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-gray-100 transition-colors"
+          className="h-8 w-8 rounded-full bg-gray-300 overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           aria-label="Open user menu"
         >
-          <div className="h-8 w-8 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center select-none">
+          <div className="h-full w-full bg-gray-400 flex items-center justify-center text-white text-xs font-semibold select-none">
             A
           </div>
-          <ChevronDown className="h-4 w-4 text-gray-500 hidden sm:block" />
         </button>
       </div>
     </header>

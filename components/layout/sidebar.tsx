@@ -5,9 +5,10 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  Calendar,
-  BarChart3,
-  Settings,
+  ClipboardList,
+  PenSquare,
+  FolderOpen,
+  LogOut,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,10 +18,10 @@ import { Logo } from "@/components/shared";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Members", href: "/dashboard/members", icon: Users },
-  { label: "Events", href: "/dashboard/events", icon: Calendar },
-  { label: "Reports", href: "/dashboard/reports", icon: BarChart3 },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  { label: "Clubs", href: "/clubs", icon: Users },
+  { label: "Pathway Checklists", href: "/pathway-checklists", icon: ClipboardList },
+  { label: "Onboarding Editor", href: "/onboarding-editor", icon: PenSquare },
+  { label: "Resources", href: "/resources", icon: FolderOpen },
 ];
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -49,32 +50,36 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       {/* Sidebar panel */}
       <aside
         className={cn(
-          // Layout
-          "fixed inset-y-0 left-0 z-30 flex w-64 flex-col",
-          "bg-primary text-white",
-          // Mobile: slide in/out
+          "fixed inset-y-0 left-0 z-30 flex w-56 flex-col",
+          "bg-white border-r border-gray-200",
           "transition-transform duration-300 ease-in-out",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          // Desktop: always visible
           "md:relative md:translate-x-0",
         )}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-5 border-b border-white/10">
+        {/* Logo */}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
           <Logo size="sm" />
           <button
             onClick={onClose}
-            className="md:hidden p-1 rounded hover:bg-white/10 transition-colors"
+            className="md:hidden p-1 rounded hover:bg-gray-100 transition-colors"
             aria-label="Close sidebar"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4 text-gray-500" />
           </button>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1" aria-label="Main navigation">
+        <nav
+          className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5"
+          aria-label="Main navigation"
+        >
           {navItems.map(({ label, href, icon: Icon }) => {
-            const isActive = pathname === href || pathname.startsWith(`${href}/`);
+            const isActive =
+              href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname === href || pathname.startsWith(`${href}/`);
+
             return (
               <Link
                 key={href}
@@ -83,8 +88,8 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium",
                   "transition-colors duration-150",
                   isActive
-                    ? "bg-white/15 text-white"
-                    : "text-white/70 hover:bg-white/10 hover:text-white",
+                    ? "bg-primary text-white"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
                 )}
                 aria-current={isActive ? "page" : undefined}
               >
@@ -94,6 +99,17 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             );
           })}
         </nav>
+
+        {/* Logout */}
+        <div className="px-2 py-3 border-t border-gray-100">
+          <button
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-colors duration-150"
+            aria-label="Log out"
+          >
+            <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+            Logout
+          </button>
+        </div>
       </aside>
     </>
   );
