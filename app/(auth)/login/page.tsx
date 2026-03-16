@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
+import { LoginForm } from "./_components/login-form";
 
-export const metadata: Metadata = {
-  title: "Sign in",
-};
+export const metadata: Metadata = { title: "Sign in" };
 
-/**
- * Login page — renders the sign-in form.
- * Form logic lives in a Client Component to keep this page as a Server Component.
- */
 export default function LoginPage() {
   return (
     <>
@@ -19,11 +14,7 @@ export default function LoginPage() {
           Login to continue where you left off
         </p>
       </div>
-
-      {/* TODO: <LoginForm /> — implemented in auth feature task */}
-      <div className="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-400">
-        LoginForm component — coming next
-      </div>
+      <LoginForm />
     </>
   );
 }

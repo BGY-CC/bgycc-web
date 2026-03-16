@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
+import { ForgotPasswordForm } from "./_components/forgot-password-form";
 
-export const metadata: Metadata = {
-  title: "Forgot Password",
-};
+export const metadata: Metadata = { title: "Forgot Password" };
 
 export default function ForgotPasswordPage() {
   return (
@@ -15,11 +14,7 @@ export default function ForgotPasswordPage() {
           No worries — enter your email and we&apos;ll send you a reset link.
         </p>
       </div>
-
-      {/* TODO: <ForgotPasswordForm /> — implemented in auth feature task */}
-      <div className="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-400">
-        ForgotPasswordForm component — coming next
-      </div>
+      <ForgotPasswordForm />
     </>
   );
 }
