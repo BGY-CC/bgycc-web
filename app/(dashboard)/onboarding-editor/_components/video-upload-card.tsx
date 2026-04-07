@@ -43,19 +43,19 @@ export function VideoUploadCard({
 
   return (
     <>
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-border bg-white p-6 shadow-sm hover:border-primary/20 transition-all group">
         {/* Card header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Play className="h-4 w-4" />
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-background border border-border text-primary shadow-sm group-hover:scale-105 transition-transform">
+              <Play className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900">{pathway}</p>
-              <p className="text-xs text-gray-500">{description}</p>
+              <p className="text-[15px] font-bold text-primary tracking-tight">{pathway}</p>
+              <p className="text-[13px] font-medium text-muted mt-1">{description}</p>
             </div>
           </div>
-          <Badge variant={hasVideo ? "uploaded" : "no-video"}>
+          <Badge variant={hasVideo ? "uploaded" : "no-video"} className="font-bold px-3 py-1">
             {hasVideo ? "Uploaded" : "No Video"}
           </Badge>
         </div>
@@ -72,32 +72,43 @@ export function VideoUploadCard({
             </div>
 
             {/* File info */}
-            <div className="flex-1 space-y-1.5">
-              <p className="text-xs text-gray-500">File Name</p>
-              <p className="text-sm font-medium text-gray-900">{video.name}</p>
-
-              <div className="flex gap-6 text-xs text-gray-500 mt-2">
-                <span>Size <span className="font-medium text-gray-700">{video.size}</span></span>
-                <span>Duration <span className="font-medium text-gray-700">{video.duration}</span></span>
-                <span>Uploaded <span className="font-medium text-gray-700">{video.uploaded}</span></span>
+            <div className="flex-1 space-y-4">
+              <div className="space-y-1">
+                <p className="text-[11px] font-bold text-muted uppercase tracking-[0.1em]">File Name</p>
+                <p className="text-sm font-bold text-primary">{video.name}</p>
               </div>
 
-              <div className="flex gap-2 mt-3">
+              <div className="flex gap-8 border-y border-border py-3">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted uppercase tracking-[0.1em]">Size</p>
+                  <p className="text-xs font-bold text-primary">{video.size}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted uppercase tracking-[0.1em]">Duration</p>
+                  <p className="text-xs font-bold text-primary">{video.duration}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted uppercase tracking-[0.1em]">Uploaded</p>
+                  <p className="text-xs font-bold text-primary">{video.uploaded}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
                   onClick={handleReplace}
-                  className="text-gray-600"
+                  className="bg-background border-border text-primary hover:bg-background/80"
                 >
-                  Replace
+                  Replace Video
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   leftIcon={<Trash2 className="h-3.5 w-3.5" />}
                   onClick={() => setShowConfirm(true)}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  className="text-error hover:text-error hover:bg-error-bg font-bold"
                 >
                   Remove
                 </Button>

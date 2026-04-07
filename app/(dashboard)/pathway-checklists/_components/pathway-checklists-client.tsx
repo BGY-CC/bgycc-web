@@ -104,10 +104,13 @@ export function PathwayChecklistsClient() {
       />
 
       {/* Lists */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-6">
+      <div className="rounded-3xl border border-border bg-white p-8 shadow-sm space-y-10">
         {everyday.length > 0 && (
           <section>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Everyday Tasks</h3>
+            <h3 className="text-[12px] font-bold text-muted uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Everyday Tasks
+            </h3>
             {everyday.map((item) => (
               <ChecklistItemRow
                 key={item.id}
@@ -121,7 +124,10 @@ export function PathwayChecklistsClient() {
 
         {weekly.length > 0 && (
           <section>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Weekly Tasks</h3>
+            <h3 className="text-[12px] font-bold text-muted uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-accent" />
+              Weekly Tasks
+            </h3>
             {weekly.map((item) => (
               <ChecklistItemRow
                 key={item.id}
@@ -135,7 +141,8 @@ export function PathwayChecklistsClient() {
 
         {specificDay.length > 0 && (
           <section>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">
+            <h3 className="text-[12px] font-bold text-muted uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-warning" />
               Specific Day &amp; Cycle Tasks
             </h3>
             {specificDay.map((item) => (

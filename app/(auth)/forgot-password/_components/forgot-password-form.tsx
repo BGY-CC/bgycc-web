@@ -29,16 +29,19 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="space-y-4">
-        <Alert
-          variant="success"
-          icon={<CheckCircle2 className="h-4 w-4" />}
-        >
-          We&apos;ve sent a password reset link to your email. It may take a few minutes to arrive.
-        </Alert>
+      <div className="flex flex-col items-center text-center space-y-6 pt-4">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success-bg text-success shadow-sm ring-1 ring-border/10">
+          <CheckCircle2 className="h-10 w-10" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-bold text-primary tracking-tight">Check your email</h2>
+          <p className="text-sm font-medium text-muted leading-relaxed">
+            We&apos;ve sent a password reset link to your email. It may take a few minutes to arrive.
+          </p>
+        </div>
         <Link
           href={ROUTES.LOGIN}
-          className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
+          className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-white px-6 text-sm font-bold text-primary hover:bg-background transition-all shadow-sm active:scale-95"
         >
           Back to Login
         </Link>

@@ -56,50 +56,41 @@ export function ResourcesClient() {
       </div>
 
       {/* Resource list */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm divide-y divide-gray-50">
+      <div className="rounded-3xl border border-border bg-white shadow-sm overflow-hidden divide-y divide-border">
         {resources.map((r) => (
-          <div key={r.id} className="flex items-start gap-3 px-5 py-4">
+          <div key={r.id} className="flex items-start gap-4 px-6 py-5 hover:bg-background/50 transition-colors group">
             {/* File icon */}
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100">
-              <Trash2 className="h-4 w-4 text-gray-400" />
+            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-background border border-border text-primary shadow-sm group-hover:scale-105 transition-transform">
+              <Link2 className="h-5 w-5" />
             </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900">{r.title}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{r.description}</p>
+              <p className="text-[15px] font-bold text-primary tracking-tight">{r.title}</p>
+              <p className="text-[13px] font-medium text-muted mt-1">{r.description}</p>
               <a
                 href={r.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 mt-1.5 text-xs text-primary hover:underline"
+                className="flex items-center gap-1.5 mt-2.5 text-xs font-bold text-accent hover:underline underline-offset-4"
               >
-                <Link2 className="h-3 w-3" />
+                <ExternalLink className="h-3 w-3" />
                 {r.link}
               </a>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-1 shrink-0">
-              <a
-                href={r.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-                aria-label={`Open ${r.title}`}
-              >
-                <ExternalLink className="h-4 w-4" />
-              </a>
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => setEditTarget(r)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-background hover:text-primary transition-colors border border-transparent hover:border-border"
                 aria-label={`Edit ${r.title}`}
               >
                 <Pencil className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setDeleteTarget(r)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-error-bg hover:text-error transition-colors border border-transparent hover:border-error/20"
                 aria-label={`Delete ${r.title}`}
               >
                 <Trash2 className="h-4 w-4" />

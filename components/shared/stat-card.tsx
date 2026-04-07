@@ -28,7 +28,11 @@ export function StatCard({ label, value, icon, change = 0, className }: StatCard
       <div className="flex items-start justify-between">
         {/* Icon */}
         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-background text-primary">
-          {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
+          {React.isValidElement(icon)
+            ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
+                className: "h-5 w-5",
+              })
+            : icon}
         </div>
 
         {/* Change badge */}

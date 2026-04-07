@@ -49,20 +49,20 @@ export default function OnboardingEditorPage() {
       />
 
       {/* Section header */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="rounded-3xl border border-border bg-white p-8 shadow-sm">
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+          <div className="flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-background border border-border text-primary shadow-sm">
               <span className="text-primary text-sm">▶</span>
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-gray-900">Pathway Videos</h2>
-              <p className="text-xs text-gray-500">
+              <h2 className="text-[17px] font-bold text-primary tracking-tight">Pathway Videos</h2>
+              <p className="text-sm font-medium text-muted mt-1">
                 Manage the welcome videos that new members see during onboarding for each pathway.
               </p>
             </div>
           </div>
-          <Badge variant="warning" className="bg-orange-100 text-orange-700 shrink-0">
+          <Badge variant="warning" className="px-4 py-1.5 font-bold uppercase tracking-wider">
             {uploaded}/{total} Videos Uploaded
           </Badge>
         </div>
