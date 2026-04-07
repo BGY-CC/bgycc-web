@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Logo } from "@/components/shared";
+import { AuthFooter } from "./_components/auth-footer";
 
 export const metadata: Metadata = {
   title: {
@@ -8,10 +9,6 @@ export const metadata: Metadata = {
   },
 };
 
-/**
- * Auth layout — centered card, logo above, legal footer below.
- * No sidebar or header chrome; intentionally minimal.
- */
 export default function AuthLayout({
   children,
 }: {
@@ -25,22 +22,11 @@ export default function AuthLayout({
       </div>
 
       {/* Auth card */}
-      <div className="w-full max-w-[448px] rounded-3xl border border-border bg-white p-8 sm:p-10 shadow-none">
+      <div className="w-full max-w-[512px] rounded-3xl border border-border bg-white p-10 shadow-none">
         {children}
       </div>
 
-      {/* Legal footer */}
-      <p className="mt-8 sm:mt-10 text-center text-[13px] font-medium text-black max-w-sm leading-relaxed">
-        By joining, you agree to our{" "}
-        <a href="#" className="text-primary underline underline-offset-4 hover:text-primary-hover">
-          Terms of Service
-        </a>{" "}
-        and{" "}
-        <a href="#" className="text-primary underline underline-offset-4 hover:text-primary-hover">
-          Privacy Policy
-        </a>
-        .
-      </p>
+      <AuthFooter />
     </div>
   );
 }

@@ -35,13 +35,13 @@ export function ForgotPasswordForm() {
         </div>
         <div className="space-y-2">
           <h2 className="text-xl font-bold text-primary tracking-tight">Check your email</h2>
-          <p className="text-sm font-medium text-muted leading-relaxed">
+          <p className="text-sm font-medium text-gray-100 leading-relaxed">
             We&apos;ve sent a password reset link to your email. It may take a few minutes to arrive.
           </p>
         </div>
         <Link
           href={ROUTES.LOGIN}
-          className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-white px-6 text-sm font-bold text-primary hover:bg-background transition-all shadow-sm active:scale-95"
+          className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-white px-6 text-sm text-primary hover:bg-background transition-all shadow-sm active:scale-95 underline underline-offset-4"
         >
           Back to Login
         </Link>
@@ -67,7 +67,7 @@ export function ForgotPasswordForm() {
 
       <p className="text-center text-sm text-gray-500">
         Remember your password?{" "}
-        <Link href={ROUTES.LOGIN} className="text-primary font-medium hover:underline">
+        <Link href={ROUTES.LOGIN} className="text-primary font-light underline underline-offset-3">
           Back to login
         </Link>
       </p>

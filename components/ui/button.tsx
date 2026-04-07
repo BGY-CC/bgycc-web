@@ -15,10 +15,10 @@ const variantClasses = {
 } as const;
 
 const sizeClasses = {
-  sm: "h-9 px-4 text-xs rounded-xl font-bold",
-  md: "h-11 px-6 text-sm rounded-2xl font-bold",
-  lg: "h-14 px-8 text-base rounded-2xl font-bold",
-  icon: "h-11 w-11 rounded-2xl font-bold",
+  sm: "h-9 px-4 text-xs rounded-xl font-semibold",
+  md: "h-11 px-6 text-sm rounded-2xl font-semibold",
+  lg: "h-14 px-8 text-base rounded-2xl font-semibold",
+  icon: "h-11 w-11 rounded-2xl font-semibold",
 } as const;
 
 // ─── Props ────────────────────────────────────────────────────────────────────

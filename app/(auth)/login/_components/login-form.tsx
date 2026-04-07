@@ -71,7 +71,7 @@ export function LoginForm() {
       {/* Divider */}
       <div className="relative flex items-center gap-4 py-2">
         <div className="flex-1 h-px bg-border" />
-        <span className="text-sm font-bold text-black">Or</span>
+        <span className="text-sm text-black">Or</span>
         <div className="flex-1 h-px bg-border" />
       </div>
 
@@ -133,7 +133,7 @@ export function LoginForm() {
 
       <p className="text-center text-sm text-gray-500">
         Already have an account?{" "}
-        <Link href={ROUTES.LOGIN} className="text-primary font-bold underline underline-offset-4">
+        <Link href={ROUTES.LOGIN} className="text-primary underline underline-offset-4">
           Sign in
         </Link>
       </p>
