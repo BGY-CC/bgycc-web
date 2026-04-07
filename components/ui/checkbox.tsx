@@ -29,7 +29,6 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           )}
           {...props}
         />
-        {/* Custom checkmark rendered via CSS sibling selector */}
         <span className="pointer-events-none absolute hidden peer-checked:block text-white" aria-hidden="true" />
         {label && (
           <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
