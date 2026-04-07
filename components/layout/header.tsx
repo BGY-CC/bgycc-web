@@ -9,55 +9,60 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-gray-200 bg-white px-4 md:px-6">
-      {/* Mobile menu toggle */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onMenuClick}
-        className="md:hidden shrink-0"
-        aria-label="Open navigation menu"
-      >
-        <Menu className="h-5 w-5" />
-      </Button>
+    <header className="sticky top-0 z-10 flex h-20 items-center justify-between bg-transparent px-4 md:px-8">
+      {/* Mobile menu toggle and Page Title */}
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onMenuClick}
+          className="md:hidden shrink-0"
+          aria-label="Open navigation menu"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        <div className="hidden md:block">
+          <h1 className="text-2xl font-bold text-primary">Dashboard</h1>
+        </div>
+      </div>
 
-      {/* Global search */}
-      <div className="flex-1 max-w-md">
-        <div className="relative">
+      {/* Right side container - floating style */}
+      <div className="flex items-center gap-4 bg-white rounded-3xl px-4 py-2 shadow-sm border border-border">
+        {/* Global search */}
+        <div className="relative w-48 lg:w-64">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted"
             aria-hidden="true"
           />
           <input
             type="search"
             placeholder="Search..."
-            className="h-9 w-full rounded-lg border border-gray-200 bg-gray-50 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            className="h-10 w-full rounded-2xl bg-background border-none pl-10 pr-3 text-sm text-primary placeholder:text-muted focus:ring-2 focus:ring-primary/20 transition-all"
           />
         </div>
-      </div>
 
-      {/* Right actions */}
-      <div className="ml-auto flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          aria-label="Notifications"
-        >
-          <Bell className="h-5 w-5 text-gray-600" />
-          {/* Notification dot */}
-          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
-        </Button>
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative h-10 w-10 text-muted hover:text-primary hover:bg-background rounded-xl"
+            aria-label="Notifications"
+          >
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-error border-2 border-white" aria-hidden="true" />
+          </Button>
 
-        {/* User avatar */}
-        <button
-          className="h-8 w-8 rounded-full bg-gray-300 overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          aria-label="Open user menu"
-        >
-          <div className="h-full w-full bg-gray-400 flex items-center justify-center text-white text-xs font-semibold select-none">
-            A
-          </div>
-        </button>
+          {/* User avatar */}
+          <button
+            className="h-10 w-10 rounded-full bg-blue-100 overflow-hidden border-2 border-white shadow-sm focus:ring-2 focus:ring-primary/20"
+            aria-label="Open user menu"
+          >
+            <div className="h-full w-full bg-primary flex items-center justify-center text-white text-xs font-bold select-none">
+              JD
+            </div>
+          </button>
+        </div>
       </div>
     </header>
   );

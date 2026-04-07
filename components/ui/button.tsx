@@ -5,20 +5,20 @@ import { cn } from "@/lib/utils";
 
 const variantClasses = {
   primary:
-    "bg-primary text-white hover:bg-primary-hover active:bg-primary-hover disabled:opacity-50",
+    "bg-primary text-white hover:bg-primary-hover active:bg-primary-hover disabled:opacity-50 shadow-sm shadow-primary/20",
   secondary:
-    "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50",
+    "bg-white text-primary border border-border hover:bg-background active:bg-border disabled:opacity-50 shadow-sm",
   ghost:
-    "bg-transparent text-gray-700 hover:bg-gray-100 active:bg-gray-200 disabled:opacity-50",
+    "bg-transparent text-muted hover:bg-background hover:text-primary active:bg-border disabled:opacity-50",
   destructive:
-    "bg-red-600 text-white hover:bg-red-700 active:bg-red-800 disabled:opacity-50",
+    "bg-error text-white hover:bg-error/90 active:bg-error disabled:opacity-50 shadow-sm shadow-error/20",
 } as const;
 
 const sizeClasses = {
-  sm: "h-8 px-3 text-sm rounded-md",
-  md: "h-10 px-4 text-sm rounded-lg",
-  lg: "h-12 px-6 text-base rounded-lg",
-  icon: "h-10 w-10 rounded-lg",
+  sm: "h-9 px-4 text-xs rounded-xl font-bold",
+  md: "h-11 px-6 text-sm rounded-2xl font-bold",
+  lg: "h-14 px-8 text-base rounded-2xl font-bold",
+  icon: "h-11 w-11 rounded-2xl font-bold",
 } as const;
 
 // ─── Props ────────────────────────────────────────────────────────────────────

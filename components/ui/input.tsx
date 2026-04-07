@@ -59,12 +59,12 @@ Input.displayName = "Input";
 // ─── Shared class strings ─────────────────────────────────────────────────────
 
 const baseInputClasses = [
-  "flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2",
-  "text-sm text-gray-900 placeholder:text-gray-400",
-  "transition-colors duration-150",
-  "focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary",
-  "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50",
+  "flex h-11 w-full rounded-2xl border border-border bg-white px-4 py-2",
+  "text-sm text-primary font-medium placeholder:text-muted",
+  "transition-all duration-200",
+  "focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary",
+  "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-background",
 ].join(" ");
 
 const errorClasses =
-  "border-red-500 focus:ring-red-500 focus:border-red-500";
+  "border-error focus:ring-error/10 focus:border-error";

@@ -21,37 +21,33 @@ export function StatCard({ label, value, icon, change = 0, className }: StatCard
   return (
     <div
       className={cn(
-        "rounded-xl border border-gray-200 bg-white p-4 shadow-sm",
+        "rounded-2xl border border-border bg-white p-5 shadow-sm transition-all hover:shadow-md",
         className,
       )}
     >
       <div className="flex items-start justify-between">
         {/* Icon */}
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-600">
-          {icon}
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-background text-primary">
+          {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
         </div>
 
         {/* Change badge */}
         <span
           className={cn(
-            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
+            "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold",
             isPositive
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-600",
+              ? "bg-success-bg text-success"
+              : "bg-error-bg text-error",
           )}
         >
-          {isPositive ? (
-            <TrendingUp className="h-3 w-3" aria-hidden="true" />
-          ) : (
-            <TrendingDown className="h-3 w-3" aria-hidden="true" />
-          )}
+          <TrendingUp className={cn("h-3.5 w-3.5", isPositive ? "" : "rotate-180")} aria-hidden="true" />
           {changeLabel}
         </span>
       </div>
 
-      <div className="mt-3">
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-        <p className="mt-0.5 text-xs text-gray-500">{label}</p>
+      <div className="mt-4">
+        <p className="text-2xl font-extrabold text-primary tracking-tight">{value}</p>
+        <p className="mt-1 text-sm font-bold text-muted">{label}</p>
       </div>
     </div>
   );

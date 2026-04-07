@@ -3,9 +3,9 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 const DATA = [
-  { name: "Active", value: 60, color: "#1e2d6b" },
-  { name: "At Risk", value: 30, color: "#c0392b" },
-  { name: "Reset", value: 10, color: "#d1d5db" },
+  { name: "Active", value: 60, color: "#1b2559" },
+  { name: "At Risk", value: 30, color: "#e21d48" },
+  { name: "Reset", value: 10, color: "#e9edf7" },
 ];
 
 export function MemberStatusChart() {

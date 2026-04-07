@@ -46,44 +46,46 @@ export function EngagementChart() {
       <AreaChart data={MOCK_DATA} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="reportsGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#1e2d6b" stopOpacity={0.15} />
-            <stop offset="95%" stopColor="#1e2d6b" stopOpacity={0} />
+            <stop offset="5%" stopColor="#1b2559" stopOpacity={0.1} />
+            <stop offset="95%" stopColor="#1b2559" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="loginsGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#c0392b" stopOpacity={0.15} />
-            <stop offset="95%" stopColor="#c0392b" stopOpacity={0} />
+            <stop offset="5%" stopColor="#e21d48" stopOpacity={0.1} />
+            <stop offset="95%" stopColor="#e21d48" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+        <CartesianGrid strokeDasharray="5 5" stroke="#e9edf7" vertical={false} />
         <XAxis
           dataKey="day"
-          tick={{ fontSize: 12, fill: "#9ca3af" }}
+          tick={{ fontSize: 12, fill: "#a3aed0", fontWeight: 500 }}
           axisLine={false}
           tickLine={false}
+          dy={10}
         />
         <YAxis
-          tick={{ fontSize: 12, fill: "#9ca3af" }}
+          tick={{ fontSize: 12, fill: "#a3aed0", fontWeight: 500 }}
           axisLine={false}
           tickLine={false}
+          dx={-10}
         />
         <Tooltip content={<CustomTooltip />} />
         <Area
           type="monotone"
           dataKey="reports"
-          stroke="#1e2d6b"
-          strokeWidth={2}
+          stroke="#1b2559"
+          strokeWidth={4}
           fill="url(#reportsGradient)"
           dot={false}
-          activeDot={{ r: 5, fill: "#1e2d6b" }}
+          activeDot={{ r: 6, fill: "#1b2559", strokeWidth: 2, stroke: "#fff" }}
         />
         <Area
           type="monotone"
           dataKey="logins"
-          stroke="#c0392b"
-          strokeWidth={2}
+          stroke="#e21d48"
+          strokeWidth={4}
           fill="url(#loginsGradient)"
           dot={false}
-          activeDot={{ r: 5, fill: "#c0392b" }}
+          activeDot={{ r: 6, fill: "#e21d48", strokeWidth: 2, stroke: "#fff" }}
         />
       </AreaChart>
     </ResponsiveContainer>

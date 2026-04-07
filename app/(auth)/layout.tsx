@@ -18,25 +18,25 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4 py-20">
       {/* Brand mark */}
-      <div className="mb-8">
-        <Logo size="md" />
+      <div className="mb-10 text-center">
+        <Logo size="lg" className="flex-col items-center gap-4" />
       </div>
 
       {/* Auth card */}
-      <div className="w-full max-w-[440px] rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+      <div className="w-full max-w-[448px] rounded-3xl border border-border bg-white p-10 shadow-sm">
         {children}
       </div>
 
       {/* Legal footer */}
-      <p className="mt-8 text-center text-xs text-gray-500 max-w-sm">
+      <p className="mt-10 text-center text-[13px] font-medium text-muted max-w-sm leading-relaxed">
         By joining, you agree to our{" "}
-        <a href="#" className="underline hover:text-gray-900">
+        <a href="#" className="text-primary underline underline-offset-4 hover:text-primary-hover">
           Terms of Service
         </a>{" "}
         and{" "}
-        <a href="#" className="underline hover:text-gray-900">
+        <a href="#" className="text-primary underline underline-offset-4 hover:text-primary-hover">
           Privacy Policy
         </a>
         .

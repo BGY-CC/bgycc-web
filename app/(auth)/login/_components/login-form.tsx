@@ -48,10 +48,10 @@ export function LoginForm() {
       </Button>
 
       {/* Divider */}
-      <div className="relative flex items-center gap-3">
-        <div className="flex-1 border-t border-gray-200" />
-        <span className="text-xs text-gray-400">Or</span>
-        <div className="flex-1 border-t border-gray-200" />
+      <div className="relative flex items-center gap-4 py-2">
+        <div className="flex-1 h-px bg-border" />
+        <span className="text-sm font-bold text-muted">Or</span>
+        <div className="flex-1 h-px bg-border" />
       </div>
 
       {/* Server error */}
@@ -84,17 +84,16 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        {/* Forgot password — inline with label */}
-        <div className="flex justify-end -mt-1">
+        <div className="flex justify-end mt-2">
           <Link
             href={ROUTES.FORGOT_PASSWORD}
-            className="text-xs text-primary hover:underline"
+            className="text-xs font-bold text-primary hover:underline underline-offset-2"
           >
             Forgot your password?
           </Link>

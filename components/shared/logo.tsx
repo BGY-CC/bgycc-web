@@ -24,7 +24,7 @@ export function Logo({ className, size = "md" }: LogoProps) {
   const { iconSize, textSize, subtextSize } = sizeMap[size];
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center gap-3", className)}>
       <Image
         src="/bgycc_logo.svg"
         alt="BGYCC logo"
@@ -33,11 +33,11 @@ export function Logo({ className, size = "md" }: LogoProps) {
         className="shrink-0"
         priority
       />
-      <div className="leading-tight">
-        <span className={cn("block font-extrabold text-gray-900 tracking-wide", textSize)}>
+      <div className={cn("leading-tight", className?.includes("flex-col") && "text-center")}>
+        <span className={cn("block font-extrabold text-primary tracking-tight", textSize)}>
           BGYCC
         </span>
-        <span className={cn("block font-semibold uppercase tracking-widest text-red-600", subtextSize)}>
+        <span className={cn("block font-bold uppercase tracking-[0.2em] text-accent", subtextSize)}>
           School of Leadership
         </span>
       </div>

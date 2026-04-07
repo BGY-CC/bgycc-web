@@ -7,6 +7,7 @@ import { Badge, ActionMenu, Pagination, type DropdownItem } from "@/components/u
 import { ConfirmDialog } from "@/components/ui";
 import { useToast } from "@/components/ui";
 import type { Club } from "./types";
+import { cn } from "@/lib/utils";
 
 interface ClubsTableProps {
   clubs: Club[];
@@ -29,16 +30,16 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
   return (
     <>
       {/* Table wrapper — horizontal scroll on mobile */}
-      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+      <div className="rounded-2xl border border-border bg-white overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm font-sans">
             <thead>
-              <tr className="border-b border-gray-100 text-left">
+              <tr className="border-b border-border text-left">
                 {["Club", "Region", "Leader", "Members", "Report Rate", "Score", "Status", "Actions"].map(
                   (col) => (
                     <th
                       key={col}
-                      className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap"
+                      className="px-6 py-5 text-[11px] font-bold text-muted uppercase tracking-[0.1em] whitespace-nowrap"
                     >
                       {col}
                     </th>
@@ -46,7 +47,7 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border">
               {paginated.map((club) => {
                 const menuItems: DropdownItem[] = [
                   {
@@ -68,52 +69,54 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
                 ];
 
                 return (
-                  <tr key={club.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
+                  <tr key={club.id} className="hover:bg-background/50 transition-colors group">
+                    <td className="px-6 py-4 font-bold text-primary whitespace-nowrap">
                       <Link
                         href={`/clubs/${club.id}`}
-                        className="hover:text-primary transition-colors"
+                        className="hover:text-accent transition-colors"
                       >
                         {club.name}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                      <span className="flex items-center gap-1">
-                        <span className="text-gray-400">📍</span>
+                    <td className="px-6 py-4 text-subtle font-medium whitespace-nowrap">
+                      <span className="flex items-center gap-2">
+                        <span className="text-muted text-sm">📍</span>
                         {club.region}
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="flex items-center gap-2">
-                        <span className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600 shrink-0">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="flex items-center gap-3">
+                        <span className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-xs font-bold text-primary shrink-0 shadow-sm">
                           {club.leader.charAt(0)}
                         </span>
-                        <span className="text-gray-700">{club.leader}</span>
+                        <span className="text-primary font-bold">{club.leader}</span>
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{club.members}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4 text-subtle font-bold">{club.members}</td>
+                    <td className="px-6 py-4">
                       <span
-                        className={
+                        className={cn(
+                          "font-bold",
                           club.reportRate >= 80
-                            ? "text-green-600 font-medium"
+                            ? "text-success"
                             : club.reportRate >= 60
-                              ? "text-orange-500 font-medium"
-                              : "text-red-500 font-medium"
-                        }
+                              ? "text-warning"
+                              : "text-error"
+                        )}
                       >
                         {club.reportRate}%
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{club.score}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4 text-subtle font-bold">{club.score}</td>
+                    <td className="px-6 py-4">
                       <Badge
                         variant={club.status === "Active" ? "active" : "dormant"}
+                        className="font-bold px-3 py-1.5"
                       >
                         {club.status}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4">
                       <ActionMenu items={menuItems} align="right" />
                     </td>
                   </tr>
@@ -124,7 +127,7 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-center border-t border-gray-100 px-4 py-3">
+        <div className="flex items-center justify-center border-t border-border px-4 py-4">
           <Pagination
             currentPage={page}
             totalPages={totalPages}
