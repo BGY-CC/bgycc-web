@@ -105,7 +105,7 @@ export function LoginForm() {
             type={showPassword ? "text" : "password"}
             placeholder="••••••"
             autoComplete="current-password"
-            error={!!errors.password}
+            error={!!errors.password || !!serverError}
             className="pr-10"
             {...register("password")}
           />
