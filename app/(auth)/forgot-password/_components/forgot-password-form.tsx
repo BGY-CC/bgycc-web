@@ -8,9 +8,11 @@ import { CheckCircle2 } from "lucide-react";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validations/auth";
 import { Button, Input, FormField, Alert } from "@/components/ui";
 import { ROUTES } from "@/lib/constants";
+import { authService } from "@/lib/services/auth";
 
 export function ForgotPasswordForm() {
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -20,11 +22,18 @@ export function ForgotPasswordForm() {
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onSubmit = async (_data: ForgotPasswordInput) => {
-    // TODO Phase 2 — call reset email API
-    await new Promise((r) => setTimeout(r, 600));
-    setSent(true);
+  const onSubmit = async (data: ForgotPasswordInput) => {
+    setError(null);
+    try {
+      const result = await authService.forgotPassword(data.email);
+      if (result.success) {
+        setSent(true);
+      } else {
+        setError(result.error || "Failed to send reset email. Please try again.");
+      }
+    } catch (err: any) {
+      setError("An unexpected error occurred. Please try again later.");
+    }
   };
 
   if (sent) {
@@ -50,6 +59,8 @@ export function ForgotPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+      {error && <Alert variant="error">{error}</Alert>}
+      
       <FormField label="Email" required error={errors.email?.message}>
         <Input
           type="email"

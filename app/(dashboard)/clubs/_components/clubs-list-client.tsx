@@ -7,15 +7,24 @@ import { SearchInput } from "@/components/shared";
 import { ClubsTable } from "./clubs-table";
 import { ClubModal } from "./club-modal";
 import { SuccessModal } from "./success-modal";
-import { MOCK_CLUBS } from "./mock-data";
+import { useQuery } from "@/hooks/use-query";
+import { Club, PaginatedClubs } from "@/lib/services/clubs";
 
 export function ClubsListClient() {
   const [showCreate, setShowCreate] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const { data, isLoading, refetch } = useQuery<PaginatedClubs>(
+    `/clubs?page=${page}&name=${search}`,
+    { enabled: true }
+  );
 
   const handleCreateSuccess = () => {
     setShowCreate(false);
     setShowSuccess(true);
+    refetch();
   };
 
   return (
@@ -24,14 +33,16 @@ export function ClubsListClient() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
           <SearchInput
-            placeholder="Search clubs or leaders..."
+            placeholder="Search clubs..."
             containerClassName="w-full max-w-xs"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1); // Reset to first page on search
+            }}
           />
           <Button variant="secondary" size="sm" rightIcon={<ChevronDown className="h-4 w-4" />}>
             All Regions
-          </Button>
-          <Button variant="secondary" size="sm" rightIcon={<ChevronDown className="h-4 w-4" />}>
-            Name
           </Button>
         </div>
         <Button
@@ -43,7 +54,14 @@ export function ClubsListClient() {
         </Button>
       </div>
 
-      <ClubsTable clubs={MOCK_CLUBS} />
+      <div className={isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity"}>
+        <ClubsTable 
+          clubs={data?.clubs || []} 
+          currentPage={page}
+          totalPages={data?.total_pages || 1}
+          onPageChange={setPage}
+        />
+      </div>
 
       {/* Modals */}
       <ClubModal

@@ -6,21 +6,19 @@ import { Eye, Pencil, PowerOff } from "lucide-react";
 import { Badge, ActionMenu, Pagination, type DropdownItem } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ui";
 import { useToast } from "@/components/ui";
-import type { Club } from "./types";
+import { Club } from "@/lib/services/clubs";
 import { cn } from "@/lib/utils";
 
 interface ClubsTableProps {
   clubs: Club[];
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
-export function ClubsTable({ clubs }: ClubsTableProps) {
+export function ClubsTable({ clubs, currentPage, totalPages, onPageChange }: ClubsTableProps) {
   const { toast } = useToast();
-  const [page, setPage] = useState(1);
   const [deactivateTarget, setDeactivateTarget] = useState<Club | null>(null);
-
-  const pageSize = 10;
-  const totalPages = Math.ceil(clubs.length / pageSize);
-  const paginated = clubs.slice((page - 1) * pageSize, page * pageSize);
 
   const handleDeactivate = () => {
     toast(`${deactivateTarget?.name} has been deactivated.`);
@@ -35,7 +33,7 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
           <table className="w-full text-sm font-sans">
             <thead>
               <tr className="border-b border-border text-left">
-                {["Club", "Region", "Leader", "Members", "Report Rate", "Score", "Status", "Actions"].map(
+                {["Club", "Location", "Leader", "Members", "Avg Streak", "Status", "Actions"].map(
                   (col) => (
                     <th
                       key={col}
@@ -48,7 +46,7 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {paginated.map((club) => {
+              {clubs.map((club) => {
                 const menuItems: DropdownItem[] = [
                   {
                     label: "View Details",
@@ -68,6 +66,8 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
                   },
                 ];
 
+                const location = [club.city, club.state].filter(Boolean).join(", ") || club.region || "Unknown";
+
                 return (
                   <tr key={club.id} className="hover:bg-background/50 transition-colors group">
                     <td className="px-4 py-4 font-bold text-primary whitespace-nowrap">
@@ -81,39 +81,29 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
                     <td className="px-4 py-4 text-subtle font-medium whitespace-nowrap">
                       <span className="flex items-center gap-2">
                         <span className="text-muted text-sm">📍</span>
-                        {club.region}
+                        {location}
                       </span>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
                       <span className="flex items-center gap-3">
                         <span className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-xs font-bold text-primary shrink-0 shadow-sm">
-                          {club.leader.charAt(0)}
+                          {(club.leader_name || "L").charAt(0)}
                         </span>
-                        <span className="text-primary font-bold">{club.leader}</span>
+                        <span className="text-primary font-bold">{club.leader_name || "No Leader"}</span>
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-subtle font-bold">{club.members}</td>
+                    <td className="px-4 py-4 text-subtle font-bold">{club.total_members}</td>
                     <td className="px-4 py-4">
-                      <span
-                        className={cn(
-                          "font-bold",
-                          club.reportRate >= 80
-                            ? "text-success"
-                            : club.reportRate >= 60
-                              ? "text-warning"
-                              : "text-error"
-                        )}
-                      >
-                        {club.reportRate}%
+                      <span className="font-bold text-primary">
+                        {club.average_streak.toFixed(1)}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-subtle font-bold">{club.score}</td>
                     <td className="px-4 py-4">
                       <Badge
-                        variant={club.status === "Active" ? "active" : "dormant"}
+                        variant={club.is_active ? "active" : "dormant"}
                         className="font-bold px-3 py-1.5"
                       >
-                        {club.status}
+                        {club.is_active ? "Active" : "Dormant"}
                       </Badge>
                     </td>
                     <td className="px-6 py-4">
@@ -124,14 +114,19 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
               })}
             </tbody>
           </table>
+          {clubs.length === 0 && (
+            <div className="py-12 text-center text-gray-500">
+              No clubs found matching your criteria.
+            </div>
+          )}
         </div>
 
         {/* Pagination */}
         <div className="flex items-center justify-center border-t border-border px-4 py-4">
           <Pagination
-            currentPage={page}
+            currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={setPage}
+            onPageChange={onPageChange}
           />
         </div>
       </div>
@@ -142,7 +137,7 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
         onClose={() => setDeactivateTarget(null)}
         onConfirm={handleDeactivate}
         title="Deactivate Club"
-        description="Are you sure you want to delete this club? This action cannot be undone."
+        description="Are you sure you want to deactivate this club? This action cannot be undone."
       />
     </>
   );

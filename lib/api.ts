@@ -1,31 +1,37 @@
-import { useAuth } from "@/hooks/use-auth";
+import { useMemo, useCallback } from "react";
+
+/**
+ * lib/api.ts
+ */
 
 /**
  * Base configuration for API requests.
  */
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "https://api.bgycc.com", // Replace with actual base URL
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "https://uzdrrelxsjtvjvqbxcfy.supabase.co/functions/v1/admin",
   TIMEOUT: 10000,
 };
 
 /**
- * Custom hook for making authenticated API requests.
- * Uses the auth state from useAuth to include the necessary headers.
+ * Standard API Response interface
  */
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data: T;
+  message?: string;
+  error?: string;
+}
+
 export function useApi() {
-  const { logout } = useAuth();
-  
-  // Phase 1: Simple localStorage check
-  // Phase 2: This will use actual JWT tokens
   const getAuthHeaders = () => {
-    const isAuth = localStorage.getItem("bgycc-auth") === "true";
+    const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
     return {
       "Content-Type": "application/json",
-      ...(isAuth ? { "Authorization": "Bearer mock-token" } : {}),
+      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
     };
   };
 
-  const request = async (endpoint: string, options: RequestInit = {}) => {
+  const request = useCallback(async <T = any>(endpoint: string, options: RequestInit = {}): Promise<T> => {
     const url = `${API_CONFIG.BASE_URL}${endpoint}`;
     const headers = {
       ...getAuthHeaders(),
@@ -36,36 +42,43 @@ export function useApi() {
       const response = await fetch(url, { ...options, headers });
 
       if (response.status === 401) {
-        logout();
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem("bgycc-token");
+          localStorage.removeItem("bgycc-auth");
+          window.dispatchEvent(new CustomEvent("unauthorized"));
+        }
         throw new Error("Unauthorized");
       }
 
+      const result = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Something went wrong");
+        throw new Error(result.error || result.message || "Something went wrong");
       }
 
-      return await response.json();
-    } catch (error) {
-      console.error(`API Error [${url}]:`, error);
+      return result;
+    } catch (error: any) {
+      if (error.message !== "Unauthorized") {
+        console.error(`API Error [${url}]:`, error);
+      }
       throw error;
     }
-  };
+  }, []); // getAuthHeaders doesn't change as it's just a getter
 
-  return {
-    get: (endpoint: string, options?: RequestInit) => 
-      request(endpoint, { ...options, method: "GET" }),
+  return useMemo(() => ({
+    get: <T = any>(endpoint: string, options?: RequestInit) => 
+      request<T>(endpoint, { ...options, method: "GET" }),
     
-    post: (endpoint: string, body: any, options?: RequestInit) => 
-      request(endpoint, { ...options, method: "POST", body: JSON.stringify(body) }),
+    post: <T = any>(endpoint: string, body: any, options?: RequestInit) => 
+      request<T>(endpoint, { ...options, method: "POST", body: JSON.stringify(body) }),
     
-    put: (endpoint: string, body: any, options?: RequestInit) => 
-      request(endpoint, { ...options, method: "PUT", body: JSON.stringify(body) }),
+    put: <T = any>(endpoint: string, body: any, options?: RequestInit) => 
+      request<T>(endpoint, { ...options, method: "PUT", body: JSON.stringify(body) }),
     
-    patch: (endpoint: string, body: any, options?: RequestInit) => 
-      request(endpoint, { ...options, method: "PATCH", body: JSON.stringify(body) }),
+    patch: <T = any>(endpoint: string, body: any, options?: RequestInit) => 
+      request<T>(endpoint, { ...options, method: "PATCH", body: JSON.stringify(body) }),
     
-    delete: (endpoint: string, options?: RequestInit) => 
-      request(endpoint, { ...options, method: "DELETE" }),
-  };
+    delete: <T = any>(endpoint: string, options?: RequestInit) => 
+      request<T>(endpoint, { ...options, method: "DELETE" }),
+  }), [request]);
 }

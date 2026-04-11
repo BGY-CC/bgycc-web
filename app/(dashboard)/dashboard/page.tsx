@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+"use client";
+
 import {
   Users,
   FileText,
@@ -9,28 +10,38 @@ import {
 } from "lucide-react";
 import { StatCard, PageHeader } from "@/components/shared";
 import { EngagementChart, MemberStatusChart } from "@/components/charts";
-
-export const metadata: Metadata = { title: "Dashboard" };
-
-// ─── Mock data (replace with API calls in Phase 2) ────────────────────────────
-
-const stats = [
-  { label: "Total Active Users", value: "1,286", icon: <Users className="h-4 w-4" />, change: 0 },
-  { label: "Avg Daily Reports", value: "847", icon: <FileText className="h-4 w-4" />, change: 0 },
-  { label: "Avg Streak Length", value: "14.3 days", icon: <Flame className="h-4 w-4" />, change: 0 },
-  { label: "At-Risk Members", value: "27", icon: <AlertTriangle className="h-4 w-4" />, change: 0 },
-  { label: "Resets (7 days)", value: "65", icon: <RefreshCw className="h-4 w-4" />, change: 0 },
-  { label: "Audio Reports", value: "312", icon: <Mic className="h-4 w-4" />, change: 0 },
-];
+import { useQuery } from "@/hooks/use-query";
+import { DashboardData } from "@/lib/services/dashboard";
+import { useState } from "react";
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
+  const [period, setPeriod] = useState("week");
+  const { data, isLoading } = useQuery<DashboardData>(`/dashboard?period=${period}`);
+
+  const stats = data ? [
+    { label: "Total Active Users", value: data.stats.active_users.value.toString(), icon: <Users className="h-4 w-4" />, change: data.stats.active_users.change_percent || 0, trend: data.stats.active_users.trend },
+    { label: "Avg Daily Reports", value: data.stats.avg_daily_reports.value.toFixed(1), icon: <FileText className="h-4 w-4" />, change: data.stats.avg_daily_reports.change_percent || 0, trend: data.stats.avg_daily_reports.trend },
+    { label: "Avg Streak Length", value: `${data.stats.avg_streak_days.value} days`, icon: <Flame className="h-4 w-4" />, change: data.stats.avg_streak_days.change_percent || 0, trend: data.stats.avg_streak_days.trend },
+    { label: "At-Risk Members", value: data.stats.at_risk_members.value.toString(), icon: <AlertTriangle className="h-4 w-4" />, change: data.stats.at_risk_members.change_percent || 0, trend: data.stats.at_risk_members.trend },
+    { label: "Resets", value: data.stats.reset_members.value.toString(), icon: <RefreshCw className="h-4 w-4" />, change: data.stats.reset_members.change_percent || 0, trend: data.stats.reset_members.trend },
+    { label: "Audio Reports", value: data.stats.audio_reports.value.toString(), icon: <Mic className="h-4 w-4" />, change: data.stats.audio_reports.change_percent || 0, trend: data.stats.audio_reports.trend },
+  ] : [];
+
+  if (isLoading && !data) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Dashboard" breadcrumb={[]} />
 
-      {/* Stat cards — 3-col on md+, 2-col on sm, 1-col on mobile */}
+      {/* Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((s) => (
           <StatCard
@@ -45,35 +56,35 @@ export default function DashboardPage() {
 
       {/* Charts row */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Engagement Trends — takes 2/3 width on desktop */}
+        {/* Engagement Trends */}
         <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-start justify-between">
             <div>
               <h2 className="text-sm font-semibold text-gray-900">Engagement Trends</h2>
-              <p className="text-xs text-gray-500">Reports &amp; logins this week</p>
+              <p className="text-xs text-gray-500">Reports & active users this {period}</p>
             </div>
-            <select className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-primary">
-              <option>Last 7 Days</option>
-              <option>Last 30 Days</option>
-              <option>Last 90 Days</option>
+            <select 
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="year">This Year</option>
             </select>
           </div>
-          <EngagementChart />
+          <EngagementChart data={data?.engagement_trends} />
         </div>
 
-        {/* Member Status — takes 1/3 width on desktop */}
+        {/* Member Status */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-start justify-between">
             <div>
               <h2 className="text-sm font-semibold text-gray-900">Member Status</h2>
               <p className="text-xs text-gray-500">Risk distribution</p>
             </div>
-            <select className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-primary">
-              <option>This Week</option>
-              <option>This Month</option>
-            </select>
           </div>
-          <MemberStatusChart />
+          <MemberStatusChart data={data?.member_status} />
         </div>
       </div>
     </div>

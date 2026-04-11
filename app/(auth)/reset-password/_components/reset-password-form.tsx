@@ -6,11 +6,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { resetPasswordSchema, type ResetPasswordInput } from "@/lib/validations/auth";
 import { Button, Input, FormField, Alert } from "@/components/ui";
+import { useRouter, useSearchParams } from "next/navigation";
+import { authService } from "@/lib/services/auth";
+import { ROUTES } from "@/lib/constants";
 
 export function ResetPasswordForm() {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
 
   const {
     register,
@@ -20,14 +26,23 @@ export function ResetPasswordForm() {
     resolver: zodResolver(resetPasswordSchema),
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onSubmit = async (_data: ResetPasswordInput) => {
+  const onSubmit = async (data: ResetPasswordInput) => {
     setServerError(null);
+    
+    if (!token) {
+      setServerError("Invalid or missing reset token. Please request a new reset link.");
+      return;
+    }
+
     try {
-      // TODO Phase 2 — call reset password API
-      await new Promise((r) => setTimeout(r, 600));
-    } catch {
-      setServerError("Something went wrong. Please try again.");
+      const result = await authService.resetPassword(data.password, token);
+      if (result.success) {
+        router.push(`${ROUTES.LOGIN}?reset=success`);
+      } else {
+        setServerError(result.error || "Failed to reset password. The link may have expired.");
+      }
+    } catch (err: any) {
+      setServerError("An unexpected error occurred. Please try again.");
     }
   };
 

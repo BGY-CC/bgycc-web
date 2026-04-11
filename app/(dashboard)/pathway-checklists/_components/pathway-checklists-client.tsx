@@ -13,11 +13,8 @@ import { StatCard, SearchInput } from "@/components/shared";
 import { ChecklistItemRow } from "./checklist-item-row";
 import { ChecklistModal } from "./checklist-modal";
 import { SuccessModal } from "../../clubs/_components/success-modal";
-import {
-  LEADERSHIP_ITEMS,
-  PUBLIC_SPEAKING_ITEMS,
-} from "./mock-data";
-import type { ChecklistItem } from "./types";
+import { useQuery } from "@/hooks/use-query";
+import { ChecklistItem } from "@/lib/services/checklist";
 
 export function PathwayChecklistsClient() {
   const [tab, setTab] = useState("leadership");
@@ -25,45 +22,49 @@ export function PathwayChecklistsClient() {
   const [editTarget, setEditTarget] = useState<ChecklistItem | null>(null);
   const [removeTarget, setRemoveTarget] = useState<ChecklistItem | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [search, setSearch] = useState("");
 
-  const items =
-    tab === "leadership" ? LEADERSHIP_ITEMS : PUBLIC_SPEAKING_ITEMS;
+  const { data: allItems, isLoading, refetch } = useQuery<ChecklistItem[]>("/checklist");
 
-  const everyday = items.filter((i) => i.schedule === "Everyday");
-  const weekly = items.filter((i) => i.schedule === "Weekly");
-  const specificDay = items.filter((i) => i.schedule === "Specific Day");
+  // Map API pathways to Tabs
+  // Leadership in API might be "leadership-pathway" or just "leadership"
+  const filteredItems = (allItems || []).filter((item) => {
+    const matchesTab = item.pathway.toLowerCase().includes(tab.toLowerCase());
+    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
+    return matchesTab && matchesSearch;
+  });
 
   const handleAddSuccess = () => {
     setShowAdd(false);
     setShowSuccess(true);
-  };
-
-  const handleEditSuccess = () => {
-    setEditTarget(null);
+    refetch();
   };
 
   const stats = [
     {
-      label: "Total Checklist Items",
-      value: items.length,
+      label: "Total Items",
+      value: filteredItems.length,
       icon: <RefreshCw className="h-4 w-4" />,
     },
     {
-      label: "Everyday",
-      value: everyday.length,
+      label: "Active Tasks",
+      value: filteredItems.filter(i => i.is_active).length,
       icon: <RefreshCw className="h-4 w-4" />,
     },
     {
-      label: "Weekly",
-      value: weekly.length,
-      icon: <Calendar className="h-4 w-4" />,
-    },
-    {
-      label: "Specific Day",
-      value: specificDay.length,
+      label: "XP Potential",
+      value: filteredItems.reduce((acc, curr) => acc + curr.xp_value, 0),
       icon: <Calendar className="h-4 w-4" />,
     },
   ];
+
+  if (isLoading && !allItems) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -86,7 +87,7 @@ export function PathwayChecklistsClient() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         {stats.map((s) => (
           <StatCard
             key={s.label}
@@ -101,59 +102,25 @@ export function PathwayChecklistsClient() {
       <SearchInput
         placeholder="Search Checklist Items"
         containerClassName="max-w-xs"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
       />
 
       {/* Lists */}
-      <div className="rounded-3xl border border-border bg-white p-8 shadow-sm space-y-10">
-        {everyday.length > 0 && (
-          <section>
-            <h3 className="text-[12px] font-bold text-muted uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
-              <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Everyday Tasks
-            </h3>
-            {everyday.map((item) => (
-              <ChecklistItemRow
-                key={item.id}
-                item={item}
-                onEdit={setEditTarget}
-                onRemove={setRemoveTarget}
-              />
-            ))}
-          </section>
-        )}
-
-        {weekly.length > 0 && (
-          <section>
-            <h3 className="text-[12px] font-bold text-muted uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
-              <div className="h-1.5 w-1.5 rounded-full bg-accent" />
-              Weekly Tasks
-            </h3>
-            {weekly.map((item) => (
-              <ChecklistItemRow
-                key={item.id}
-                item={item}
-                onEdit={setEditTarget}
-                onRemove={setRemoveTarget}
-              />
-            ))}
-          </section>
-        )}
-
-        {specificDay.length > 0 && (
-          <section>
-            <h3 className="text-[12px] font-bold text-muted uppercase tracking-[0.1em] mb-6 flex items-center gap-2">
-              <div className="h-1.5 w-1.5 rounded-full bg-warning" />
-              Specific Day &amp; Cycle Tasks
-            </h3>
-            {specificDay.map((item) => (
-              <ChecklistItemRow
-                key={item.id}
-                item={item}
-                onEdit={setEditTarget}
-                onRemove={setRemoveTarget}
-              />
-            ))}
-          </section>
+      <div className="rounded-3xl border border-border bg-white p-8 shadow-sm space-y-4">
+        {filteredItems.length > 0 ? (
+          filteredItems.map((item) => (
+            <ChecklistItemRow
+              key={item.id}
+              item={item}
+              onEdit={setEditTarget as any}
+              onRemove={setRemoveTarget as any}
+            />
+          ))
+        ) : (
+          <div className="py-12 text-center text-gray-500">
+            No checklist items found for this pathway.
+          </div>
         )}
       </div>
 
@@ -167,14 +134,17 @@ export function PathwayChecklistsClient() {
       <ChecklistModal
         open={!!editTarget}
         onClose={() => setEditTarget(null)}
-        onSuccess={handleEditSuccess}
+        onSuccess={() => { setEditTarget(null); refetch(); }}
         mode="edit"
         defaultValues={editTarget ?? undefined}
       />
       <ConfirmDialog
         open={!!removeTarget}
         onClose={() => setRemoveTarget(null)}
-        onConfirm={() => setRemoveTarget(null)}
+        onConfirm={() => {
+          // TODO: Call DELETE /checklist/{slug}
+          setRemoveTarget(null);
+        }}
         title="Remove Checklist Item"
         description="Are you sure you want to remove this checklist? This action cannot be undone."
       />
@@ -182,7 +152,7 @@ export function PathwayChecklistsClient() {
         open={showSuccess}
         onClose={() => setShowSuccess(false)}
         title="Checklist Added Successfully!"
-        description="You have successfully added a checklist item. Leaders will be able to edit this post and republish changes."
+        description="You have successfully added a checklist item."
       />
     </>
   );
