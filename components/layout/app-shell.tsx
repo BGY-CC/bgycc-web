@@ -31,7 +31,7 @@ export function AppShell({ children }: AppShellProps) {
         <Header
           onMenuClick={() => setSidebarOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-visible">
           <div className="container mx-auto max-w-7xl px-4 py-2 sm:px-4 lg:px-2">
             {children}
           </div>
