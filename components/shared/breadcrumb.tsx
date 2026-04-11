@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home, ChevronRight } from "lucide-react";
+import { Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface BreadcrumbItem {
@@ -34,7 +34,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
         const isLast = i === items.length - 1;
         return (
           <span key={i} className="flex items-center gap-1">
-            <ChevronRight className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+            <span className="text-gray-400 mx-1">/</span>
             {item.href && !isLast ? (
               <Link
                 href={item.href}
