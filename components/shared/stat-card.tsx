@@ -21,7 +21,7 @@ export function StatCard({ label, value, icon, change = 0, className }: StatCard
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-white p-5 shadow-sm transition-all hover:shadow-md",
+        "rounded-2xl border border-border bg-white p-4 shadow-sm transition-all hover:shadow-md",
         className,
       )}
     >
@@ -49,7 +49,7 @@ export function StatCard({ label, value, icon, change = 0, className }: StatCard
         </span>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-2 text-left">
         <p className="text-2xl font-extrabold text-primary tracking-tight">{value}</p>
         <p className="mt-1 text-sm font-bold text-muted">{label}</p>
       </div>

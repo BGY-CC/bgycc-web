@@ -39,7 +39,7 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
                   (col) => (
                     <th
                       key={col}
-                      className="px-6 py-5 text-[11px] font-bold text-muted uppercase tracking-[0.1em] whitespace-nowrap"
+                      className="px-4 py-5 text-[11px] font-bold text-muted uppercase tracking-[0.1em] whitespace-nowrap"
                     >
                       {col}
                     </th>
@@ -70,7 +70,7 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
 
                 return (
                   <tr key={club.id} className="hover:bg-background/50 transition-colors group">
-                    <td className="px-6 py-4 font-bold text-primary whitespace-nowrap">
+                    <td className="px-4 py-4 font-bold text-primary whitespace-nowrap">
                       <Link
                         href={`/clubs/${club.id}`}
                         className="hover:text-accent transition-colors"
@@ -78,13 +78,13 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
                         {club.name}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 text-subtle font-medium whitespace-nowrap">
+                    <td className="px-4 py-4 text-subtle font-medium whitespace-nowrap">
                       <span className="flex items-center gap-2">
                         <span className="text-muted text-sm">📍</span>
                         {club.region}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <span className="flex items-center gap-3">
                         <span className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-xs font-bold text-primary shrink-0 shadow-sm">
                           {club.leader.charAt(0)}
@@ -92,8 +92,8 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
                         <span className="text-primary font-bold">{club.leader}</span>
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-subtle font-bold">{club.members}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4 text-subtle font-bold">{club.members}</td>
+                    <td className="px-4 py-4">
                       <span
                         className={cn(
                           "font-bold",
@@ -107,8 +107,8 @@ export function ClubsTable({ clubs }: ClubsTableProps) {
                         {club.reportRate}%
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-subtle font-bold">{club.score}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4 text-subtle font-bold">{club.score}</td>
+                    <td className="px-4 py-4">
                       <Badge
                         variant={club.status === "Active" ? "active" : "dormant"}
                         className="font-bold px-3 py-1.5"
