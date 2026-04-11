@@ -1,20 +1,23 @@
 export interface Announcement {
   id: string;
+  club_id: string | null;
   title: string;
-  content: string;
+  content: string | null;
   type: "announcement" | "event";
-  image_url?: string;
-  link_url?: string;
-  event_date?: string;
-  event_location?: string;
+  image_url: string | null;
+  link_url: string | null;
+  author_id: string | null;
+  event_topic?: string | null;
+  event_sub_topic?: string | null;
+  event_date: string | null;
+  event_time?: string | null;
+  event_location: string | null;
+  metadata?: any;
   is_active: boolean;
-  created_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface PaginatedAnnouncements {
-  items: Announcement[];
-  total: number;
-  page: number;
-  page_size: number;
-  total_pages: number;
+export interface AnnouncementResponse {
+  announcements: Announcement[];
 }
