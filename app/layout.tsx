@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { AuthProvider } from "@/hooks/use-auth";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,7 +30,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${poppins.variable}`}>
-      <body className="antialiased font-sans">{children}</body>
+      <body className="antialiased font-sans">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

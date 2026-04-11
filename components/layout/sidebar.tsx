@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/shared";
+import { useAuth } from "@/hooks/use-auth";
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   return (
     <>
@@ -107,6 +109,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         {/* Logout */}
         <div className="px-4 py-8">
           <button
+            onClick={logout}
             className="flex w-full items-center gap-4 rounded-2xl px-4 py-4 text-sm font-bold text-error hover:bg-error-bg transition-all duration-200"
             aria-label="Log out"
           >

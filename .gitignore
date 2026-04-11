@@ -18,7 +18,7 @@ build/
 
 # ─── Design assets (not source code) ─────────────────────────────────────────
 BGYCC APP/
-
+.agents/
 # ─── Project meta (dev-only, not for CI/CD) ──────────────────────────────────
 docs/
 tasks/

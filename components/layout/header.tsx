@@ -10,7 +10,6 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
   return (
     <header className="sticky top-0 z-10 flex h-20 items-center justify-between bg-transparent px-4 md:px-8">
-      {/* Mobile menu toggle and Page Title */}
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -21,9 +20,6 @@ export function Header({ onMenuClick }: HeaderProps) {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <div className="hidden md:block">
-          <h1 className="text-2xl font-bold text-primary">Dashboard</h1>
-        </div>
       </div>
 
       {/* Right side container - floating style */}

@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { useAuth } from "@/hooks/use-auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
@@ -12,6 +14,8 @@ import { ROUTES } from "@/lib/constants";
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const { login } = useAuth();
+  const router = useRouter();
 
   const {
     register,
@@ -22,13 +26,15 @@ export function LoginForm() {
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onSubmit = async (_data: LoginInput) => {
+  const onSubmit = async (data: LoginInput) => {
     setServerError(null);
     try {
-      // TODO Phase 2 — call auth API
-      await new Promise((r) => setTimeout(r, 800));
-      // Simulate error for demo
-      setServerError("Invalid email or password. Please try again.");
+      const success = await login(data.email, data.password);
+      if (success) {
+        router.push("/dashboard");
+      } else {
+        setServerError("Invalid email or password. Please try again.");
+      }
     } catch {
       setServerError("Something went wrong. Please try again.");
     }

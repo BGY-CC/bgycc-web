@@ -29,19 +29,18 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="flex flex-col items-center text-center space-y-6 pt-4">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success-bg text-success shadow-sm ring-1 ring-border/10">
-          <CheckCircle2 className="h-10 w-10" />
-        </div>
-        <div className="space-y-2">
-          <h2 className="text-xl font-bold text-primary tracking-tight">Check your email</h2>
-          <p className="text-sm font-medium text-gray-100 leading-relaxed">
+      <div className="flex flex-col items-start text-left space-y-6 pt-4">
+        <div className="bg-[#f0f9eb] rounded-2xl p-6 w-full flex items-start gap-4">
+          <div className="bg-white rounded-full p-1 shadow-sm shrink-0">
+            <CheckCircle2 className="h-5 w-5 text-[#4C7B10]" />
+          </div>
+          <p className="text-sm font-medium text-[#4C7B10] leading-relaxed">
             We&apos;ve sent a password reset link to your email. It may take a few minutes to arrive.
           </p>
         </div>
         <Link
           href={ROUTES.LOGIN}
-          className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-white px-6 text-sm text-primary hover:bg-background transition-all shadow-sm active:scale-95 underline underline-offset-4"
+          className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-white px-6 text-sm text-primary hover:bg-background transition-all shadow-sm active:scale-95 font-bold"
         >
           Back to Login
         </Link>
