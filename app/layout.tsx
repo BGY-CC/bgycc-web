@@ -14,6 +14,7 @@ export const metadata: Metadata = {
     default: "BGYCC Admin — School of Leadership",
   },
   description: "BGYCC School of Leadership admin dashboard",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes",
   icons: {
     icon: "/bgycc_logo.svg",
     shortcut: "/bgycc_logo.svg",
@@ -29,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable}`}>
-      <body className="antialiased font-sans">
+    <html lang="en" className={`${poppins.variable} h-full`}>
+      <body className="antialiased font-sans h-full">
         <AuthProvider>
           {children}
         </AuthProvider>
