@@ -88,6 +88,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  height: 100%;
 }
 
 body {
@@ -96,6 +97,11 @@ body {
   font-family: var(--font-sans);
   line-height: 1.5;
   overflow-x: hidden;
+  height: 100%;
+}
+
+#__next {
+  height: 100%;
 }
 
 /* Visually-hidden utility for accessibility */

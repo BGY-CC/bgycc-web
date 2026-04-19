@@ -11,4 +11,5 @@ export const primaryNav: Omit<NavItem, "icon">[] = [
   { label: "Pathway Checklists", href: "/pathway-checklists" },
   { label: "Onboarding Editor", href: "/onboarding-editor" },
   { label: "Resources", href: "/resources" },
+  { label: "Announcement", href: "/announcement" },
 ];

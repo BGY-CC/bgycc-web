@@ -12,4 +12,5 @@ export const ROUTES = {
   PATHWAY_CHECKLISTS: "/pathway-checklists",
   ONBOARDING_EDITOR: "/onboarding-editor",
   RESOURCES: "/resources",
+  ANNOUNCEMENT: "/announcement",
 } as const;
