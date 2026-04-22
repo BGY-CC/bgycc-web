@@ -28,14 +28,27 @@ export function PathwayChecklistsClient() {
 
   const handleAdd = async (formData: any) => {
     try {
+      // Generate a slug from the title
+      const slug = formData.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/(^_|_$)/g, '');
+
       const result = await checklistService.create({
         name: formData.title,
-        description: formData.description,
+        slug,
+        description: formData.description || "",
         pathway: (tab === "leadership" ? "leadership" : "public_speaking") as any,
-        day_of_week: 1, 
-        xp_value: 10, // Default XP
+        // Map schedule to day_of_week (null for Everyday)
+        day_of_week: formData.schedule === "Everyday" ? null : 1, 
+        xp_value: 1, 
         is_active: true,
-        metadata: { type: formData.type, schedule: formData.schedule }
+        is_curriculum_based: false,
+        metadata: { 
+          type: formData.type, 
+          schedule: formData.schedule,
+          is_admin_created: true 
+        }
       });
 
       if (result.id || result.success) {
