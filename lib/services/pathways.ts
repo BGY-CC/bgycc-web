@@ -56,11 +56,20 @@ export const pathwaysService = {
   },
 
   delete: async (slug: string) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/pathways/${slug}`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/pathways/${slug.trim()}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
+    
     if (response.status === 204) return { success: true };
-    return response.json();
+    
+    const text = await response.text();
+    try {
+      const result = text ? JSON.parse(text) : { success: response.ok };
+      return result;
+    } catch {
+      return { success: response.ok };
+    }
   },
+
 };

@@ -35,13 +35,13 @@ export function ResourcesClient() {
 
       if (result.success) {
         setShowAdd(false);
-        toast({ title: "Resource added successfully" });
+        toast("Resource added successfully");
         refetch();
       } else {
-        toast({ title: "Failed to add resource", variant: "destructive" });
+        toast("Failed to add resource", "error");
       }
     } catch (error: any) {
-      toast({ title: error.message || "An error occurred", variant: "destructive" });
+      toast(error.message || "An error occurred", "error");
     }
   };
 
@@ -56,13 +56,13 @@ export function ResourcesClient() {
 
       if (result.success) {
         setEditTarget(null);
-        toast({ title: "Resource updated successfully" });
+        toast("Resource updated successfully");
         refetch();
       } else {
-        toast({ title: "Failed to update resource", variant: "destructive" });
+        toast("Failed to update resource", "error");
       }
     } catch (error: any) {
-      toast({ title: error.message || "An error occurred", variant: "destructive" });
+      toast(error.message || "An error occurred", "error");
     }
   };
 
@@ -72,15 +72,16 @@ export function ResourcesClient() {
       const result = await resourcesService.delete(deleteTarget.id);
       if (result.success) {
         setDeleteTarget(null);
-        toast({ title: "Resource deleted successfully" });
+        toast("Resource deleted successfully");
         refetch();
       } else {
-        toast({ title: "Failed to delete resource", variant: "destructive" });
+        toast("Failed to delete resource", "error");
       }
     } catch (error: any) {
-      toast({ title: error.message || "An error occurred", variant: "destructive" });
+      toast(error.message || "An error occurred", "error");
     }
   };
+
 
 
   if (isLoading && !data) {

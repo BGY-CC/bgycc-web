@@ -119,13 +119,22 @@ export const clubsService = {
   },
 
   delete: async (id: string) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/clubs/${id}`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/clubs/${id.trim()}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
+    
     if (response.status === 204) return { success: true };
-    return response.json();
+    
+    const text = await response.text();
+    try {
+      const result = text ? JSON.parse(text) : { success: response.ok };
+      return result;
+    } catch {
+      return { success: response.ok };
+    }
   },
+
 
   getMemberHealth: async (id: string) => {
     const response = await fetch(`${API_CONFIG.BASE_URL}/clubs/${id}/member-health`, {

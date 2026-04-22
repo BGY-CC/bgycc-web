@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui";
+import { Button, useToast } from "@/components/ui";
 import { SearchInput } from "@/components/shared";
 import { ClubsTable } from "./clubs-table";
 import { ClubModal } from "./club-modal";
@@ -11,6 +11,7 @@ import { useQuery } from "@/hooks/use-query";
 import { clubsService, Club, PaginatedClubs } from "@/lib/services/clubs";
 
 export function ClubsListClient() {
+  const { toast } = useToast();
   const [showCreate, setShowCreate] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [page, setPage] = useState(1);
@@ -41,6 +42,21 @@ export function ClubsListClient() {
       }
     } catch (error: any) {
       alert(error.message || "An error occurred while creating the club");
+    }
+  };
+
+
+  const handleDelete = async (id: string) => {
+    try {
+      const result = await clubsService.delete(id);
+      if (result.success) {
+        toast("Club deleted successfully");
+        refetch();
+      } else {
+        toast("Failed to delete club", "error");
+      }
+    } catch (error: any) {
+      toast(error.message || "An error occurred", "error");
     }
   };
 
@@ -78,8 +94,10 @@ export function ClubsListClient() {
           currentPage={page}
           totalPages={data?.total_pages || 1}
           onPageChange={setPage}
+          onDelete={handleDelete}
         />
       </div>
+
 
       {/* Modals */}
       <ClubModal

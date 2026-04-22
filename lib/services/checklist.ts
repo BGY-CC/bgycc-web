@@ -67,12 +67,21 @@ export const checklistService = {
   },
 
   delete: async (slug: string) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/checklist/${slug}`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/checklist/${slug.trim()}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
-    if (response.status === 200 || response.status === 204) return { success: true };
-    return response.json();
+    
+    if (response.status === 204) return { success: true };
+    
+    const text = await response.text();
+    try {
+      const result = text ? JSON.parse(text) : { success: response.ok };
+      return result;
+    } catch {
+      return { success: response.ok };
+    }
   },
+
 };
 
