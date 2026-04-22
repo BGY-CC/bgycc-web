@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, Pencil, PowerOff } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import { Badge, ActionMenu, Pagination, type DropdownItem } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ui";
 import { useToast } from "@/components/ui";
@@ -14,16 +14,23 @@ interface ClubsTableProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function ClubsTable({ clubs, currentPage, totalPages, onPageChange }: ClubsTableProps) {
+export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDelete }: ClubsTableProps) {
   const { toast } = useToast();
-  const [deactivateTarget, setDeactivateTarget] = useState<Club | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Club | null>(null);
 
-  const handleDeactivate = () => {
-    toast(`${deactivateTarget?.name} has been deactivated.`);
-    setDeactivateTarget(null);
+  const handleDeleteConfirm = () => {
+    if (onDelete && deleteTarget) {
+      onDelete(deleteTarget.id);
+      setDeleteTarget(null);
+    } else {
+      toast(`${deleteTarget?.name} has been deleted (mock).`);
+      setDeleteTarget(null);
+    }
   };
+
 
   return (
     <>
@@ -59,9 +66,9 @@ export function ClubsTable({ clubs, currentPage, totalPages, onPageChange }: Clu
                     onClick: () => {},
                   },
                   {
-                    label: "Deactivate",
-                    icon: <PowerOff className="h-4 w-4" />,
-                    onClick: () => setDeactivateTarget(club),
+                    label: "Delete Club",
+                    icon: <Trash2 className="h-4 w-4" />,
+                    onClick: () => setDeleteTarget(club),
                     variant: "destructive",
                   },
                 ];
@@ -131,13 +138,13 @@ export function ClubsTable({ clubs, currentPage, totalPages, onPageChange }: Clu
         </div>
       </div>
 
-      {/* Deactivate confirm */}
+      {/* Delete confirm */}
       <ConfirmDialog
-        open={!!deactivateTarget}
-        onClose={() => setDeactivateTarget(null)}
-        onConfirm={handleDeactivate}
-        title="Deactivate Club"
-        description="Are you sure you want to deactivate this club? This action cannot be undone."
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Club"
+        description="Are you sure you want to delete this club? This action cannot be undone."
       />
     </>
   );

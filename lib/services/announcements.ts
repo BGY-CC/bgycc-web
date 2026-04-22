@@ -63,12 +63,22 @@ export const announcementsService = {
   },
 
   delete: async (id: string) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/community/announcements/${id}`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/community/announcements/${id.trim()}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    
+    if (response.status === 204) return { success: true };
+    
+    const text = await response.text();
+    try {
+      const result = text ? JSON.parse(text) : { success: response.ok };
+      return result;
+    } catch {
+      return { success: response.ok };
+    }
   },
+
 
   uploadImage: async (file: File) => {
     const formData = new FormData();
