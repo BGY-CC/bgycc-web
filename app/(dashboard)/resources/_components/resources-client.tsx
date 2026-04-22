@@ -20,7 +20,9 @@ export function ResourcesClient() {
     `/resources`
   );
 
-  const resources = data?.resources || [];
+  const resources = Array.isArray(data)
+    ? data
+    : (data as any)?.resources || (data as any)?.data || [];
 
   const handleAdd = async (formData: any) => {
     try {

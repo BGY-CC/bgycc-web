@@ -31,12 +31,14 @@ export function PathwayChecklistsClient() {
       const result = await checklistService.create({
         name: formData.title,
         description: formData.description,
-        pathway: tab === "leadership" ? "leadership" : "public_speaking",
-        day_of_week: 1, // default
+        pathway: (tab === "leadership" ? "leadership" : "public_speaking") as any,
+        day_of_week: 1, 
+        xp_value: 10, // Default XP
         is_active: true,
+        metadata: { type: formData.type, schedule: formData.schedule }
       });
 
-      if (result.id) { // The API returns the item directly on success
+      if (result.id || result.success) {
         setShowAdd(false);
         setShowSuccess(true);
         refetch();
@@ -54,9 +56,10 @@ export function PathwayChecklistsClient() {
       const result = await checklistService.update(editTarget.slug, {
         name: formData.title,
         description: formData.description,
+        metadata: { ...editTarget.metadata, type: formData.type, schedule: formData.schedule }
       });
 
-      if (result.id) {
+      if (result.id || result.success) {
         setEditTarget(null);
         refetch();
       } else {
@@ -83,9 +86,27 @@ export function PathwayChecklistsClient() {
   };
 
 
+  // Robustly extract the array from the API response
+  let itemsArray: any[] = [];
+  if (Array.isArray(allItems)) {
+    itemsArray = allItems;
+  } else if (allItems) {
+    const res = allItems as any;
+    // Handle the split pathway structure
+    if (res.leadership || res.public_speaking) {
+      itemsArray = [
+        ...(Array.isArray(res.leadership) ? res.leadership : []),
+        ...(Array.isArray(res.public_speaking) ? res.public_speaking : [])
+      ];
+    } else {
+      itemsArray = res.data || res.checklist || [];
+    }
+  }
+
   // Map API pathways to Tabs
-  const filteredItems = (allItems || []).filter((item) => {
-    const matchesTab = item.pathway.toLowerCase().includes(tab.toLowerCase());
+  const filteredItems = itemsArray.filter((item: any) => {
+    const itemPathway = typeof item.pathway === 'string' ? item.pathway : "";
+    const matchesTab = itemPathway.toLowerCase().includes(tab.toLowerCase());
     const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
     return matchesTab && matchesSearch;
   });
@@ -108,7 +129,7 @@ export function PathwayChecklistsClient() {
     },
   ];
 
-  if (isLoading && !allItems) {
+  if (isLoading && itemsArray.length === 0) {
     return (
       <div className="flex h-[400px] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -123,7 +144,7 @@ export function PathwayChecklistsClient() {
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
             <TabsTrigger value="leadership">Leadership Pathway</TabsTrigger>
-            <TabsTrigger value="public-speaking">Public Speaking Pathway</TabsTrigger>
+            <TabsTrigger value="public_speaking">Public Speaking Pathway</TabsTrigger>
           </TabsList>
         </Tabs>
 
