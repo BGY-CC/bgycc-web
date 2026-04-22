@@ -8,7 +8,7 @@ import { ClubsTable } from "./clubs-table";
 import { ClubModal } from "./club-modal";
 import { SuccessModal } from "./success-modal";
 import { useQuery } from "@/hooks/use-query";
-import { Club, PaginatedClubs } from "@/lib/services/clubs";
+import { clubsService, Club, PaginatedClubs } from "@/lib/services/clubs";
 
 export function ClubsListClient() {
   const [showCreate, setShowCreate] = useState(false);
@@ -21,11 +21,29 @@ export function ClubsListClient() {
     { enabled: true }
   );
 
-  const handleCreateSuccess = () => {
-    setShowCreate(false);
-    setShowSuccess(true);
-    refetch();
+  const handleCreate = async (formData: any) => {
+    try {
+      const result = await clubsService.create({
+        name: formData.name,
+        state: formData.state,
+        city: formData.city,
+        description: formData.description,
+        url_link: formData.whatsappLink,
+        country: "Nigeria", // default
+      });
+
+      if (result.success) {
+        setShowCreate(false);
+        setShowSuccess(true);
+        refetch();
+      } else {
+        alert(result.error || result.message || "Failed to create club");
+      }
+    } catch (error: any) {
+      alert(error.message || "An error occurred while creating the club");
+    }
   };
+
 
   return (
     <>
@@ -67,7 +85,7 @@ export function ClubsListClient() {
       <ClubModal
         open={showCreate}
         onClose={() => setShowCreate(false)}
-        onSuccess={handleCreateSuccess}
+        onSuccess={handleCreate}
         mode="create"
       />
       <SuccessModal

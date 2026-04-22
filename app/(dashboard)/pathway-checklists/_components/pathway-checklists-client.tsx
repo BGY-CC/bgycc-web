@@ -14,7 +14,7 @@ import { ChecklistItemRow } from "./checklist-item-row";
 import { ChecklistModal } from "./checklist-modal";
 import { SuccessModal } from "../../clubs/_components/success-modal";
 import { useQuery } from "@/hooks/use-query";
-import { ChecklistItem } from "@/lib/services/checklist";
+import { checklistService, ChecklistItem } from "@/lib/services/checklist";
 
 export function PathwayChecklistsClient() {
   const [tab, setTab] = useState("leadership");
@@ -26,19 +26,69 @@ export function PathwayChecklistsClient() {
 
   const { data: allItems, isLoading, refetch } = useQuery<ChecklistItem[]>("/checklist");
 
+  const handleAdd = async (formData: any) => {
+    try {
+      const result = await checklistService.create({
+        name: formData.title,
+        description: formData.description,
+        pathway: tab === "leadership" ? "leadership" : "public_speaking",
+        day_of_week: 1, // default
+        is_active: true,
+      });
+
+      if (result.id) { // The API returns the item directly on success
+        setShowAdd(false);
+        setShowSuccess(true);
+        refetch();
+      } else {
+        alert(result.error || "Failed to add checklist item");
+      }
+    } catch (error: any) {
+      alert(error.message || "An error occurred");
+    }
+  };
+
+  const handleEdit = async (formData: any) => {
+    if (!editTarget) return;
+    try {
+      const result = await checklistService.update(editTarget.slug, {
+        name: formData.title,
+        description: formData.description,
+      });
+
+      if (result.id) {
+        setEditTarget(null);
+        refetch();
+      } else {
+        alert(result.error || "Failed to update item");
+      }
+    } catch (error: any) {
+      alert(error.message || "An error occurred");
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!removeTarget) return;
+    try {
+      const result = await checklistService.delete(removeTarget.slug);
+      if (result.success) {
+        setRemoveTarget(null);
+        refetch();
+      } else {
+        alert(result.error || "Failed to remove item");
+      }
+    } catch (error: any) {
+      alert(error.message || "An error occurred");
+    }
+  };
+
+
   // Map API pathways to Tabs
-  // Leadership in API might be "leadership-pathway" or just "leadership"
   const filteredItems = (allItems || []).filter((item) => {
     const matchesTab = item.pathway.toLowerCase().includes(tab.toLowerCase());
     const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
     return matchesTab && matchesSearch;
   });
-
-  const handleAddSuccess = () => {
-    setShowAdd(false);
-    setShowSuccess(true);
-    refetch();
-  };
 
   const stats = [
     {
@@ -128,23 +178,20 @@ export function PathwayChecklistsClient() {
       <ChecklistModal
         open={showAdd}
         onClose={() => setShowAdd(false)}
-        onSuccess={handleAddSuccess}
+        onSuccess={handleAdd}
         mode="add"
       />
       <ChecklistModal
         open={!!editTarget}
         onClose={() => setEditTarget(null)}
-        onSuccess={() => { setEditTarget(null); refetch(); }}
+        onSuccess={handleEdit}
         mode="edit"
         defaultValues={editTarget ?? undefined}
       />
       <ConfirmDialog
         open={!!removeTarget}
         onClose={() => setRemoveTarget(null)}
-        onConfirm={() => {
-          // TODO: Call DELETE /checklist/{slug}
-          setRemoveTarget(null);
-        }}
+        onConfirm={handleRemove}
         title="Remove Checklist Item"
         description="Are you sure you want to remove this checklist? This action cannot be undone."
       />

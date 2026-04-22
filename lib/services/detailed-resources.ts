@@ -1,27 +1,21 @@
 import { API_CONFIG } from "../api";
 
-export interface Announcement {
+export interface DetailedResource {
   id: string;
-  club_id: string | null;
+  category: string;
   title: string;
-  content: string | null;
-  type: "announcement" | "event";
-  image_url: string | null;
-  link_url: string | null;
-  author_id: string | null;
-  event_topic?: string | null;
-  event_sub_topic?: string | null;
-  event_date: string | null;
-  event_time?: string | null;
-  event_location: string | null;
-  metadata?: any;
+  description: string | null;
+  thumbnail_url: string | null;
+  file_url: string | null;
+  resource_type: "pdf" | "video" | "audio" | "link" | "text" | null;
+  content_text: string | null;
+  xp_reward: number;
+  min_rank_required: string | null;
+  min_streak_required: number;
   is_active: boolean;
+  category_id: string | null;
   created_at: string;
   updated_at: string;
-}
-
-export interface AnnouncementResponse {
-  announcements: Announcement[];
 }
 
 const getAuthHeaders = () => {
@@ -32,20 +26,17 @@ const getAuthHeaders = () => {
   };
 };
 
-export const announcementsService = {
-  list: async (clubId?: string) => {
-    const url = clubId 
-      ? `${API_CONFIG.BASE_URL}/community/announcements?club_id=${clubId}`
-      : `${API_CONFIG.BASE_URL}/community/announcements`;
-    const response = await fetch(url, {
+export const detailedResourcesService = {
+  list: async () => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/detailed-resources`, {
       method: "GET",
       headers: getAuthHeaders(),
     });
     return response.json();
   },
 
-  create: async (data: Partial<Announcement>) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/community/announcements`, {
+  create: async (data: Partial<DetailedResource>) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/detailed-resources`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -53,8 +44,8 @@ export const announcementsService = {
     return response.json();
   },
 
-  update: async (id: string, data: Partial<Announcement>) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/community/announcements/${id}`, {
+  update: async (id: string, data: Partial<DetailedResource>) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/detailed-resources/${id}`, {
       method: "PUT",
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -63,7 +54,7 @@ export const announcementsService = {
   },
 
   delete: async (id: string) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/community/announcements/${id}`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/detailed-resources/${id}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
@@ -75,7 +66,7 @@ export const announcementsService = {
     formData.append("image", file);
     
     const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
-    const response = await fetch(`${API_CONFIG.BASE_URL}/community/announcements/upload`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/detailed-resources/upload-image`, {
       method: "POST",
       headers: {
         ...(token ? { "Authorization": `Bearer ${token}` } : {}),
@@ -85,4 +76,3 @@ export const announcementsService = {
     return response.json();
   },
 };
-

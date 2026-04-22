@@ -1,3 +1,5 @@
+import { API_CONFIG } from "../api";
+
 export interface ChecklistItem {
   id: string;
   name: string;
@@ -28,3 +30,49 @@ export interface CurriculumItem {
   created_at?: string;
   updated_at?: string;
 }
+
+const getAuthHeaders = () => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+  };
+};
+
+export const checklistService = {
+  list: async () => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/checklist`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  create: async (data: Partial<ChecklistItem>) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/checklist`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
+  update: async (slug: string, data: Partial<ChecklistItem>) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/checklist/${slug}`, {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
+  delete: async (slug: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/checklist/${slug}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    if (response.status === 200 || response.status === 204) return { success: true };
+    return response.json();
+  },
+};
+

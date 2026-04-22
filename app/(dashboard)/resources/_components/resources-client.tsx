@@ -7,7 +7,7 @@ import { SearchInput } from "@/components/shared";
 import { ResourceModal } from "./resource-modal";
 import { useToast } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
-import { Resource, ResourceResponse } from "@/lib/services/resources";
+import { resourcesService, Resource, ResourceResponse } from "@/lib/services/resources";
 
 export function ResourcesClient() {
   const { toast } = useToast();
@@ -17,17 +17,71 @@ export function ResourcesClient() {
   const [search, setSearch] = useState("");
 
   const { data, isLoading, refetch } = useQuery<ResourceResponse>(
-    `/resources` // The spec for /admin/resources doesn't explicit search param but might support it
+    `/resources`
   );
 
   const resources = data?.resources || [];
 
-  const handleDelete = () => {
-    // TODO: Call DELETE /resources/{id}
-    toast("Resource deleted successfully.");
-    setDeleteTarget(null);
-    refetch();
+  const handleAdd = async (formData: any) => {
+    try {
+      const result = await resourcesService.create({
+        title: formData.title,
+        description: formData.description,
+        link: formData.link,
+        is_active: true,
+        slug: formData.title.toLowerCase().replace(/ /g, "-"), // simple slug
+        min_rank_required: "member",
+      });
+
+      if (result.success) {
+        setShowAdd(false);
+        toast({ title: "Resource added successfully" });
+        refetch();
+      } else {
+        toast({ title: "Failed to add resource", variant: "destructive" });
+      }
+    } catch (error: any) {
+      toast({ title: error.message || "An error occurred", variant: "destructive" });
+    }
   };
+
+  const handleEdit = async (formData: any) => {
+    if (!editTarget) return;
+    try {
+      const result = await resourcesService.update(editTarget.id, {
+        title: formData.title,
+        description: formData.description,
+        link: formData.link,
+      });
+
+      if (result.success) {
+        setEditTarget(null);
+        toast({ title: "Resource updated successfully" });
+        refetch();
+      } else {
+        toast({ title: "Failed to update resource", variant: "destructive" });
+      }
+    } catch (error: any) {
+      toast({ title: error.message || "An error occurred", variant: "destructive" });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      const result = await resourcesService.delete(deleteTarget.id);
+      if (result.success) {
+        setDeleteTarget(null);
+        toast({ title: "Resource deleted successfully" });
+        refetch();
+      } else {
+        toast({ title: "Failed to delete resource", variant: "destructive" });
+      }
+    } catch (error: any) {
+      toast({ title: error.message || "An error occurred", variant: "destructive" });
+    }
+  };
+
 
   if (isLoading && !data) {
     return (
@@ -111,13 +165,13 @@ export function ResourcesClient() {
       <ResourceModal
         open={showAdd}
         onClose={() => setShowAdd(false)}
-        onSuccess={() => { setShowAdd(false); refetch(); }}
+        onSuccess={handleAdd}
         mode="add"
       />
       <ResourceModal
         open={!!editTarget}
         onClose={() => setEditTarget(null)}
-        onSuccess={() => { setEditTarget(null); refetch(); }}
+        onSuccess={handleEdit}
         mode="edit"
         defaultValues={editTarget ? {
           title: editTarget.title,
