@@ -11,18 +11,21 @@ interface VideoFile {
   size: string;
   duration: string;
   uploaded: string;
+  url?: string; // External link from backend (video_link field)
 }
 
 interface VideoUploadCardProps {
   pathway: string;
   description: string;
   initialVideo?: VideoFile;
+  slug?: string; // Pathway slug for update calls
 }
 
 export function VideoUploadCard({
   pathway,
   description,
   initialVideo,
+  slug,
 }: VideoUploadCardProps) {
   const [video, setVideo] = useState<VideoFile | undefined>(initialVideo);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -63,13 +66,25 @@ export function VideoUploadCard({
         {/* Content area */}
         {hasVideo ? (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
-            {/* Video thumbnail placeholder */}
-            <div className="relative h-32 w-48 shrink-0 rounded-lg bg-gray-900 overflow-hidden flex items-center justify-center">
-              <div className="text-white text-xs text-center p-2 opacity-70">
-                <Play className="h-8 w-8 mx-auto mb-1" />
-                Video Preview
+            {/* Video thumbnail / link */}
+            {video.url ? (
+              <a
+                href={video.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative h-32 w-48 shrink-0 rounded-lg bg-gray-900 overflow-hidden flex flex-col items-center justify-center gap-1 hover:opacity-80 transition-opacity"
+              >
+                <Play className="h-8 w-8 text-white" />
+                <span className="text-white text-[10px] font-bold uppercase tracking-wider">Watch Video</span>
+              </a>
+            ) : (
+              <div className="relative h-32 w-48 shrink-0 rounded-lg bg-gray-900 overflow-hidden flex items-center justify-center">
+                <div className="text-white text-xs text-center p-2 opacity-70">
+                  <Play className="h-8 w-8 mx-auto mb-1" />
+                  Video Preview
+                </div>
               </div>
-            </div>
+            )}
 
             {/* File info */}
             <div className="flex-1 space-y-4">

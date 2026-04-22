@@ -52,13 +52,12 @@ export function AnnouncementsClient() {
   const [deleteTarget, setDeleteTarget] = useState<Announcement | null>(null);
   const [search, setSearch] = useState("");
 
-  const { data, isLoading, refetch } = useQuery<AnnouncementResponse>(
-    `/announcements`
-  );
+  const { data: rawData, isLoading, refetch } = useQuery<any>(`/community/announcements`);
 
-  const announcements = Array.isArray(data) 
-    ? data 
-    : (data as any)?.announcements || (data as any)?.data || [];
+  // useQuery returns result.data; API shape: { announcements: [...] }
+  const announcements: Announcement[] = Array.isArray(rawData)
+    ? rawData
+    : rawData?.announcements ?? rawData?.data?.announcements ?? [];
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -125,7 +124,7 @@ export function AnnouncementsClient() {
     }
   };
 
-  if (isLoading && !data) {
+  if (isLoading && !rawData) {
     return (
       <div className="flex h-[400px] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>

@@ -24,7 +24,7 @@ export function PathwayChecklistsClient() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { data: allItems, isLoading, refetch } = useQuery<ChecklistItem[]>("/checklist");
+  const { data: rawData, isLoading, refetch } = useQuery<any>("/checklist");
 
   const handleAdd = async (formData: any) => {
     try {
@@ -99,21 +99,18 @@ export function PathwayChecklistsClient() {
   };
 
 
-  // Robustly extract the array from the API response
+  // useQuery returns result.data from the API
+  // API shape: { success, data: { leadership: [...], public_speaking: [...] } }
+  // So rawData = { leadership: [...], public_speaking: [...] }
   let itemsArray: any[] = [];
-  if (Array.isArray(allItems)) {
-    itemsArray = allItems;
-  } else if (allItems) {
-    const res = allItems as any;
-    // Handle the split pathway structure
-    if (res.leadership || res.public_speaking) {
-      itemsArray = [
-        ...(Array.isArray(res.leadership) ? res.leadership : []),
-        ...(Array.isArray(res.public_speaking) ? res.public_speaking : [])
-      ];
-    } else {
-      itemsArray = res.data || res.checklist || [];
-    }
+  if (Array.isArray(rawData)) {
+    itemsArray = rawData;
+  } else if (rawData) {
+    const src = rawData?.leadership ? rawData : rawData?.data ?? rawData;
+    itemsArray = [
+      ...(Array.isArray(src.leadership) ? src.leadership : []),
+      ...(Array.isArray(src.public_speaking) ? src.public_speaking : []),
+    ];
   }
 
   // Map API pathways to Tabs
