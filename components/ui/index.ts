@@ -10,6 +10,9 @@ export type { LabelProps } from "./label";
 export { Checkbox } from "./checkbox";
 export type { CheckboxProps } from "./checkbox";
 
+export { Radio } from "./radio";
+export type { RadioProps } from "./radio";
+
 export { FormField } from "./form-field";
 export type { FormFieldProps } from "./form-field";
 

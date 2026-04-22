@@ -8,6 +8,7 @@ import {
   ClipboardList,
   PenSquare,
   FolderOpen,
+  Megaphone,
   LogOut,
   X,
 } from "lucide-react";
@@ -23,6 +24,7 @@ const navItems = [
   { label: "Pathway Checklists", href: "/pathway-checklists", icon: ClipboardList },
   { label: "Onboarding Editor", href: "/onboarding-editor", icon: PenSquare },
   { label: "Resources", href: "/resources", icon: FolderOpen },
+  { label: "Announcement", href: "/announcement", icon: Megaphone },
 ];
 
 // ─── Props ────────────────────────────────────────────────────────────────────
