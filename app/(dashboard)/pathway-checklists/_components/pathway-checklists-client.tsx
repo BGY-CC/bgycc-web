@@ -14,7 +14,7 @@ import { ChecklistItemRow } from "./checklist-item-row";
 import { ChecklistModal } from "./checklist-modal";
 import { SuccessModal } from "../../clubs/_components/success-modal";
 import { useQuery } from "@/hooks/use-query";
-import { ChecklistItem } from "@/lib/services/checklist";
+import { checklistService, ChecklistItem } from "@/lib/services/checklist";
 
 export function PathwayChecklistsClient() {
   const [tab, setTab] = useState("leadership");
@@ -24,21 +24,102 @@ export function PathwayChecklistsClient() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { data: allItems, isLoading, refetch } = useQuery<ChecklistItem[]>("/checklist");
+  const { data: rawData, isLoading, refetch } = useQuery<any>("/checklist");
+
+  const handleAdd = async (formData: any) => {
+    try {
+      // Generate a slug from the title
+      const slug = formData.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/(^_|_$)/g, '');
+
+      const result = await checklistService.create({
+        name: formData.title,
+        slug,
+        description: formData.description || "",
+        pathway: (tab === "leadership" ? "leadership" : "public_speaking") as any,
+        // Map schedule to day_of_week (null for Everyday)
+        day_of_week: formData.schedule === "Everyday" ? null : 1, 
+        xp_value: 1, 
+        is_active: true,
+        is_curriculum_based: false,
+        metadata: { 
+          type: formData.type, 
+          schedule: formData.schedule,
+          is_admin_created: true 
+        }
+      });
+
+      if (result.id || result.success) {
+        setShowAdd(false);
+        setShowSuccess(true);
+        refetch();
+      } else {
+        alert(result.error || "Failed to add checklist item");
+      }
+    } catch (error: any) {
+      alert(error.message || "An error occurred");
+    }
+  };
+
+  const handleEdit = async (formData: any) => {
+    if (!editTarget) return;
+    try {
+      const result = await checklistService.update(editTarget.slug, {
+        name: formData.title,
+        description: formData.description,
+        metadata: { ...editTarget.metadata, type: formData.type, schedule: formData.schedule }
+      });
+
+      if (result.id || result.success) {
+        setEditTarget(null);
+        refetch();
+      } else {
+        alert(result.error || "Failed to update item");
+      }
+    } catch (error: any) {
+      alert(error.message || "An error occurred");
+    }
+  };
+
+  const handleRemove = async () => {
+    if (!removeTarget) return;
+    try {
+      const result = await checklistService.delete(removeTarget.slug);
+      if (result.success) {
+        setRemoveTarget(null);
+        refetch();
+      } else {
+        alert(result.error || "Failed to remove item");
+      }
+    } catch (error: any) {
+      alert(error.message || "An error occurred");
+    }
+  };
+
+
+  // useQuery returns result.data from the API
+  // API shape: { success, data: { leadership: [...], public_speaking: [...] } }
+  // So rawData = { leadership: [...], public_speaking: [...] }
+  let itemsArray: any[] = [];
+  if (Array.isArray(rawData)) {
+    itemsArray = rawData;
+  } else if (rawData) {
+    const src = rawData?.leadership ? rawData : rawData?.data ?? rawData;
+    itemsArray = [
+      ...(Array.isArray(src.leadership) ? src.leadership : []),
+      ...(Array.isArray(src.public_speaking) ? src.public_speaking : []),
+    ];
+  }
 
   // Map API pathways to Tabs
-  // Leadership in API might be "leadership-pathway" or just "leadership"
-  const filteredItems = (allItems || []).filter((item) => {
-    const matchesTab = item.pathway.toLowerCase().includes(tab.toLowerCase());
+  const filteredItems = itemsArray.filter((item: any) => {
+    const itemPathway = typeof item.pathway === 'string' ? item.pathway : "";
+    const matchesTab = itemPathway.toLowerCase().includes(tab.toLowerCase());
     const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
     return matchesTab && matchesSearch;
   });
-
-  const handleAddSuccess = () => {
-    setShowAdd(false);
-    setShowSuccess(true);
-    refetch();
-  };
 
   const stats = [
     {
@@ -58,7 +139,7 @@ export function PathwayChecklistsClient() {
     },
   ];
 
-  if (isLoading && !allItems) {
+  if (isLoading && itemsArray.length === 0) {
     return (
       <div className="flex h-[400px] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -73,7 +154,7 @@ export function PathwayChecklistsClient() {
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList>
             <TabsTrigger value="leadership">Leadership Pathway</TabsTrigger>
-            <TabsTrigger value="public-speaking">Public Speaking Pathway</TabsTrigger>
+            <TabsTrigger value="public_speaking">Public Speaking Pathway</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -128,23 +209,20 @@ export function PathwayChecklistsClient() {
       <ChecklistModal
         open={showAdd}
         onClose={() => setShowAdd(false)}
-        onSuccess={handleAddSuccess}
+        onSuccess={handleAdd}
         mode="add"
       />
       <ChecklistModal
         open={!!editTarget}
         onClose={() => setEditTarget(null)}
-        onSuccess={() => { setEditTarget(null); refetch(); }}
+        onSuccess={handleEdit}
         mode="edit"
         defaultValues={editTarget ?? undefined}
       />
       <ConfirmDialog
         open={!!removeTarget}
         onClose={() => setRemoveTarget(null)}
-        onConfirm={() => {
-          // TODO: Call DELETE /checklist/{slug}
-          setRemoveTarget(null);
-        }}
+        onConfirm={handleRemove}
         title="Remove Checklist Item"
         description="Are you sure you want to remove this checklist? This action cannot be undone."
       />

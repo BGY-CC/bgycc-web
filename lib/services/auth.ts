@@ -29,5 +29,14 @@ export const authService = {
       body: JSON.stringify({ password }),
     });
     return response.json();
+  },
+
+  login: async (email: string, password: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    return response.json();
   }
 };

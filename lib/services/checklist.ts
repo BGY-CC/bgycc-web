@@ -1,3 +1,5 @@
+import { API_CONFIG } from "../api";
+
 export interface ChecklistItem {
   id: string;
   name: string;
@@ -12,7 +14,7 @@ export interface ChecklistItem {
   resource_url: string | null;
   is_active: boolean;
   is_curriculum_based: boolean;
-  metadata?: any;
+  metadata?: Record<string, any> | null;
 }
 
 export interface CurriculumItem {
@@ -23,8 +25,62 @@ export interface CurriculumItem {
   description: string | null;
   media_url: string;
   media_type: "video" | "audio" | "image" | "text";
-  xp_value?: number;
-  metadata?: any;
-  created_at?: string;
-  updated_at?: string;
+  xp_value: number | null;
+  metadata?: Record<string, any> | null;
+  created_at: string;
+  updated_at: string;
 }
+
+const getAuthHeaders = () => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+  };
+};
+
+export const checklistService = {
+  list: async () => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/checklist`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  create: async (data: Partial<ChecklistItem>) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/checklist`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
+  update: async (slug: string, data: Partial<ChecklistItem>) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/checklist/${slug}`, {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  },
+
+  delete: async (slug: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/checklist/${slug.trim()}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+    
+    if (response.status === 204 || response.status === 200) return { success: true };
+    
+    try {
+      const result = await response.json();
+      return result;
+    } catch {
+      return { success: response.ok };
+    }
+  },
+
+};
+

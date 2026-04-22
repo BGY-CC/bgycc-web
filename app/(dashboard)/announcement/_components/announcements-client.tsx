@@ -52,20 +52,79 @@ export function AnnouncementsClient() {
   const [deleteTarget, setDeleteTarget] = useState<Announcement | null>(null);
   const [search, setSearch] = useState("");
 
-  const { data, isLoading, refetch } = useQuery<AnnouncementResponse>(
-    `/announcements`
-  );
+  const { data: rawData, isLoading, refetch } = useQuery<any>(`/community/announcements`);
 
-  const announcements = data?.announcements || MOCK_ANNOUNCEMENTS;
+  // useQuery returns result.data; API shape: { announcements: [...] }
+  const announcements: Announcement[] = Array.isArray(rawData)
+    ? rawData
+    : rawData?.announcements ?? rawData?.data?.announcements ?? [];
 
-  const handleDelete = () => {
-    toast("Announcement deleted successfully.");
-    setDeleteTarget(null);
-    // In a real app, we'd call the API here
-    // refetch();
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      const result = await announcementsService.delete(deleteTarget.id);
+      if (result.success) {
+        toast("Announcement deleted successfully.");
+        setDeleteTarget(null);
+        refetch();
+      } else {
+        toast(result.error || "Failed to delete announcement");
+      }
+    } catch (error: any) {
+      toast(error.message || "An error occurred");
+    }
   };
 
-  if (isLoading && !data && MOCK_ANNOUNCEMENTS.length === 0) {
+  const handleAdd = async (formData: any) => {
+    try {
+      const result = await announcementsService.create({
+        title: formData.title,
+        content: formData.content,
+        type: "announcement",
+        is_active: true,
+        metadata: {
+          delivery: formData.deliveryOptions,
+          target: formData.targetAudience === "all" ? "All Members" : formData.selectedClubs,
+        },
+      });
+
+      if (result.success) {
+        setShowAdd(false);
+        toast("Announcement sent successfully!");
+        refetch();
+      } else {
+        toast(result.error || "Failed to send announcement");
+      }
+    } catch (error: any) {
+      toast(error.message || "An error occurred");
+    }
+  };
+
+  const handleEdit = async (formData: any) => {
+    if (!editTarget) return;
+    try {
+      const result = await announcementsService.update(editTarget.id, {
+        title: formData.title,
+        content: formData.content,
+        metadata: {
+          delivery: formData.deliveryOptions,
+          target: formData.targetAudience === "all" ? "All Members" : formData.selectedClubs,
+        },
+      });
+
+      if (result.success) {
+        setEditTarget(null);
+        toast("Announcement updated successfully!");
+        refetch();
+      } else {
+        toast(result.error || "Failed to update announcement");
+      }
+    } catch (error: any) {
+      toast(error.message || "An error occurred");
+    }
+  };
+
+  if (isLoading && !rawData) {
     return (
       <div className="flex h-[400px] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -165,7 +224,7 @@ export function AnnouncementsClient() {
       <AnnouncementModal
         open={showAdd}
         onClose={() => setShowAdd(false)}
-        onSuccess={() => { setShowAdd(false); /* refetch(); */ }}
+        onSuccess={handleAdd}
         mode="add"
       />
       
@@ -173,7 +232,7 @@ export function AnnouncementsClient() {
         <AnnouncementModal
             open={!!editTarget}
             onClose={() => setEditTarget(null)}
-            onSuccess={() => { setEditTarget(null); /* refetch(); */ }}
+            onSuccess={handleEdit}
             mode="edit"
             defaultValues={editTarget}
         />
