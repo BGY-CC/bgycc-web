@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 
@@ -14,12 +14,18 @@ export const metadata: Metadata = {
     default: "BGYCC Admin — School of Leadership",
   },
   description: "BGYCC School of Leadership admin dashboard",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes",
   icons: {
     icon: "/bgycc_logo.svg",
     shortcut: "/bgycc_logo.svg",
     apple: "/bgycc_logo.svg",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 import { AuthProvider } from "@/hooks/use-auth";
