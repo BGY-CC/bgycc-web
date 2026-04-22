@@ -16,13 +16,12 @@ export function ResourcesClient() {
   const [deleteTarget, setDeleteTarget] = useState<Resource | null>(null);
   const [search, setSearch] = useState("");
 
-  const { data, isLoading, refetch } = useQuery<ResourceResponse>(
-    `/resources`
-  );
+  const { data: rawData, isLoading, refetch } = useQuery<any>(`/resources`);
 
-  const resources = Array.isArray(data)
-    ? data
-    : (data as any)?.resources || (data as any)?.data || [];
+  // useQuery returns result.data; API shape: { resources: [...] }
+  const resources: Resource[] = Array.isArray(rawData)
+    ? rawData
+    : rawData?.resources ?? rawData?.data?.resources ?? [];
 
   const handleAdd = async (formData: any) => {
     try {
@@ -86,7 +85,7 @@ export function ResourcesClient() {
 
 
 
-  if (isLoading && !data) {
+  if (isLoading && !rawData) {
     return (
       <div className="flex h-[400px] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
