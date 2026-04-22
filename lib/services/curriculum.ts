@@ -41,6 +41,14 @@ export const curriculumService = {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    
+    if (response.status === 204 || response.status === 200) return { success: true };
+    
+    try {
+      const result = await response.json();
+      return result;
+    } catch {
+      return { success: response.ok };
+    }
   },
 };

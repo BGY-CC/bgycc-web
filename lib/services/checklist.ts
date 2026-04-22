@@ -14,7 +14,7 @@ export interface ChecklistItem {
   resource_url: string | null;
   is_active: boolean;
   is_curriculum_based: boolean;
-  metadata?: any;
+  metadata?: Record<string, any> | null;
 }
 
 export interface CurriculumItem {
@@ -25,10 +25,10 @@ export interface CurriculumItem {
   description: string | null;
   media_url: string;
   media_type: "video" | "audio" | "image" | "text";
-  xp_value?: number;
-  metadata?: any;
-  created_at?: string;
-  updated_at?: string;
+  xp_value: number | null;
+  metadata?: Record<string, any> | null;
+  created_at: string;
+  updated_at: string;
 }
 
 const getAuthHeaders = () => {
@@ -72,11 +72,10 @@ export const checklistService = {
       headers: getAuthHeaders(),
     });
     
-    if (response.status === 204) return { success: true };
+    if (response.status === 204 || response.status === 200) return { success: true };
     
-    const text = await response.text();
     try {
-      const result = text ? JSON.parse(text) : { success: response.ok };
+      const result = await response.json();
       return result;
     } catch {
       return { success: response.ok };

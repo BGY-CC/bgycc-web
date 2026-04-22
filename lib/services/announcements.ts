@@ -3,9 +3,9 @@ import { API_CONFIG } from "../api";
 export interface Announcement {
   id: string;
   club_id: string | null;
+  type: "announcement" | "event";
   title: string;
   content: string | null;
-  type: "announcement" | "event";
   image_url: string | null;
   link_url: string | null;
   author_id: string | null;
@@ -14,7 +14,7 @@ export interface Announcement {
   event_date: string | null;
   event_time?: string | null;
   event_location: string | null;
-  metadata?: any;
+  metadata?: Record<string, any> | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -68,11 +68,10 @@ export const announcementsService = {
       headers: getAuthHeaders(),
     });
     
-    if (response.status === 204) return { success: true };
+    if (response.status === 204 || response.status === 200) return { success: true };
     
-    const text = await response.text();
     try {
-      const result = text ? JSON.parse(text) : { success: response.ok };
+      const result = await response.json();
       return result;
     } catch {
       return { success: response.ok };

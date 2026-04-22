@@ -61,15 +61,12 @@ export const pathwaysService = {
       headers: getAuthHeaders(),
     });
     
-    if (response.status === 204) return { success: true };
+    if (response.status === 204 || response.status === 200) return { success: true };
     
-    const text = await response.text();
     try {
-      const result = text ? JSON.parse(text) : { success: response.ok };
+      const result = await response.json();
       return result;
     } catch {
       return { success: response.ok };
-    }
   },
-
 };
