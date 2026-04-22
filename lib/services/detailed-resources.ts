@@ -1,23 +1,21 @@
 import { API_CONFIG } from "../api";
 
-export interface Resource {
+export interface DetailedResource {
   id: string;
-  slug: string | null;
+  category: string;
   title: string;
   description: string | null;
-  image_url: string | null;
-  link: string | null;
+  thumbnail_url: string | null;
+  file_url: string | null;
+  resource_type: "pdf" | "video" | "audio" | "link" | "text" | null;
+  content_text: string | null;
   xp_reward: number;
-  is_active: boolean;
   min_rank_required: string | null;
   min_streak_required: number;
-  pathway: "leadership" | "public_speaking" | null;
+  is_active: boolean;
+  category_id: string | null;
   created_at: string;
   updated_at: string;
-}
-
-export interface ResourceResponse {
-  resources: Resource[];
 }
 
 const getAuthHeaders = () => {
@@ -28,17 +26,17 @@ const getAuthHeaders = () => {
   };
 };
 
-export const resourcesService = {
+export const detailedResourcesService = {
   list: async () => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/resources`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/detailed-resources`, {
       method: "GET",
       headers: getAuthHeaders(),
     });
     return response.json();
   },
 
-  create: async (data: Partial<Resource>) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/resources`, {
+  create: async (data: Partial<DetailedResource>) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/detailed-resources`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -46,8 +44,8 @@ export const resourcesService = {
     return response.json();
   },
 
-  update: async (id: string, data: Partial<Resource>) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/resources/${id}`, {
+  update: async (id: string, data: Partial<DetailedResource>) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/detailed-resources/${id}`, {
       method: "PUT",
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -56,7 +54,7 @@ export const resourcesService = {
   },
 
   delete: async (id: string) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/resources/${id.trim()}`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/detailed-resources/${id.trim()}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
@@ -77,7 +75,7 @@ export const resourcesService = {
     formData.append("image", file);
     
     const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
-    const response = await fetch(`${API_CONFIG.BASE_URL}/resources/upload-image`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/detailed-resources/upload-image`, {
       method: "POST",
       headers: {
         ...(token ? { "Authorization": `Bearer ${token}` } : {}),
@@ -87,4 +85,3 @@ export const resourcesService = {
     return response.json();
   },
 };
-

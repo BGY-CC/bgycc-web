@@ -1,4 +1,4 @@
-import { ApiResponse } from "../api";
+import { API_CONFIG } from "../api";
 
 export interface DashboardStats {
   active_users: StatValue;
@@ -37,5 +37,25 @@ export interface DashboardData {
   engagement_trends: EngagementTrend[];
 }
 
-// These types are for consumers, actual fetching happens via useApi or useQuery hooks usually.
-// But we define the interfaces here for consistency.
+export const dashboardService = {
+  getDashboardData: async (period: "week" | "month" | "year" = "week") => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
+    const response = await fetch(`${API_CONFIG.BASE_URL}/dashboard?period=${period}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+      },
+    });
+    return response.json();
+  },
+
+  healthCheck: async () => {
+    const response = await fetch(`${API_CONFIG.BASE_URL.replace("/admin", "")}/admin`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    return response.json();
+  },
+};
+

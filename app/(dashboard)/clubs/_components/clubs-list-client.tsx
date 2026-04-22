@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { Plus, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui";
+import { Button, useToast } from "@/components/ui";
 import { SearchInput } from "@/components/shared";
 import { ClubsTable } from "./clubs-table";
 import { ClubModal } from "./club-modal";
 import { SuccessModal } from "./success-modal";
 import { useQuery } from "@/hooks/use-query";
-import { Club, PaginatedClubs } from "@/lib/services/clubs";
+import { clubsService, Club, PaginatedClubs } from "@/lib/services/clubs";
 
 export function ClubsListClient() {
+  const { toast } = useToast();
   const [showCreate, setShowCreate] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [page, setPage] = useState(1);
@@ -21,11 +22,44 @@ export function ClubsListClient() {
     { enabled: true }
   );
 
-  const handleCreateSuccess = () => {
-    setShowCreate(false);
-    setShowSuccess(true);
-    refetch();
+  const handleCreate = async (formData: any) => {
+    try {
+      const result = await clubsService.create({
+        name: formData.name,
+        state: formData.state,
+        city: formData.city,
+        description: formData.description,
+        url_link: formData.whatsappLink,
+        country: "Nigeria", // default
+      });
+
+      if (result.success) {
+        setShowCreate(false);
+        setShowSuccess(true);
+        refetch();
+      } else {
+        alert(result.error || result.message || "Failed to create club");
+      }
+    } catch (error: any) {
+      alert(error.message || "An error occurred while creating the club");
+    }
   };
+
+
+  const handleDelete = async (id: string) => {
+    try {
+      const result = await clubsService.delete(id);
+      if (result.success) {
+        toast("Club deleted successfully");
+        refetch();
+      } else {
+        toast("Failed to delete club", "error");
+      }
+    } catch (error: any) {
+      toast(error.message || "An error occurred", "error");
+    }
+  };
+
 
   return (
     <>
@@ -60,14 +94,16 @@ export function ClubsListClient() {
           currentPage={page}
           totalPages={data?.total_pages || 1}
           onPageChange={setPage}
+          onDelete={handleDelete}
         />
       </div>
+
 
       {/* Modals */}
       <ClubModal
         open={showCreate}
         onClose={() => setShowCreate(false)}
-        onSuccess={handleCreateSuccess}
+        onSuccess={handleCreate}
         mode="create"
       />
       <SuccessModal

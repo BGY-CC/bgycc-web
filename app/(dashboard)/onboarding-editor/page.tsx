@@ -1,45 +1,33 @@
-import type { Metadata } from "next";
+"use client";
+
 import { PageHeader } from "@/components/shared";
 import { Badge } from "@/components/ui";
 import { VideoUploadCard } from "./_components/video-upload-card";
-
-export const metadata: Metadata = { title: "Onboarding Editor" };
-
-// ─── Mock data ────────────────────────────────────────────────────────────────
-
-const PATHWAYS = [
-  {
-    pathway: "Leadership Pathway",
-    description: "Welcome video shown to members who select the Leadership pathway during onboarding.",
-    initialVideo: {
-      name: "leadership_welcome_v3.mp4",
-      size: "24.5 MB",
-      duration: "3:42",
-      uploaded: "2025-12-01",
-    },
-  },
-  {
-    pathway: "Public Speaking Pathway",
-    description: "Welcome video shown to members who select the Public Speaking pathway during onboarding.",
-    initialVideo: undefined,
-  },
-  {
-    pathway: "Both Pathways",
-    description: "Welcome video for members who choose both Leadership and Public Speaking pathways.",
-    initialVideo: {
-      name: "both_pathways_intro.mp4",
-      size: "31.2 MB",
-      duration: "4:18",
-      uploaded: "2026-01-15",
-    },
-  },
-];
+import { useQuery } from "@/hooks/use-query";
+import { Pathway } from "@/lib/services/pathways";
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function OnboardingEditorPage() {
-  const uploaded = PATHWAYS.filter((p) => p.initialVideo).length;
-  const total = PATHWAYS.length;
+  const { data: rawData, isLoading } = useQuery<any>("/pathways");
+
+  // useQuery sets data = result.data from the API response
+  // API shape: { success, data: { pathways: [...] } }
+  // So rawData = { pathways: [...] }
+  const pathways: Pathway[] = Array.isArray(rawData)
+    ? rawData
+    : rawData?.pathways ?? rawData?.data?.pathways ?? [];
+
+  const uploaded = pathways.filter((p) => p.video_link).length;
+  const total = pathways.length;
+
+  if (isLoading && pathways.length === 0) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -69,14 +57,27 @@ export default function OnboardingEditorPage() {
 
         {/* Video cards */}
         <div className="mt-5 space-y-4">
-          {PATHWAYS.map((p) => (
-            <VideoUploadCard
-              key={p.pathway}
-              pathway={p.pathway}
-              description={p.description}
-              initialVideo={p.initialVideo}
-            />
-          ))}
+          {pathways.length > 0 ? (
+            pathways.map((p) => (
+              <VideoUploadCard
+                key={p.id}
+                pathway={p.display_name || p.label}
+                description={p.description || `Welcome video for the ${p.label} pathway.`}
+                initialVideo={p.video_link ? {
+                  name: "Welcome Video",
+                  size: "External Link",
+                  duration: "—",
+                  uploaded: "Uploaded",
+                  url: p.video_link
+                } : undefined}
+                slug={p.slug}
+              />
+            ))
+          ) : (
+            <div className="py-12 text-center text-gray-500">
+              No pathways found.
+            </div>
+          )}
         </div>
       </div>
     </div>

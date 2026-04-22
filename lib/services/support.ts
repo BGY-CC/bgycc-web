@@ -1,3 +1,5 @@
+import { API_CONFIG } from "../api";
+
 export interface SupportTicket {
   id: string;
   user_id: string;
@@ -12,16 +14,41 @@ export interface SupportResponse {
   tickets: SupportTicket[];
 }
 
-export interface Quote {
-  id: string;
-  content: string;
-  author: string | null;
-  pathway_id: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+const getAuthHeaders = () => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+  };
+};
 
-export interface QuoteResponse {
-  quotes: Quote[];
-}
+export const supportService = {
+  list: async (status?: string) => {
+    const url = status 
+      ? `${API_CONFIG.BASE_URL}/support?status=${status}`
+      : `${API_CONFIG.BASE_URL}/support`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getDetails: async (id: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/support/${id}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  updateStatus: async (id: string, status: "pending" | "acknowledged" | "resolved") => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/support/${id}`, {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ status }),
+    });
+    return response.json();
+  },
+};
+

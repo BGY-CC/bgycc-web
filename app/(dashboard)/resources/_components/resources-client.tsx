@@ -7,7 +7,7 @@ import { SearchInput } from "@/components/shared";
 import { ResourceModal } from "./resource-modal";
 import { useToast } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
-import { Resource, ResourceResponse } from "@/lib/services/resources";
+import { resourcesService, Resource, ResourceResponse } from "@/lib/services/resources";
 
 export function ResourcesClient() {
   const { toast } = useToast();
@@ -16,20 +16,76 @@ export function ResourcesClient() {
   const [deleteTarget, setDeleteTarget] = useState<Resource | null>(null);
   const [search, setSearch] = useState("");
 
-  const { data, isLoading, refetch } = useQuery<ResourceResponse>(
-    `/resources` // The spec for /admin/resources doesn't explicit search param but might support it
-  );
+  const { data: rawData, isLoading, refetch } = useQuery<any>(`/resources`);
 
-  const resources = data?.resources || [];
+  // useQuery returns result.data; API shape: { resources: [...] }
+  const resources: Resource[] = Array.isArray(rawData)
+    ? rawData
+    : rawData?.resources ?? rawData?.data?.resources ?? [];
 
-  const handleDelete = () => {
-    // TODO: Call DELETE /resources/{id}
-    toast("Resource deleted successfully.");
-    setDeleteTarget(null);
-    refetch();
+  const handleAdd = async (formData: any) => {
+    try {
+      const result = await resourcesService.create({
+        title: formData.title,
+        description: formData.description,
+        link: formData.link,
+        is_active: true,
+        slug: formData.title.toLowerCase().replace(/ /g, "-"), // simple slug
+        min_rank_required: "member",
+      });
+
+      if (result.success) {
+        setShowAdd(false);
+        toast("Resource added successfully");
+        refetch();
+      } else {
+        toast("Failed to add resource", "error");
+      }
+    } catch (error: any) {
+      toast(error.message || "An error occurred", "error");
+    }
   };
 
-  if (isLoading && !data) {
+  const handleEdit = async (formData: any) => {
+    if (!editTarget) return;
+    try {
+      const result = await resourcesService.update(editTarget.id, {
+        title: formData.title,
+        description: formData.description,
+        link: formData.link,
+      });
+
+      if (result.success) {
+        setEditTarget(null);
+        toast("Resource updated successfully");
+        refetch();
+      } else {
+        toast("Failed to update resource", "error");
+      }
+    } catch (error: any) {
+      toast(error.message || "An error occurred", "error");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      const result = await resourcesService.delete(deleteTarget.id);
+      if (result.success) {
+        setDeleteTarget(null);
+        toast("Resource deleted successfully");
+        refetch();
+      } else {
+        toast("Failed to delete resource", "error");
+      }
+    } catch (error: any) {
+      toast(error.message || "An error occurred", "error");
+    }
+  };
+
+
+
+  if (isLoading && !rawData) {
     return (
       <div className="flex h-[400px] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -111,13 +167,13 @@ export function ResourcesClient() {
       <ResourceModal
         open={showAdd}
         onClose={() => setShowAdd(false)}
-        onSuccess={() => { setShowAdd(false); refetch(); }}
+        onSuccess={handleAdd}
         mode="add"
       />
       <ResourceModal
         open={!!editTarget}
         onClose={() => setEditTarget(null)}
-        onSuccess={() => { setEditTarget(null); refetch(); }}
+        onSuccess={handleEdit}
         mode="edit"
         defaultValues={editTarget ? {
           title: editTarget.title,
