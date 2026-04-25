@@ -39,7 +39,7 @@ interface ClubModalProps {
   onClose: () => void;
   onSuccess: (data: ClubFormData) => void;
   mode: "create" | "edit";
-  defaultValues?: Partial<Club>;
+  defaultValues?: Partial<ClubFormData>;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -70,8 +70,26 @@ export function ClubModal({
 
   // Reset form when modal opens/closes
   useEffect(() => {
-    if (!open) reset();
-  }, [open, reset]);
+    if (open) {
+      reset({
+        name: defaultValues?.name ?? "",
+        leader: defaultValues?.leader ?? "",
+        state: defaultValues?.state?.toLowerCase() ?? "",
+        city: defaultValues?.city?.toLowerCase() ?? "",
+        whatsappLink: defaultValues?.whatsappLink ?? "",
+        description: defaultValues?.description ?? "",
+      });
+    } else {
+      reset({
+        name: "",
+        leader: "",
+        state: "",
+        city: "",
+        whatsappLink: "",
+        description: "",
+      });
+    }
+  }, [open, reset, defaultValues]);
 
   const isCreate = mode === "create";
 
