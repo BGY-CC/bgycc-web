@@ -1,42 +1,91 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Users,
-  Activity,
-  TrendingUp,
-  MessageCircle,
-  Pencil,
-} from "lucide-react";
-import { Badge, Button } from "@/components/ui";
+import { ArrowLeft, Users, Activity, TrendingUp, MessageCircle, Pencil } from "lucide-react";
+import { Badge, Button, useToast } from "@/components/ui";
 import { StatCard, PageHeader } from "@/components/shared";
 import { EngagementChart, MemberStatusChart } from "@/components/charts";
-import { MOCK_CLUBS } from "../_components/mock-data";
+import { useQuery } from "@/hooks/use-query";
+import { clubsService, Club } from "@/lib/services/clubs";
+import { ClubModal } from "../_components/club-modal";
+import { useParams } from "next/navigation";
 
-export const metadata: Metadata = { title: "Club Details" };
+export default function ClubDetailPage() {
+  const params = useParams();
+  const { toast } = useToast();
+  const [showEdit, setShowEdit] = useState(false);
 
-// ─── Mock performers / at-risk data ──────────────────────────────────────────
+  // Validate that the id is not undefined or invalid
+  if (!params.id || params.id === "undefined") {
+    return (
+      <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-primary mb-2">Invalid Club ID</h1>
+          <p className="text-muted mb-6">The club ID is missing or invalid. Please go back and try again.</p>
+          <Link href="/clubs" className="inline-block">
+            <Button leftIcon={<ArrowLeft className="h-4 w-4" />}>
+              Back to Clubs
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-const TOP_PERFORMERS = [
-  { name: "John Adewale", streak: 44, score: 89 },
-  { name: "Grace Obi", streak: 34, score: 87 },
-  { name: "Samuel Eze", streak: 28, score: 79 },
-  { name: "Faith Nwosu", streak: 25, score: 76 },
-  { name: "John Adewale", streak: 21, score: 70 },
-];
+  // Fetch data
+  const { data: clubData, isLoading: isLoadingClub, refetch: refetchClub } = useQuery<{ club: Club & { leader?: { full_name?: string } } }>(
+    `/clubs/${params.id}`
+  );
+  
+  const { data: healthData, isLoading: isLoadingHealth } = useQuery<{ demographics: any; at_risk_members: any[] }>(
+    `/clubs/${params.id}/member-health`
+  );
+  
+  const { data: topPerformersData, isLoading: isLoadingTop } = useQuery<{ top_performers: any[] }>(
+    `/clubs/${params.id}/top-performers`
+  );
 
-const AT_RISK_MEMBERS = [
-  { name: "John Adewale", reason: "3 consecutive missed reports" },
-  { name: "Grace Obi", reason: "Last login: 7d ago" },
-  { name: "Samuel Eze", reason: "Streak dropped (2nd time monthly)" },
-  { name: "Faith Nwosu", reason: "Missed yesterday's report" },
-  { name: "John Adewale", reason: "3 consecutive missed reports" },
-];
+  const club = clubData?.club;
+  const health = healthData;
+  const topPerformers = topPerformersData?.top_performers || [];
+  const atRiskMembers = healthData?.at_risk_members || [];
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+  const handleEdit = async (formData: any) => {
+    if (!club) return;
+    try {
+      const result = await clubsService.update(club.id, {
+        name: formData.name,
+        state: formData.state,
+        city: formData.city,
+        description: formData.description,
+        url_link: formData.whatsappLink,
+        country: "Nigeria", // default
+      });
 
-export default function ClubDetailPage({ params }: { params: { id: string } }) {
-  const club = MOCK_CLUBS.find((c) => c.id === params.id) ?? MOCK_CLUBS[0];
+      if (result.success) {
+        setShowEdit(false);
+        toast("Club updated successfully");
+        refetchClub();
+      } else {
+        alert(result.error || result.message || "Failed to update club");
+      }
+    } catch (error: any) {
+      alert(error.message || "An error occurred while updating the club");
+    }
+  };
+
+  if (isLoadingClub) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (!club) {
+    return <div className="p-8 text-center text-gray-500">Club not found.</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -58,36 +107,42 @@ export default function ClubDetailPage({ params }: { params: { id: string } }) {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold text-gray-900">{club.name}</h2>
-              <Badge variant={club.status === "Active" ? "active" : "dormant"}>
-                {club.status}
+              <Badge variant={club.is_active ? "active" : "dormant"}>
+                {club.is_active ? "Active" : "Dormant"}
               </Badge>
             </div>
-            <p className="text-sm text-gray-500 mt-0.5">Holistic city, modern leadership approach</p>
+            <p className="text-sm text-gray-500 mt-0.5">{club.description || "Holistic city, modern leadership approach"}</p>
 
             <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
               <span className="flex items-center gap-1.5">
                 <span className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
-                  {club.leader.charAt(0)}
+                  {club.leader?.full_name?.charAt(0) || "L"}
                 </span>
-                <span className="font-medium text-gray-700">{club.leader}</span>
+                <span className="font-medium text-gray-700">{club.leader?.full_name || "No Leader"}</span>
                 <span className="text-gray-400 text-xs">Leader</span>
               </span>
-              <span>{club.region} <span className="text-gray-400 text-xs ml-1">Region</span></span>
-              <span>{club.createdAt ?? "8/22/2023"} <span className="text-gray-400 text-xs ml-1">Created</span></span>
+              <span>{[club.city, club.state].filter(Boolean).join(", ") || "Unknown"} <span className="text-gray-400 text-xs ml-1">Region</span></span>
+              {club.created_at && (
+                <span>{new Date(club.created_at).toLocaleDateString()} <span className="text-gray-400 text-xs ml-1">Created</span></span>
+              )}
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <Button
-              variant="secondary"
-              size="sm"
-              leftIcon={<MessageCircle className="h-4 w-4" />}
-            >
-              WhatsApp
-            </Button>
+            {club.url_link && (
+              <Button
+                variant="secondary"
+                size="sm"
+                leftIcon={<MessageCircle className="h-4 w-4" />}
+                onClick={() => window.open(club.url_link, "_blank")}
+              >
+                WhatsApp
+              </Button>
+            )}
             <Button
               size="sm"
               leftIcon={<Pencil className="h-4 w-4" />}
+              onClick={() => setShowEdit(true)}
             >
               Edit Club
             </Button>
@@ -97,10 +152,10 @@ export default function ClubDetailPage({ params }: { params: { id: string } }) {
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Total Clubs" value="8" icon={<Users className="h-4 w-4" />} />
-        <StatCard label="Active Clubs" value="7" icon={<Activity className="h-4 w-4" />} />
-        <StatCard label="Total Members" value="1,157" icon={<Users className="h-4 w-4" />} />
-        <StatCard label="Avg Club Score" value="76%" icon={<TrendingUp className="h-4 w-4" />} />
+        <StatCard label="Total Members" value={health?.demographics?.total?.toString() || club.total_members?.toString() || "0"} icon={<Users className="h-4 w-4" />} />
+        <StatCard label="Active Members" value={health?.demographics?.active?.toString() || club.active_members?.toString() || "0"} icon={<Activity className="h-4 w-4" />} />
+        <StatCard label="At Risk Members" value={health?.demographics?.at_risk?.toString() || "0"} icon={<Users className="h-4 w-4 text-red-500" />} />
+        <StatCard label="Avg Streak" value={club.average_streak?.toFixed(1) || "0.0"} icon={<TrendingUp className="h-4 w-4" />} />
       </div>
 
       {/* Charts */}
@@ -138,20 +193,25 @@ export default function ClubDetailPage({ params }: { params: { id: string } }) {
             Top Performers
           </h3>
           <div className="space-y-3">
-            {TOP_PERFORMERS.map((p, i) => (
+            {isLoadingTop ? (
+               <div className="text-sm text-gray-500">Loading...</div>
+            ) : topPerformers.length === 0 ? (
+               <div className="text-sm text-gray-500">No top performers found.</div>
+            ) : (
+               topPerformers.map((p: any, i: number) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <span className="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600 shrink-0">
-                    {p.name.charAt(0)}
+                    {(p.full_name || "U").charAt(0)}
                   </span>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{p.name}</p>
-                    <p className="text-xs text-gray-500">Streak: {p.streak} days</p>
+                    <p className="text-sm font-medium text-gray-900">{p.full_name || "Unknown"}</p>
+                    <p className="text-xs text-gray-500">Streak: {p.current_streak} days</p>
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-gray-900">{p.score}%</span>
+                <span className="text-sm font-semibold text-gray-900">{p.total_xp} XP</span>
               </div>
-            ))}
+            )))}
           </div>
         </div>
 
@@ -162,25 +222,45 @@ export default function ClubDetailPage({ params }: { params: { id: string } }) {
             At-Risk Members
           </h3>
           <div className="space-y-3">
-            {AT_RISK_MEMBERS.map((m, i) => (
+            {isLoadingHealth ? (
+               <div className="text-sm text-gray-500">Loading...</div>
+            ) : atRiskMembers.length === 0 ? (
+               <div className="text-sm text-gray-500">No at-risk members found.</div>
+            ) : (
+              atRiskMembers.map((m: any, i: number) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <span className="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600 shrink-0">
-                    {m.name.charAt(0)}
+                    {(m.full_name || "U").charAt(0)}
                   </span>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{m.name}</p>
-                    <p className="text-xs text-gray-500">{m.reason}</p>
+                    <p className="text-sm font-medium text-gray-900">{m.full_name || "Unknown"}</p>
+                    <p className="text-xs text-gray-500">Broken streak</p>
                   </div>
                 </div>
                 <button className="text-xs text-primary hover:underline font-medium">
                   View
                 </button>
               </div>
-            ))}
+            )))}
           </div>
         </div>
       </div>
+
+      <ClubModal
+        open={showEdit}
+        onClose={() => setShowEdit(false)}
+        onSuccess={handleEdit}
+        mode="edit"
+        defaultValues={{
+          name: club.name,
+          leader: club.leader?.full_name || "",
+          state: club.state,
+          city: club.city,
+          description: club.description,
+          whatsappLink: club.url_link,
+        }}
+      />
     </div>
   );
 }
