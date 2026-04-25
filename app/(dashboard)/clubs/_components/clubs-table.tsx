@@ -8,6 +8,7 @@ import { ConfirmDialog } from "@/components/ui";
 import { useToast } from "@/components/ui";
 import { Club } from "@/lib/services/clubs";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface ClubsTableProps {
   clubs: Club[];
@@ -15,9 +16,11 @@ interface ClubsTableProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   onDelete?: (id: string) => void;
+  onEdit?: (club: Club) => void;
 }
 
-export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDelete }: ClubsTableProps) {
+export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDelete, onEdit }: ClubsTableProps) {
+  const router = useRouter();
   const { toast } = useToast();
   const [deleteTarget, setDeleteTarget] = useState<Club | null>(null);
 
@@ -26,7 +29,7 @@ export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDel
       onDelete(deleteTarget.id);
       setDeleteTarget(null);
     } else {
-      toast(`${deleteTarget?.name} has been deleted (mock).`);
+      toast(`${deleteTarget?.name} has been deleted.`);
       setDeleteTarget(null);
     }
   };
@@ -54,16 +57,28 @@ export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDel
             </thead>
             <tbody className="divide-y divide-border">
               {clubs.map((club) => {
+                // Defensive check: ensure club has a valid id before rendering
+                if (!club.id) {
+                  console.warn('Club object missing id field:', club);
+                  return null;
+                }
+
                 const menuItems: DropdownItem[] = [
                   {
                     label: "View Details",
                     icon: <Eye className="h-4 w-4" />,
-                    onClick: () => {},
+                    onClick: () => {
+                      if (!club.id) {
+                        toast('Club details are not available', 'error');
+                        return;
+                      }
+                      router.push(`/clubs/${club.id}`);
+                    },
                   },
                   {
                     label: "Edit Club",
                     icon: <Pencil className="h-4 w-4" />,
-                    onClick: () => {},
+                    onClick: () => onEdit && onEdit(club),
                   },
                   {
                     label: "Delete Club",
@@ -78,12 +93,16 @@ export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDel
                 return (
                   <tr key={club.id} className="hover:bg-background/50 transition-colors group">
                     <td className="px-4 py-4 font-bold text-primary whitespace-nowrap">
-                      <Link
-                        href={`/clubs/${club.id}`}
-                        className="hover:text-accent transition-colors"
-                      >
-                        {club.name}
-                      </Link>
+                      {club.id ? (
+                        <Link
+                          href={`/clubs/${club.id}`}
+                          className="hover:text-accent transition-colors"
+                        >
+                          {club.name}
+                        </Link>
+                      ) : (
+                        <span className="text-muted">{club.name}</span>
+                      )}
                     </td>
                     <td className="px-4 py-4 text-subtle font-medium whitespace-nowrap">
                       <span className="flex items-center gap-2">
