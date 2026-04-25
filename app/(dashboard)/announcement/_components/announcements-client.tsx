@@ -7,43 +7,9 @@ import { SearchInput } from "@/components/shared";
 import { AnnouncementModal } from "./announcement-modal";
 import { useToast } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
-import { Announcement, AnnouncementResponse } from "@/lib/services/announcements";
+import { Announcement, AnnouncementResponse, announcementsService } from "@/lib/services/announcements";
 import { cn } from "@/lib/utils";
 
-const MOCK_ANNOUNCEMENTS: Announcement[] = [
-  {
-    id: "1",
-    club_id: null,
-    title: "Pathway Update Available",
-    content: "New pathway milestones have been added. Complete your checklist to earn rewards!",
-    type: "announcement",
-    image_url: null,
-    link_url: null,
-    author_id: "system",
-    event_date: "2026-04-10",
-    event_location: null,
-    is_active: true,
-    created_at: "2026-04-10T10:00:00Z",
-    updated_at: "2026-04-10T10:00:00Z",
-    metadata: { delivery: ["IN-APP"], target: "All Members" }
-  },
-  {
-    id: "2",
-    club_id: "lagos-owerri",
-    title: "Club Zoom Meeting",
-    content: "Reminder: Downtown club meets this Thursday at 6 PM. Don't forget to bring your materials.",
-    type: "announcement",
-    image_url: null,
-    link_url: null,
-    author_id: "manager",
-    event_date: "2026-04-08",
-    event_location: "Zoom",
-    is_active: true,
-    created_at: "2026-04-08T15:00:00Z",
-    updated_at: "2026-04-08T15:00:00Z",
-    metadata: { delivery: ["IN-APP", "PUSH"], target: ["Lagos Club", "Owerri Club"] }
-  }
-];
 
 export function AnnouncementsClient() {
   const { toast } = useToast();
