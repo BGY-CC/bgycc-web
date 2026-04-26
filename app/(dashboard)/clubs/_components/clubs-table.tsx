@@ -3,7 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Eye, Pencil, Trash2 } from "lucide-react";
-import { Badge, ActionMenu, Pagination, type DropdownItem } from "@/components/ui";
+import {
+  Badge,
+  ActionMenu,
+  Pagination,
+  type DropdownItem,
+} from "@/components/ui";
 import { ConfirmDialog } from "@/components/ui";
 import { useToast } from "@/components/ui";
 import { Club } from "@/lib/services/clubs";
@@ -19,7 +24,14 @@ interface ClubsTableProps {
   onEdit?: (club: Club) => void;
 }
 
-export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDelete, onEdit }: ClubsTableProps) {
+export function ClubsTable({
+  clubs,
+  currentPage,
+  totalPages,
+  onPageChange,
+  onDelete,
+  onEdit,
+}: ClubsTableProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [deleteTarget, setDeleteTarget] = useState<Club | null>(null);
@@ -34,7 +46,6 @@ export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDel
     }
   };
 
-
   return (
     <>
       {/* Table wrapper — horizontal scroll on mobile */}
@@ -43,23 +54,30 @@ export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDel
           <table className="w-full text-sm font-sans">
             <thead>
               <tr className="border-b border-border text-left">
-                {["Club", "Location", "Leader", "Members", "Avg Streak", "Status", "Actions"].map(
-                  (col) => (
-                    <th
-                      key={col}
-                      className="px-4 py-5 text-[11px] font-bold text-muted uppercase tracking-[0.1em] whitespace-nowrap"
-                    >
-                      {col}
-                    </th>
-                  ),
-                )}
+                {[
+                  "Club",
+                  "Region",
+                  "Leader",
+                  "Members",
+                  "Report Rate",
+                  "Score",
+                  "Status",
+                  "Actions",
+                ].map((col) => (
+                  <th
+                    key={col}
+                    className="px-4 py-5 text-[11px] font-bold text-muted uppercase tracking-[0.1em] whitespace-nowrap"
+                  >
+                    {col}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {clubs.map((club) => {
                 // Defensive check: ensure club has a valid id before rendering
                 if (!club.id) {
-                  console.warn('Club object missing id field:', club);
+                  console.warn("Club object missing id field:", club);
                   return null;
                 }
 
@@ -69,7 +87,7 @@ export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDel
                     icon: <Eye className="h-4 w-4" />,
                     onClick: () => {
                       if (!club.id) {
-                        toast('Club details are not available', 'error');
+                        toast("Club details are not available", "error");
                         return;
                       }
                       router.push(`/clubs/${club.id}`);
@@ -88,10 +106,17 @@ export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDel
                   },
                 ];
 
-                const location = [club.city, club.state].filter(Boolean).join(", ") || club.region || "Unknown";
+                const location =
+                  [club.city, club.state].filter(Boolean).join(", ") ||
+                  club.region ||
+                  "Unknown";
 
                 return (
-                  <tr key={club.id} className="hover:bg-background/50 transition-colors group">
+                  <tr
+                    key={club.id}
+                    className="hover:bg-background/50 transition-colors group"
+                  >
+                    {/* Club */}
                     <td className="px-4 py-4 font-bold text-primary whitespace-nowrap">
                       {club.id ? (
                         <Link
@@ -104,26 +129,43 @@ export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDel
                         <span className="text-muted">{club.name}</span>
                       )}
                     </td>
+
+                    {/* Region */}
                     <td className="px-4 py-4 text-subtle font-medium whitespace-nowrap">
                       <span className="flex items-center gap-2">
                         <span className="text-muted text-sm">📍</span>
                         {location}
                       </span>
                     </td>
+
+                    {/* Leader */}
                     <td className="px-4 py-4 whitespace-nowrap">
                       <span className="flex items-center gap-3">
                         <span className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-xs font-bold text-primary shrink-0 shadow-sm">
                           {(club.leader_name || "L").charAt(0)}
                         </span>
-                        <span className="text-primary font-bold">{club.leader_name || "No Leader"}</span>
+                        <span className="text-primary font-bold">
+                          {club.leader_name || "No Leader"}
+                        </span>
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-subtle font-bold">{club.total_members}</td>
+
+                    {/* Members */}
+                    <td className="px-4 py-4 text-subtle font-bold">
+                      {club.total_members}
+                    </td>
+
+                    {/* Report Rate (EMPTY for now) */}
+                    <td className="px-4 py-4 text-muted font-medium">—</td>
+
+                    {/* Score (this was wrongly used earlier) */}
                     <td className="px-4 py-4">
                       <span className="font-bold text-primary">
                         {club.average_streak.toFixed(1)}
                       </span>
                     </td>
+
+                    {/* Status */}
                     <td className="px-4 py-4">
                       <Badge
                         variant={club.is_active ? "active" : "dormant"}
@@ -132,6 +174,8 @@ export function ClubsTable({ clubs, currentPage, totalPages, onPageChange, onDel
                         {club.is_active ? "Active" : "Dormant"}
                       </Badge>
                     </td>
+
+                    {/* Actions */}
                     <td className="px-6 py-4">
                       <ActionMenu items={menuItems} align="right" />
                     </td>

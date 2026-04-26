@@ -21,15 +21,15 @@ export function ClubsListClient() {
 
   const { data, isLoading, refetch } = useQuery<PaginatedClubs>(
     `/clubs?page=${page}&name=${search}`,
-    { enabled: true }
+    { enabled: true },
   );
 
   // Debug: Log API response to understand data structure
   if (data?.clubs && data.clubs.length > 0) {
     const firstClub = data.clubs[0];
     if (!firstClub.id) {
-      console.warn('First club is missing id field. Club object:', firstClub);
-      console.warn('Available fields:', Object.keys(firstClub));
+      console.warn("First club is missing id field. Club object:", firstClub);
+      console.warn("Available fields:", Object.keys(firstClub));
     }
   }
 
@@ -84,7 +84,6 @@ export function ClubsListClient() {
     }
   };
 
-
   const handleDelete = async (id: string) => {
     try {
       const result = await clubsService.delete(id);
@@ -99,43 +98,65 @@ export function ClubsListClient() {
     }
   };
 
-
   return (
     <>
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 items-center gap-2">
+        <div className="flex flex-1 items-center gap-2 bg-white lg:p-5 rounded-xl">
           <SearchInput
             placeholder="Search clubs..."
             containerClassName="w-full max-w-xs"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setPage(1); // Reset to first page on search
+              setPage(1);
             }}
           />
-          <Button variant="secondary" size="sm" rightIcon={<ChevronDown className="h-4 w-4" />}>
+
+          <Button
+            variant="secondary"
+            size="sm"
+            rightIcon={<ChevronDown className="h-4 w-4" />}
+          >
             All Regions
           </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            rightIcon={<ChevronDown className="h-4 w-4" />}
+          >
+            Name
+          </Button>
+
+          <Button
+            className="ml-auto"
+            size="sm"
+            leftIcon={<Plus className="h-4 w-4" />}
+            onClick={() => setShowCreate(true)}
+          >
+            Create Club
+          </Button>
         </div>
-        <Button
-          size="sm"
-          leftIcon={<Plus className="h-4 w-4" />}
-          onClick={() => setShowCreate(true)}
-        >
-          Create Club
-        </Button>
       </div>
 
-      <div className={isLoading ? "opacity-50 pointer-events-none transition-opacity" : "transition-opacity"}>
+      <div
+        className={
+          isLoading
+            ? "opacity-50 pointer-events-none transition-opacity"
+            : "transition-opacity"
+        }
+      >
         {data?.clubs && data.clubs.length > 0 && validClubs.length === 0 ? (
           <div className="rounded-2xl border border-border bg-white p-12 text-center shadow-sm">
             <p className="text-muted mb-2">Club data is incomplete</p>
-            <p className="text-sm text-muted">Some clubs are missing required information. Please contact support.</p>
+            <p className="text-sm text-muted">
+              Some clubs are missing required information. Please contact
+              support.
+            </p>
           </div>
         ) : (
-          <ClubsTable 
-            clubs={validClubs} 
+          <ClubsTable
+            clubs={validClubs}
             currentPage={page}
             totalPages={data?.total_pages || 1}
             onPageChange={setPage}
@@ -144,7 +165,6 @@ export function ClubsListClient() {
           />
         )}
       </div>
-
 
       {/* Modals */}
       <ClubModal
@@ -155,14 +175,18 @@ export function ClubsListClient() {
         }}
         onSuccess={editingClub ? handleEdit : handleCreate}
         mode={editingClub ? "edit" : "create"}
-        defaultValues={editingClub ? {
-          name: editingClub.name,
-          leader: editingClub.leader_name || "",
-          state: editingClub.state,
-          city: editingClub.city,
-          description: editingClub.description,
-          whatsappLink: editingClub.url_link,
-        } : undefined}
+        defaultValues={
+          editingClub
+            ? {
+                name: editingClub.name,
+                leader: editingClub.leader_name || "",
+                state: editingClub.state,
+                city: editingClub.city,
+                description: editingClub.description,
+                whatsappLink: editingClub.url_link,
+              }
+            : undefined
+        }
       />
       <SuccessModal
         open={showSuccess}

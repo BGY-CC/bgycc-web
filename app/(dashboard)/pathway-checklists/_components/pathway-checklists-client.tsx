@@ -180,12 +180,15 @@ export function PathwayChecklistsClient() {
       </div>
 
       {/* Search */}
-      <SearchInput
-        placeholder="Search Checklist Items"
-        containerClassName="max-w-xs"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+
+    <div className="w-full bg-white rounded-xl p-4 lg:p-5 mt-4 ">
+  <SearchInput
+    placeholder="Search Checklist Items"
+    containerClassName="max-w-xs"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+  />
+</div>
 
       {/* Lists */}
       <div className="rounded-3xl border border-border bg-white p-8 shadow-sm space-y-4">
