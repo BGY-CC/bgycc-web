@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Megaphone, Pencil, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui";
 import { SearchInput } from "@/components/shared";
@@ -20,6 +20,9 @@ export function AnnouncementsClient() {
   const [search, setSearch] = useState("");
 
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [overflowMap, setOverflowMap] = useState<Record<string, boolean>>({});
+
+  const contentRefs = useRef<Record<string, HTMLParagraphElement | null>>({});
 
   const toggleExpand = (id: string) => {
     setExpanded((prev) => ({
@@ -37,8 +40,33 @@ export function AnnouncementsClient() {
       : rawData?.announcements ?? rawData?.data?.announcements ?? []
   ).map((a: Announcement) => ({
     ...a,
-    content: a.content ?? "", // prevent null crash
+    content: a.content ?? "",
   }));
+
+  // 🔥 detect real overflow (ONLY on mobile width)
+  useEffect(() => {
+    const checkOverflow = () => {
+      const map: Record<string, boolean> = {};
+
+      announcements.forEach((a) => {
+        const el = contentRefs.current[a.id];
+        if (!el) return;
+
+        // temporarily force mobile constraint measurement
+        const isOverflowing =
+          el.scrollHeight > el.clientHeight + 1;
+
+        map[a.id] = isOverflowing;
+      });
+
+      setOverflowMap(map);
+    };
+
+    checkOverflow();
+
+    window.addEventListener("resize", checkOverflow);
+    return () => window.removeEventListener("resize", checkOverflow);
+  }, [announcements]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -109,9 +137,8 @@ export function AnnouncementsClient() {
       {/* List */}
       <div className="space-y-4">
         {announcements.length > 0 ? (
-          announcements.map((a: Announcement) => {
+          announcements.map((a) => {
             const content = a.content ?? "";
-            const isLong = content.length > 120;
             const isExpanded = !!expanded[a.id];
 
             return (
@@ -131,27 +158,23 @@ export function AnnouncementsClient() {
                       {a.title}
                     </h3>
 
-                    <p className="mt-1 text-sm text-muted break-words">
-                      {/* Mobile view */}
-                      <span className="sm:hidden">
-                        {isExpanded
-                          ? content
-                          : isLong
-                          ? `${content.slice(0, 120)}...`
-                          : content}
-                      </span>
-
-                      {/* Desktop view */}
-                      <span className="hidden sm:inline">
-                        {content}
-                      </span>
+                    {/* MOBILE clamp container */}
+                    <p
+                      ref={(el) => {
+                        contentRefs.current[a.id] = el;
+                      }}
+                      className={`mt-1 text-sm text-muted break-words sm:line-clamp-none ${
+                        isExpanded ? "" : "line-clamp-3 sm:line-clamp-none"
+                      }`}
+                    >
+                      {content}
                     </p>
 
-                    {/* See more / less (ONLY if needed) */}
-                    {isLong && (
+                    {/* ONLY show if actual overflow detected on mobile */}
+                    {overflowMap[a.id] && (
                       <button
                         onClick={() => toggleExpand(a.id)}
-                        className="mt-1 text-xs font-bold text-primary hover:underline"
+                        className="sm:hidden mt-1 text-xs font-bold text-primary hover:underline"
                       >
                         {isExpanded ? "See less" : "See more"}
                       </button>
@@ -163,7 +186,6 @@ export function AnnouncementsClient() {
                     <button
                       onClick={() => setEditTarget(a)}
                       className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-background"
-                      aria-label="Edit"
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
@@ -171,7 +193,6 @@ export function AnnouncementsClient() {
                     <button
                       onClick={() => setDeleteTarget(a)}
                       className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-red-50"
-                      aria-label="Delete"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
