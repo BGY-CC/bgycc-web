@@ -7,7 +7,11 @@ import { SearchInput } from "@/components/shared";
 import { ResourceModal } from "./resource-modal";
 import { useToast } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
-import { resourcesService, Resource, ResourceResponse } from "@/lib/services/resources";
+import {
+  resourcesService,
+  Resource,
+  ResourceResponse,
+} from "@/lib/services/resources";
 
 export function ResourcesClient() {
   const { toast } = useToast();
@@ -21,7 +25,7 @@ export function ResourcesClient() {
   // useQuery returns result.data; API shape: { resources: [...] }
   const resources: Resource[] = Array.isArray(rawData)
     ? rawData
-    : rawData?.resources ?? rawData?.data?.resources ?? [];
+    : (rawData?.resources ?? rawData?.data?.resources ?? []);
 
   const handleAdd = async (formData: any) => {
     try {
@@ -43,6 +47,19 @@ export function ResourcesClient() {
       }
     } catch (error: any) {
       toast(error.message || "An error occurred", "error");
+    }
+  };
+
+  const handleShare = async (resource: Resource) => {
+    try {
+      if (resource.link) {
+        await navigator.clipboard.writeText(resource.link);
+        toast("Link copied to clipboard");
+      } else {
+        toast("No link available to share", "error");
+      }
+    } catch {
+      toast("Failed to copy link", "error");
     }
   };
 
@@ -83,8 +100,6 @@ export function ResourcesClient() {
     }
   };
 
-
-
   if (isLoading && !rawData) {
     return (
       <div className="flex h-[400px] items-center justify-center">
@@ -96,7 +111,7 @@ export function ResourcesClient() {
   return (
     <>
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 w-full bg-white rounded-xl p-4 lg:p-5 mt-4 ">
         <SearchInput
           placeholder="Search Resources"
           containerClassName="max-w-xs w-full"
@@ -117,14 +132,21 @@ export function ResourcesClient() {
       <div className="rounded-3xl border border-border bg-white shadow-sm overflow-hidden divide-y divide-border">
         {resources.length > 0 ? (
           resources.map((r: Resource) => (
-            <div key={r.id} className="flex items-start gap-4 px-6 py-5 hover:bg-background/50 transition-colors group">
+            <div
+              key={r.id}
+              className="flex items-start gap-4 px-6 py-5 hover:bg-background/50 transition-colors group"
+            >
               <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-background border border-border text-primary shadow-sm group-hover:scale-105 transition-transform">
                 <Link2 className="h-5 w-5" />
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-bold text-primary tracking-tight">{r.title}</p>
-                <p className="text-[13px] font-medium text-muted mt-1">{r.description}</p>
+                <p className="text-[15px] font-bold text-primary tracking-tight">
+                  {r.title}
+                </p>
+                <p className="text-[13px] font-medium text-muted mt-1">
+                  {r.description}
+                </p>
                 {r.link && (
                   <a
                     href={r.link}
@@ -133,12 +155,32 @@ export function ResourcesClient() {
                     className="flex items-center gap-1.5 mt-2.5 text-xs font-bold text-accent hover:underline underline-offset-4"
                   >
                     <ExternalLink className="h-3 w-3" />
-                    {r.link}
+                    {r.link && (
+                      <a
+                        href={r.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 mt-2.5 text-xs font-bold text-accent hover:underline underline-offset-4 max-w-full"
+                      >
+                        <ExternalLink className="h-3 w-3 shrink-0" />
+
+                        <span className="truncate max-w-[220px] sm:max-w-xs block">
+                          {r.link}
+                        </span>
+                      </a>
+                    )}
                   </a>
                 )}
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => handleShare(r)}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-background hover:text-primary transition-colors border border-transparent hover:border-border"
+                  aria-label={`Share ${r.title}`}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </button>
                 <button
                   onClick={() => setEditTarget(r)}
                   className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-background hover:text-primary transition-colors border border-transparent hover:border-border"
@@ -175,11 +217,15 @@ export function ResourcesClient() {
         onClose={() => setEditTarget(null)}
         onSuccess={handleEdit}
         mode="edit"
-        defaultValues={editTarget ? {
-          title: editTarget.title,
-          description: editTarget.description || "",
-          link: editTarget.link || ""
-        } : undefined}
+        defaultValues={
+          editTarget
+            ? {
+                title: editTarget.title,
+                description: editTarget.description || "",
+                link: editTarget.link || "",
+              }
+            : undefined
+        }
       />
       <ConfirmDialog
         open={!!deleteTarget}
