@@ -19,11 +19,10 @@ export default function ClubsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
+       <PageHeader
         title="Dashboard"
         breadcrumb={[{ label: "Clubs" }]}
       />
-
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard 
