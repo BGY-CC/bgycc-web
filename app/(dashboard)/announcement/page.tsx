@@ -44,25 +44,25 @@ export default function AnnouncementPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Announcement"
-        breadcrumb={[{ label: "Announcement" }]}
+        title="Announcements"
+        breadcrumb={[{ label: "Announcements" }]}
       />
 
       {/* Info card */}
-      <div className="rounded-3xl bg-white border border-border p-6 sm:p-8 shadow-sm">
+      <div className="rounded-2xl bg-white border border-gray-100 p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           
           {/* Left content */}
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-background border border-border text-primary">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-600">
               <Megaphone className="h-6 w-6" />
             </div>
 
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-primary">
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">
                 Announcements
               </h2>
-              <p className="text-sm font-medium text-muted">
+              <p className="text-sm font-medium text-slate-500">
                 Create and manage announcements for BGYCC users
               </p>
             </div>
@@ -72,7 +72,7 @@ export default function AnnouncementPage() {
           <Button
             leftIcon={<Plus className="h-4 w-4" />}
             onClick={() => setShowAdd(true)}
-            className="shrink-0 w-full sm:w-auto"
+            className="shrink-0 w-full sm:w-auto bg-[#1A1F36] hover:bg-[#1A1F36]/90 text-white rounded-xl py-6 px-6"
           >
             New Announcement
           </Button>
