@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { Megaphone, Pencil, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui";
 import { SearchInput } from "@/components/shared";
@@ -34,14 +34,16 @@ export function AnnouncementsClient() {
   const { data: rawData, isLoading, refetch } =
     useQuery<any>(`/community/announcements`);
 
-  const announcements: Announcement[] = (
-    Array.isArray(rawData)
-      ? rawData
-      : rawData?.announcements ?? rawData?.data?.announcements ?? []
-  ).map((a: Announcement) => ({
-    ...a,
-    content: a.content ?? "",
-  }));
+  const announcements: Announcement[] = useMemo(() => {
+    return (
+      Array.isArray(rawData)
+        ? rawData
+        : rawData?.announcements ?? rawData?.data?.announcements ?? []
+    ).map((a: Announcement) => ({
+      ...a,
+      content: a.content ?? "",
+    }));
+  }, [rawData]);
 
   // 🔥 detect real overflow (ONLY on mobile width)
   useEffect(() => {
