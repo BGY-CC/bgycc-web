@@ -77,15 +77,17 @@ function ToastItem({
     <div
       role="status"
       className={cn(
-        "flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium shadow-lg",
+        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium shadow-xl border-l-4",
         "animate-in slide-in-from-bottom-2 fade-in duration-200",
-        isSuccess ? "bg-gray-900 text-white" : "bg-red-600 text-white",
+        isSuccess 
+          ? "bg-slate-900 text-white border-green-500" 
+          : "bg-[#1b2559] text-white border-red-500",
       )}
     >
       {isSuccess ? (
-        <CheckCircle2 className="h-4 w-4 shrink-0 text-green-400" />
+        <CheckCircle2 className="h-5 w-5 shrink-0 text-green-400" />
       ) : (
-        <AlertCircle className="h-4 w-4 shrink-0 text-red-200" />
+        <AlertCircle className="h-5 w-5 shrink-0 text-red-400" />
       )}
       <span>{item.message}</span>
       <button

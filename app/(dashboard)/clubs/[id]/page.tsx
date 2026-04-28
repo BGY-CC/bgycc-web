@@ -9,10 +9,11 @@ import { EngagementChart, MemberStatusChart } from "@/components/charts";
 import { useQuery } from "@/hooks/use-query";
 import { clubsService, Club } from "@/lib/services/clubs";
 import { ClubModal } from "../_components/club-modal";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export default function ClubDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const { toast } = useToast();
   const [showEdit, setShowEdit] = useState(false);
 
@@ -140,6 +141,21 @@ export default function ClubDetailPage() {
               </Button>
             )}
             <Button
+              variant="secondary"
+              size="sm"
+              onClick={async () => {
+                const result = await clubsService.update(club.id, { is_active: !club.is_active });
+                if (result.success) {
+                  toast(club.is_active ? "Club deactivated" : "Club activated");
+                  refetchClub();
+                } else {
+                  toast("Failed to update club status", "error");
+                }
+              }}
+            >
+              {club.is_active ? "Deactivate" : "Activate"}
+            </Button>
+            <Button
               size="sm"
               leftIcon={<Pencil className="h-4 w-4" />}
               onClick={() => setShowEdit(true)}
@@ -238,7 +254,10 @@ export default function ClubDetailPage() {
                     <p className="text-xs text-gray-500">Broken streak</p>
                   </div>
                 </div>
-                <button className="text-xs text-primary hover:underline font-medium">
+                <button
+                  className="text-xs text-primary hover:underline font-medium"
+                  onClick={() => m.user_id && router.push(`/users/${m.user_id}`)}
+                >
                   View
                 </button>
               </div>
