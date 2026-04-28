@@ -187,13 +187,13 @@ export function ResourcesClient() {
                       className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
                       title="Delete"
                     >
-                      <Trash2 className="h-5 w-5" />
+                      <Trash2 className="h-5 w-5 text-red-500" />
                     </button>
                   </div>
                 </div>
 
                 {r.link && (
-                  <div className="mt-5 pt-4 border-t border-slate-50 flex items-center gap-2">
+                  <div className="mt-5 pt-4 border-t border-slate-200 flex items-center gap-2">
                     <Link2 className="h-4 w-4 text-slate-400" />
                     <a
                       href={r.link}

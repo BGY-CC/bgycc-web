@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useMemo } from "react";
 import { Megaphone, Pencil, Trash2 } from "lucide-react";
-import { ConfirmDialog } from "@/components/ui";
+import { ConfirmDialog, Badge } from "@/components/ui";
 import { SearchInput } from "@/components/shared";
 import { AnnouncementModal } from "./announcement-modal";
 import { useToast } from "@/components/ui";
@@ -35,14 +35,25 @@ export function AnnouncementsClient() {
     useQuery<any>(`/community/announcements`);
 
   const announcements: Announcement[] = useMemo(() => {
-    return (
-      Array.isArray(rawData)
-        ? rawData
-        : rawData?.announcements ?? rawData?.data?.announcements ?? []
-    ).map((a: Announcement) => ({
-      ...a,
-      content: a.content ?? "",
-    }));
+    const list = Array.isArray(rawData)
+      ? rawData
+      : rawData?.announcements ?? rawData?.data?.announcements ?? [];
+
+    return list.map((a: any) => {
+      let metadata = a.metadata;
+      if (typeof metadata === "string") {
+        try {
+          metadata = JSON.parse(metadata);
+        } catch (e) {
+          metadata = {};
+        }
+      }
+      return {
+        ...a,
+        content: a.content ?? "",
+        metadata: metadata ?? {},
+      };
+    });
   }, [rawData]);
 
   // 🔥 detect real overflow (ONLY on mobile width)
@@ -116,6 +127,19 @@ export function AnnouncementsClient() {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(date);
+    } catch (e) {
+      return dateString;
+    }
+  };
+
   if (isLoading && !rawData) {
     return (
       <div className="flex h-[400px] items-center justify-center">
@@ -127,10 +151,10 @@ export function AnnouncementsClient() {
   return (
     <div className="space-y-6">
       {/* Search */}
-      <div className="w-full bg-white rounded-xl px-3 py-4 sm:p-5 mt-4">
+      <div className="w-full bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
         <SearchInput
-          placeholder="Search Announcements"
-          containerClassName="max-w-xs"
+          placeholder="Search Announcements..."
+          containerClassName="max-w-md w-full"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -142,61 +166,94 @@ export function AnnouncementsClient() {
           announcements.map((a) => {
             const content = a.content ?? "";
             const isExpanded = !!expanded[a.id];
+            const delivery = a.metadata?.delivery || [];
+            const targets = Array.isArray(a.metadata?.target) 
+              ? a.metadata.target 
+              : a.metadata?.target 
+                ? [a.metadata.target] 
+                : ["All Members"];
 
             return (
               <div
                 key={a.id}
-                className="rounded-3xl border border-border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md transition-all group"
+                className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm hover:border-primary/20 hover:shadow-md transition-all group"
               >
-                <div className="flex items-start gap-4">
-                  {/* Icon */}
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-background border border-border text-primary">
-                    <Megaphone className="h-6 w-6" />
-                  </div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4 flex-1">
+                    {/* Icon */}
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                      <Megaphone className="h-6 w-6" />
+                    </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold text-primary">
-                      {a.title}
-                    </h3>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center flex-wrap gap-2">
+                        <h3 className="text-[17px] font-bold text-slate-900 group-hover:text-primary transition-colors">
+                          {a.title}
+                        </h3>
+                        {delivery.map((d: string) => (
+                          <Badge 
+                            key={d} 
+                            className="bg-[#EEF2FF] text-[#4F46E5] border-none px-2 rounded-md text-[10px] uppercase font-bold tracking-wider"
+                          >
+                            {d}
+                          </Badge>
+                        ))}
+                      </div>
 
-                    {/* MOBILE clamp container */}
-                    <p
-                      ref={(el) => {
-                        contentRefs.current[a.id] = el;
-                      }}
-                      className={`mt-1 text-sm text-muted break-words sm:line-clamp-none ${
-                        isExpanded ? "" : "line-clamp-3 sm:line-clamp-none"
-                      }`}
-                    >
-                      {content}
-                    </p>
-
-                    {/* ONLY show if actual overflow detected on mobile */}
-                    {overflowMap[a.id] && (
-                      <button
-                        onClick={() => toggleExpand(a.id)}
-                        className="sm:hidden mt-1 text-xs font-bold text-primary hover:underline"
+                      <p
+                        ref={(el) => {
+                          contentRefs.current[a.id] = el;
+                        }}
+                        className={`mt-1 text-[14px] text-slate-500 font-medium leading-relaxed break-words ${
+                          isExpanded ? "" : "line-clamp-2"
+                        }`}
                       >
-                        {isExpanded ? "See less" : "See more"}
-                      </button>
-                    )}
+                        {content}
+                      </p>
+
+                      {overflowMap[a.id] && (
+                        <button
+                          onClick={() => toggleExpand(a.id)}
+                          className="mt-1 text-xs font-bold text-primary hover:underline"
+                        >
+                          {isExpanded ? "See less" : "See more"}
+                        </button>
+                      )}
+
+                      {/* Footer Info */}
+                      <div className="mt-4 flex items-center flex-wrap gap-2">
+                        {targets.map((t: string) => (
+                          <Badge 
+                            key={t} 
+                            className="bg-slate-100 text-slate-600 border-none font-semibold px-3 py-1"
+                          >
+                            {t}
+                          </Badge>
+                        ))}
+                        <span className="text-slate-300 mx-1">•</span>
+                        <span className="text-[13px] text-slate-400 font-medium">
+                          {formatDate(a.created_at)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => setEditTarget(a)}
-                      className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-background"
+                      className="p-2.5 text-slate-400 hover:text-primary hover:bg-slate-50 rounded-xl transition-all"
+                      title="Edit"
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil className="h-5 w-5" />
                     </button>
-
                     <button
                       onClick={() => setDeleteTarget(a)}
-                      className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-red-50"
+                      className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                      title="Delete"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-5 w-5 text-red-500" />
                     </button>
                   </div>
                 </div>
