@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2, PowerOff } from "lucide-react";
 import {
   Badge,
   ActionMenu,
@@ -99,8 +99,8 @@ export function ClubsTable({
                     onClick: () => onEdit && onEdit(club),
                   },
                   {
-                    label: "Delete Club",
-                    icon: <Trash2 className="h-4 w-4" />,
+                    label: "Deactivate",
+                    icon: <PowerOff className="h-4 w-4" />,
                     onClick: () => setDeleteTarget(club),
                     variant: "destructive",
                   },
@@ -206,8 +206,8 @@ export function ClubsTable({
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDeleteConfirm}
-        title="Delete Club"
-        description="Are you sure you want to delete this club? This action cannot be undone."
+        title="Deactivate Club"
+        description="Are you sure you want to deactivate this club? It will be marked as inactive and hidden from active listings."
       />
     </>
   );

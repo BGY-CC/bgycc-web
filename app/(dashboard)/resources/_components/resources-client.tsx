@@ -1,16 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, ExternalLink, Pencil, Trash2, Link2 } from "lucide-react";
-import { Button, ConfirmDialog } from "@/components/ui";
-import { SearchInput } from "@/components/shared";
+import { useState, useMemo } from "react";
+import { Plus, ExternalLink, Pencil, Trash2, FolderOpen, Link2, LayoutGrid } from "lucide-react";
+import { Button, ConfirmDialog, useToast } from "@/components/ui";
+import { StatCard, SearchInput } from "@/components/shared";
 import { ResourceModal } from "./resource-modal";
-import { useToast } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
 import {
   resourcesService,
   Resource,
-  ResourceResponse,
 } from "@/lib/services/resources";
 
 export function ResourcesClient() {
@@ -22,10 +20,30 @@ export function ResourcesClient() {
 
   const { data: rawData, isLoading, refetch } = useQuery<any>(`/resources`);
 
-  // useQuery returns result.data; API shape: { resources: [...] }
-  const resources: Resource[] = Array.isArray(rawData)
-    ? rawData
-    : (rawData?.resources ?? rawData?.data?.resources ?? []);
+  const resources: Resource[] = useMemo(() => {
+    if (Array.isArray(rawData)) return rawData;
+    return rawData?.resources ?? rawData?.data?.resources ?? [];
+  }, [rawData]);
+
+  const filteredResources = useMemo(() => {
+    return resources.filter(r => 
+      r.title.toLowerCase().includes(search.toLowerCase()) ||
+      r.description?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [resources, search]);
+
+  const stats = [
+    {
+      label: "Total Resources",
+      value: resources.length,
+      icon: <FolderOpen className="h-5 w-5 text-indigo-600" />,
+    },
+    {
+      label: "Drive Links",
+      value: resources.filter(r => r.link?.includes("drive.google.com")).length,
+      icon: <Link2 className="h-5 w-5 text-blue-600" />,
+    },
+  ];
 
   const handleAdd = async (formData: any) => {
     try {
@@ -34,32 +52,18 @@ export function ResourcesClient() {
         description: formData.description,
         link: formData.link,
         is_active: true,
-        slug: formData.title.toLowerCase().replace(/ /g, "-"), // simple slug
-        min_rank_required: "member",
+        slug: formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
       });
 
       if (result.success) {
         setShowAdd(false);
-        toast("Resource added successfully");
+        toast("Resource added successfully", "success");
         refetch();
       } else {
-        toast("Failed to add resource", "error");
+        toast(result.error || "Failed to add resource", "error");
       }
     } catch (error: any) {
       toast(error.message || "An error occurred", "error");
-    }
-  };
-
-  const handleShare = async (resource: Resource) => {
-    try {
-      if (resource.link) {
-        await navigator.clipboard.writeText(resource.link);
-        toast("Link copied to clipboard");
-      } else {
-        toast("No link available to share", "error");
-      }
-    } catch {
-      toast("Failed to copy link", "error");
     }
   };
 
@@ -74,10 +78,10 @@ export function ResourcesClient() {
 
       if (result.success) {
         setEditTarget(null);
-        toast("Resource updated successfully");
+        toast("Resource updated successfully", "success");
         refetch();
       } else {
-        toast("Failed to update resource", "error");
+        toast(result.error || "Failed to update resource", "error");
       }
     } catch (error: any) {
       toast(error.message || "An error occurred", "error");
@@ -90,17 +94,22 @@ export function ResourcesClient() {
       const result = await resourcesService.delete(deleteTarget.id);
       if (result.success) {
         setDeleteTarget(null);
-        toast("Resource deleted successfully");
+        toast("Resource deleted successfully", "success");
         refetch();
       } else {
-        toast("Failed to delete resource", "error");
+        toast(result.error || "Failed to delete resource", "error");
       }
     } catch (error: any) {
       toast(error.message || "An error occurred", "error");
     }
   };
 
-  if (isLoading && !rawData) {
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast("Link copied to clipboard", "success");
+  };
+
+  if (isLoading && resources.length === 0) {
     return (
       <div className="flex h-[400px] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -109,98 +118,104 @@ export function ResourcesClient() {
   }
 
   return (
-    <>
+    <div className="space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {stats.map((s) => (
+          <StatCard key={s.label} label={s.label} value={s.value} icon={s.icon} />
+        ))}
+      </div>
+
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-3 w-full bg-white rounded-xl p-4 lg:p-5 mt-4 ">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
         <SearchInput
-          placeholder="Search Resources"
-          containerClassName="max-w-xs w-full"
+          placeholder="Search Resources..."
+          containerClassName="max-w-md w-full"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <Button
-          size="sm"
           leftIcon={<Plus className="h-4 w-4" />}
           onClick={() => setShowAdd(true)}
-          className="shrink-0"
+          className="bg-primary hover:bg-primary/90"
         >
           Add Resource
         </Button>
       </div>
 
       {/* Resource list */}
-      <div className="rounded-3xl border border-border bg-white shadow-sm overflow-hidden divide-y divide-border">
-        {resources.length > 0 ? (
-          resources.map((r: Resource) => (
+      <div className="space-y-4">
+        {filteredResources.length > 0 ? (
+          filteredResources.map((r: Resource) => (
             <div
               key={r.id}
-              className="flex items-start gap-4 px-6 py-5 hover:bg-background/50 transition-colors group"
+              className="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:border-primary/20 hover:shadow-md transition-all duration-300"
             >
-              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-background border border-border text-primary shadow-sm group-hover:scale-105 transition-transform">
-                <Link2 className="h-5 w-5" />
-              </div>
+              <div className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                      <FolderOpen className="h-6 w-6" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-primary transition-colors">
+                        {r.title}
+                      </h3>
+                      <p className="mt-1 text-[14px] text-slate-500 font-medium line-clamp-2 leading-relaxed">
+                        {r.description || "No description provided."}
+                      </p>
+                    </div>
+                  </div>
 
-              <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-bold text-primary tracking-tight">
-                  {r.title}
-                </p>
-                <p className="text-[13px] font-medium text-muted mt-1">
-                  {r.description}
-                </p>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => copyToClipboard(r.link || "")}
+                      className="p-2.5 text-slate-400 hover:text-primary hover:bg-slate-50 rounded-xl transition-all"
+                      title="Copy Link"
+                    >
+                      <ExternalLink className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setEditTarget(r)}
+                      className="p-2.5 text-slate-400 hover:text-primary hover:bg-slate-50 rounded-xl transition-all"
+                      title="Edit"
+                    >
+                      <Pencil className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(r)}
+                      className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+
                 {r.link && (
-                  <a
-                    href={r.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 mt-2.5 text-xs font-bold text-accent hover:underline underline-offset-4"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                    {r.link && (
-                      <a
-                        href={r.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 mt-2.5 text-xs font-bold text-accent hover:underline underline-offset-4 max-w-full"
-                      >
-                        <ExternalLink className="h-3 w-3 shrink-0" />
-
-                        <span className="truncate max-w-[220px] sm:max-w-xs block">
-                          {r.link}
-                        </span>
-                      </a>
-                    )}
-                  </a>
+                  <div className="mt-5 pt-4 border-t border-slate-50 flex items-center gap-2">
+                    <Link2 className="h-4 w-4 text-slate-400" />
+                    <a
+                      href={r.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-slate-400 hover:text-primary hover:underline underline-offset-4 truncate transition-colors"
+                    >
+                      {r.link}
+                    </a>
+                  </div>
                 )}
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => handleShare(r)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-background hover:text-primary transition-colors border border-transparent hover:border-border"
-                  aria-label={`Share ${r.title}`}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setEditTarget(r)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-background hover:text-primary transition-colors border border-transparent hover:border-border"
-                  aria-label={`Edit ${r.title}`}
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(r)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:bg-error-bg hover:text-error transition-colors border border-transparent hover:border-error/20"
-                  aria-label={`Delete ${r.title}`}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
               </div>
             </div>
           ))
         ) : (
-          <div className="py-12 text-center text-gray-500">
-            No resources found.
+          <div className="py-20 text-center bg-white rounded-3xl border-2 border-dashed border-gray-200">
+            <p className="text-slate-500 font-medium">No resources found.</p>
+            {search && (
+              <Button variant="secondary" className="mt-4" onClick={() => setSearch("")}>
+                Clear Search
+              </Button>
+            )}
           </div>
         )}
       </div>
@@ -234,6 +249,6 @@ export function ResourcesClient() {
         title="Delete Resource"
         description="Are you sure you want to delete this resource? This action cannot be undone."
       />
-    </>
+    </div>
   );
 }

@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Users } from "lucide-react";
+// @ts-ignore – no types bundled
+import { getStates, getLgas } from "nigeria-state-lga-data";
 import {
   Modal,
   ModalContent,
@@ -22,11 +24,17 @@ import type { Club } from "./types";
 
 const clubSchema = z.object({
   name: z.string().min(1, "Club name is required"),
-  leader: z.string().min(1, "Leader is required"),
+  // Leader is optional — can be assigned later
+  leader: z.string().optional(),
   state: z.string().min(1, "State is required"),
-  city: z.string().min(1, "City is required"),
-  // Optional field — URL validation will be enforced server-side
-  whatsappLink: z.string().optional(),
+  city: z.string().min(1, "City / LGA is required"),
+  whatsappLink: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^https:\/\/chat\.whatsapp\.com\//.test(val),
+      { message: "Must be a valid WhatsApp group link (https://chat.whatsapp.com/...)" },
+    ),
   description: z.string().optional(),
 });
 
@@ -44,50 +52,41 @@ interface ClubModalProps {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ClubModal({
-  open,
-  onClose,
-  onSuccess,
-  mode,
-  defaultValues,
-}: ClubModalProps) {
+export function ClubModal({ open, onClose, onSuccess, mode, defaultValues }: ClubModalProps) {
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ClubFormData>({
     resolver: zodResolver(clubSchema),
     defaultValues: {
       name: defaultValues?.name ?? "",
       leader: defaultValues?.leader ?? "",
-      state: "",
-      city: "",
+      state: defaultValues?.state ?? "",
+      city: defaultValues?.city ?? "",
       whatsappLink: defaultValues?.whatsappLink ?? "",
       description: defaultValues?.description ?? "",
     },
   });
 
-  // Reset form when modal opens/closes
+  const selectedState = watch("state");
+  const allStates: string[] = getStates();
+  const cities: string[] = selectedState ? getLgas(selectedState) : [];
+
   useEffect(() => {
     if (open) {
       reset({
         name: defaultValues?.name ?? "",
         leader: defaultValues?.leader ?? "",
-        state: defaultValues?.state?.toLowerCase() ?? "",
-        city: defaultValues?.city?.toLowerCase() ?? "",
+        state: defaultValues?.state ?? "",
+        city: defaultValues?.city ?? "",
         whatsappLink: defaultValues?.whatsappLink ?? "",
         description: defaultValues?.description ?? "",
       });
     } else {
-      reset({
-        name: "",
-        leader: "",
-        state: "",
-        city: "",
-        whatsappLink: "",
-        description: "",
-      });
+      reset({ name: "", leader: "", state: "", city: "", whatsappLink: "", description: "" });
     }
   }, [open, reset, defaultValues]);
 
@@ -100,77 +99,49 @@ export function ClubModal({
           icon={<Users className="h-5 w-5 text-gray-600" />}
           title={isCreate ? "Create New Club" : "Edit Club"}
           description={
-            isCreate
-              ? "This is a platform to encourage discipline"
-              : "Make changes to the club"
+            isCreate ? "This is a platform to encourage discipline" : "Make changes to the club"
           }
         />
 
         <form onSubmit={handleSubmit(onSuccess)} noValidate className="space-y-4">
           <FormField label="Club Name" required error={errors.name?.message}>
-            <Input
-              placeholder="What is your title?"
-              {...register("name")}
-            />
+            <Input placeholder="What is your club name?" {...register("name")} />
           </FormField>
 
-          <FormField label="Assign Leader" required error={errors.leader?.message}>
-            <Input placeholder="Search Leader Name" {...register("leader")} />
+          <FormField label="Assign Leader" error={errors.leader?.message}>
+            <Input placeholder="Search Leader Name (optional)" {...register("leader")} />
           </FormField>
 
           <div className="grid grid-cols-2 gap-3">
             <FormField label="State" required error={errors.state?.message}>
               <Select {...register("state")}>
                 <option value="">Select State</option>
-                <option value="lagos">Lagos</option>
-                <option value="abuja">FCT Abuja</option>
-                <option value="edo">Edo</option>
-                <option value="oyo">Oyo</option>
-                <option value="delta">Delta</option>
-                <option value="anambra">Anambra</option>
-                <option value="kano">Kano</option>
-                <option value="plateau">Plateau</option>
-                <option value="niger">Niger</option>
+                {allStates.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
               </Select>
             </FormField>
 
-            <FormField label="City" required error={errors.city?.message}>
-              <Select {...register("city")}>
-                <option value="">Select City</option>
-                <option value="ikeja">Ikeja</option>
-                <option value="ibadan">Ibadan</option>
-                <option value="benin">Benin City</option>
-                <option value="warri">Warri</option>
-                <option value="kano">Kano</option>
-                <option value="jos">Jos</option>
-                <option value="minna">Minna</option>
-                <option value="onitsha">Onitsha</option>
+            <FormField label="City / LGA" required error={errors.city?.message}>
+              <Select {...register("city")} disabled={!selectedState}>
+                <option value="">{selectedState ? "Select City" : "Select state first"}</option>
+                {cities.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
               </Select>
             </FormField>
           </div>
 
           <FormField label="WhatsApp Link" error={errors.whatsappLink?.message}>
-            <Input
-              placeholder="https://chat.whatsapp.com/.."
-              {...register("whatsappLink")}
-            />
+            <Input placeholder="https://chat.whatsapp.com/..." {...register("whatsappLink")} />
           </FormField>
 
           <FormField label="Description" error={errors.description?.message}>
-            <Textarea
-              placeholder="Club Description..."
-              rows={3}
-              {...register("description")}
-            />
+            <Textarea placeholder="Club Description..." rows={3} {...register("description")} />
           </FormField>
 
           <ModalFooter>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={onClose}
-              className="flex-1"
-            >
+            <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
               Cancel
             </Button>
             <Button type="submit" isLoading={isSubmitting} className="flex-1">

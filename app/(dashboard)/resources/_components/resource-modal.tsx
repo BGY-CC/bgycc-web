@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FileText } from "lucide-react";
+import { FolderOpen } from "lucide-react";
 import {
   Modal,
   ModalContent,
@@ -54,24 +54,32 @@ export function ResourceModal({
   });
 
   useEffect(() => {
-    if (!open) reset();
-  }, [open, reset]);
+    if (open) {
+      reset({
+        title: defaultValues?.title ?? "",
+        description: defaultValues?.description ?? "",
+        link: defaultValues?.link ?? "",
+      });
+    } else {
+      reset();
+    }
+  }, [open, reset, defaultValues]);
 
   return (
     <Modal open={open} onClose={onClose}>
-      <ModalContent>
+      <ModalContent className="max-w-xl">
         <ModalHeader
-          icon={<FileText className="h-5 w-5 text-gray-600" />}
+          icon={<FolderOpen className="h-5 w-5 text-primary" />}
           title={mode === "add" ? "Add Resource" : "Edit Resource"}
           description={
             mode === "add"
-              ? "Add a new resource link."
-              : "Update the resource link."
+              ? "Add a new resource link to the library."
+              : "Update the resource link details below."
           }
         />
-        <form onSubmit={handleSubmit(onSuccess)} noValidate className="space-y-4">
+        <form onSubmit={handleSubmit(onSuccess)} noValidate className="space-y-4 px-6 pb-8">
           <FormField label="Title" required error={errors.title?.message}>
-            <Input placeholder="Audio Report" {...register("title")} />
+            <Input placeholder="e.g. Daily Audio Report Guide" {...register("title")} />
           </FormField>
 
           <FormField label="Description" required error={errors.description?.message}>
@@ -84,19 +92,19 @@ export function ResourceModal({
 
           <FormField label="Resource Link (Google Drive)" required error={errors.link?.message}>
             <Input
-              placeholder="https://drive.google.com/exapmple4"
+              placeholder="https://drive.google.com/..."
               {...register("link")}
             />
           </FormField>
 
-          <ModalFooter>
+          <div className="flex gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
               Cancel
             </Button>
             <Button type="submit" isLoading={isSubmitting} className="flex-1">
               {mode === "add" ? "Add Resource" : "Save Changes"}
             </Button>
-          </ModalFooter>
+          </div>
         </form>
       </ModalContent>
     </Modal>

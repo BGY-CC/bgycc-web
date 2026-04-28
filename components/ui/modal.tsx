@@ -69,7 +69,7 @@ export function ModalContent({ className, children }: ModalContentProps) {
   return (
     <div
       className={cn(
-        "relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl",
+        "relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto",
         className,
       )}
       onClick={(e) => e.stopPropagation()}
