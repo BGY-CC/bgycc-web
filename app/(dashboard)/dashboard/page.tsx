@@ -108,59 +108,61 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col min-h-full">
       <PageHeader title="Dashboard" breadcrumb={[]} />
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {stats.map((s) => (
-          <StatCard
-            key={s.label}
-            label={s.label}
-            value={s.value}
-            icon={s.icon}
-            change={s.change}
-          />
-        ))}
-      </div>
-
-      {/* Charts row */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Engagement Trends */}
-        <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-start justify-between">
-            <div>
-              <h2 className="text-sm font-medium text-gray-900">
-                Engagement Trends
-              </h2>
-              <p className="text-xs text-gray-500">
-                Reports & active users this {period}
-              </p>
-            </div>
-            <select
-              value={period}
-              onChange={(e) => setPeriod(e.target.value)}
-              className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="year">This Year</option>
-            </select>
-          </div>
-          <EngagementChart data={data?.engagement_trends} />
+      <div className="flex-1 space-y-4 px-3 py-4 sm:px-4 lg:px-6 max-w-7xl mx-auto w-full">
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {stats.map((s) => (
+            <StatCard
+              key={s.label}
+              label={s.label}
+              value={s.value}
+              icon={s.icon}
+              change={s.change}
+            />
+          ))}
         </div>
 
-        {/* Member Status */}
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-start justify-between">
-            <div>
-              <h2 className="text-sm font-medium text-gray-900">
-                Member Status
-              </h2>
-              <p className="text-xs text-gray-500">Risk distribution</p>
+        {/* Charts row */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {/* Engagement Trends */}
+          <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-start justify-between">
+              <div>
+                <h2 className="text-sm font-medium text-gray-900">
+                  Engagement Trends
+                </h2>
+                <p className="text-xs text-gray-500">
+                  Reports & active users this {period}
+                </p>
+              </div>
+              <select
+                value={period}
+                onChange={(e) => setPeriod(e.target.value)}
+                className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+              </select>
             </div>
+            <EngagementChart data={data?.engagement_trends} />
           </div>
-          <MemberStatusChart data={data?.member_status} />
+
+          {/* Member Status */}
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-start justify-between">
+              <div>
+                <h2 className="text-sm font-medium text-gray-900">
+                  Member Status
+                </h2>
+                <p className="text-xs text-gray-500">Risk distribution</p>
+              </div>
+            </div>
+            <MemberStatusChart data={data?.member_status} />
+          </div>
         </div>
       </div>
     </div>
