@@ -2,14 +2,57 @@
 
 import { useState, useMemo } from "react";
 import { Plus, ExternalLink, Pencil, Trash2, FolderOpen, Link2, LayoutGrid } from "lucide-react";
-import { Button, ConfirmDialog, useToast } from "@/components/ui";
-import { StatCard, SearchInput } from "@/components/shared";
+import { Button, ConfirmDialog, Skeleton, useToast } from "@/components/ui";
+import { StatCard, StatCardSkeleton, SearchInput } from "@/components/shared";
 import { ResourceModal } from "./resource-modal";
 import { useQuery } from "@/hooks/use-query";
 import {
   resourcesService,
   Resource,
 } from "@/lib/services/resources";
+
+function ResourcesSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, index) => (
+          <StatCardSkeleton key={index} />
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <Skeleton className="h-11 w-full max-w-md rounded-2xl" />
+        <Skeleton className="h-11 w-full rounded-2xl sm:w-36" />
+      </div>
+
+      <div className="space-y-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={index}
+            className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex min-w-0 flex-1 items-start gap-4">
+                <Skeleton className="h-12 w-12 shrink-0 rounded-xl" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-5 w-48 max-w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-4/5" />
+                </div>
+              </div>
+              <div className="hidden gap-2 sm:flex">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <Skeleton className="h-10 w-10 rounded-xl" />
+                <Skeleton className="h-10 w-10 rounded-xl" />
+              </div>
+            </div>
+            <Skeleton className="mt-5 h-4 w-2/3 max-w-full" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function ResourcesClient() {
   const { toast } = useToast();
@@ -110,11 +153,7 @@ export function ResourcesClient() {
   };
 
   if (isLoading && resources.length === 0) {
-    return (
-      <div className="flex h-[400px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-      </div>
-    );
+    return <ResourcesSkeleton />;
   }
 
   return (

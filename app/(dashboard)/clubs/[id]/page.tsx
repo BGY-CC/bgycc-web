@@ -3,48 +3,96 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Users, Activity, TrendingUp, MessageCircle, Pencil } from "lucide-react";
-import { Badge, Button, useToast } from "@/components/ui";
-import { StatCard, PageHeader } from "@/components/shared";
+import { Badge, Button, Skeleton, useToast } from "@/components/ui";
+import { StatCard, StatCardSkeleton, PageHeader } from "@/components/shared";
 import { EngagementChart, MemberStatusChart } from "@/components/charts";
 import { useQuery } from "@/hooks/use-query";
 import { clubsService, Club } from "@/lib/services/clubs";
 import { ClubModal } from "../_components/club-modal";
 import { useParams, useRouter } from "next/navigation";
 
+function ClubDetailSkeleton() {
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Dashboard"
+        breadcrumb={[{ label: "Clubs", href: "/clubs" }, { label: "Loading" }]}
+      />
+
+      <div className="space-y-4">
+        <Skeleton className="h-5 w-10" />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-7 w-44" />
+              <Skeleton className="h-6 w-16 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-80 max-w-full" />
+            <Skeleton className="h-4 w-72 max-w-full" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-9 w-24 rounded-xl" />
+            <Skeleton className="h-9 w-28 rounded-xl" />
+            <Skeleton className="h-9 w-24 rounded-xl" />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <StatCardSkeleton key={index} />
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Skeleton className="h-[340px] rounded-xl border border-gray-200 bg-white lg:col-span-2" />
+        <Skeleton className="h-[340px] rounded-xl border border-gray-200 bg-white" />
+      </div>
+    </div>
+  );
+}
+
+function MemberListSkeleton() {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Skeleton className="h-7 w-7 rounded-full" />
+            <div className="space-y-1.5">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          </div>
+          <Skeleton className="h-4 w-14" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function ClubDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const [showEdit, setShowEdit] = useState(false);
-
-  // Validate that the id is not undefined or invalid
-  if (!params.id || params.id === "undefined") {
-    return (
-      <div className="flex flex-col items-center justify-center h-[400px] gap-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold text-primary mb-2">Invalid Club ID</h1>
-          <p className="text-muted mb-6">The club ID is missing or invalid. Please go back and try again.</p>
-          <Link href="/clubs" className="inline-block">
-            <Button leftIcon={<ArrowLeft className="h-4 w-4" />}>
-              Back to Clubs
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const clubId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const hasValidClubId = !!clubId && clubId !== "undefined";
 
   // Fetch data
   const { data: clubData, isLoading: isLoadingClub, refetch: refetchClub } = useQuery<{ club: Club & { leader?: { full_name?: string } } }>(
-    `/clubs/${params.id}`
+    `/clubs/${clubId}`,
+    { enabled: hasValidClubId },
   );
   
   const { data: healthData, isLoading: isLoadingHealth } = useQuery<{ demographics: any; at_risk_members: any[] }>(
-    `/clubs/${params.id}/member-health`
+    `/clubs/${clubId}/member-health`,
+    { enabled: hasValidClubId },
   );
   
   const { data: topPerformersData, isLoading: isLoadingTop } = useQuery<{ top_performers: any[] }>(
-    `/clubs/${params.id}/top-performers`
+    `/clubs/${clubId}/top-performers`,
+    { enabled: hasValidClubId },
   );
 
   const club = clubData?.club;
@@ -76,12 +124,25 @@ export default function ClubDetailPage() {
     }
   };
 
-  if (isLoadingClub) {
+  // Validate that the id is not undefined or invalid
+  if (!hasValidClubId) {
     return (
-      <div className="flex h-[400px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      <div className="flex flex-col items-center justify-center h-[400px] gap-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold text-primary mb-2">Invalid Club ID</h1>
+          <p className="text-muted mb-6">The club ID is missing or invalid. Please go back and try again.</p>
+          <Link href="/clubs" className="inline-block">
+            <Button leftIcon={<ArrowLeft className="h-4 w-4" />}>
+              Back to Clubs
+            </Button>
+          </Link>
+        </div>
       </div>
     );
+  }
+
+  if (isLoadingClub) {
+    return <ClubDetailSkeleton />;
   }
 
   if (!club) {
@@ -210,7 +271,7 @@ export default function ClubDetailPage() {
           </h3>
           <div className="space-y-3">
             {isLoadingTop ? (
-               <div className="text-sm text-gray-500">Loading...</div>
+               <MemberListSkeleton />
             ) : topPerformers.length === 0 ? (
                <div className="text-sm text-gray-500">No top performers found.</div>
             ) : (
@@ -239,7 +300,7 @@ export default function ClubDetailPage() {
           </h3>
           <div className="space-y-3">
             {isLoadingHealth ? (
-               <div className="text-sm text-gray-500">Loading...</div>
+               <MemberListSkeleton />
             ) : atRiskMembers.length === 0 ? (
                <div className="text-sm text-gray-500">No at-risk members found.</div>
             ) : (

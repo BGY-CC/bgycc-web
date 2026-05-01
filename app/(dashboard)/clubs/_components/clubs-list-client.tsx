@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus, ChevronDown } from "lucide-react";
-import { Button, useToast } from "@/components/ui";
+import { Button, Skeleton, useToast } from "@/components/ui";
 import { SearchInput } from "@/components/shared";
 import { ClubsTable } from "./clubs-table";
 import { ClubModal } from "./club-modal";
@@ -12,6 +12,31 @@ import { clubsService, Club, PaginatedClubs } from "@/lib/services/clubs";
 import { filterAndNormalizeClubs } from "@/lib/services/club-utils";
 // @ts-ignore – no types bundled
 import { getStates, getLgas } from "nigeria-state-lga-data";
+
+function ClubsTableSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
+      <div className="space-y-3 p-4">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="grid grid-cols-2 items-center gap-4 border-b border-gray-100 py-3 last:border-b-0 lg:grid-cols-6"
+          >
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="hidden h-4 w-24 lg:block" />
+            <Skeleton className="hidden h-4 w-20 lg:block" />
+            <Skeleton className="hidden h-6 w-16 rounded-full lg:block" />
+            <div className="ml-auto flex gap-2">
+              <Skeleton className="h-8 w-8 rounded-xl" />
+              <Skeleton className="h-8 w-8 rounded-xl" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function ClubsListClient() {
   const { toast } = useToast();
@@ -229,14 +254,10 @@ export function ClubsListClient() {
         </div>
       </div>
 
-      <div
-        className={
-          isLoading
-            ? "opacity-50 pointer-events-none transition-opacity mt-6"
-            : "transition-opacity mt-6"
-        }
-      >
-        {data?.clubs && data.clubs.length > 0 && validClubs.length === 0 ? (
+      <div className="mt-6 transition-opacity">
+        {isLoading && !data ? (
+          <ClubsTableSkeleton />
+        ) : data?.clubs && data.clubs.length > 0 && validClubs.length === 0 ? (
           <div className="rounded-2xl border border-border bg-white p-12 text-center shadow-sm">
             <p className="text-muted mb-2">Club data is incomplete</p>
             <p className="text-sm text-muted">

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 export interface StatCardProps {
@@ -52,6 +53,26 @@ export function StatCard({ label, value, icon, change = 0, className }: StatCard
       <div className="mt-2 text-left">
         <p className="text-2xl font-bold text-primary tracking-tight">{value}</p>
         <p className="mt-1 text-sm font-semibold text-muted">{label}</p>
+      </div>
+    </div>
+  );
+}
+
+export function StatCardSkeleton({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border border-border bg-white p-4 shadow-sm",
+        className,
+      )}
+    >
+      <div className="flex items-start justify-between">
+        <Skeleton className="h-11 w-11 rounded-xl" />
+        <Skeleton className="h-6 w-16 rounded-full" />
+      </div>
+      <div className="mt-4 space-y-2">
+        <Skeleton className="h-7 w-20" />
+        <Skeleton className="h-4 w-28" />
       </div>
     </div>
   );
