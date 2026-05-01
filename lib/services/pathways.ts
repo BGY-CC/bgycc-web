@@ -71,39 +71,52 @@ export const pathwaysService = {
     }
   },
 
+  saveVideo: async (slug: string, fileKey: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/pathways/${slug}/video`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ file_key: fileKey }),
+    });
+    return response.json();
+  },
+
   uploadVideo: async (slug: string, file: File) => {
-    const formData = new FormData();
-    formData.append("video", file);
-    formData.append("slug", slug);
-
-    const token =
-      typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
-    const headers = {
-      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-    };
-
-    const primaryResponse = await fetch(
-      `${API_CONFIG.BASE_URL}/pathways/${slug}/upload-video`,
+    const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
+    
+    // 1. Get signed upload URL
+    const getUrlResponse = await fetch(
+      `${API_CONFIG.BASE_URL}/pathways/${slug}/video/upload-url`,
       {
         method: "POST",
-        headers,
-        body: formData,
-      },
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          file_name: file.name,
+          file_type: file.type || "video/mp4",
+        }),
+      }
     );
 
-    if (primaryResponse.status !== 404) {
-      return primaryResponse.json();
+    const urlData = await getUrlResponse.json();
+    if (!urlData.success) {
+      return urlData;
     }
 
-    const fallbackResponse = await fetch(
-      `${API_CONFIG.BASE_URL}/pathways/upload-video`,
-      {
-        method: "POST",
-        headers,
-        body: formData,
-      },
-    );
+    const { uploadUrl, fileKey } = urlData.data;
 
-    return fallbackResponse.json();
+    // 2. Upload directly to R2
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "PUT",
+      body: file,
+      headers: {
+        "Content-Type": file.type || "video/mp4",
+      },
+    });
+
+    if (!uploadResponse.ok) {
+      return { success: false, error: "Direct upload to R2 failed" };
+    }
+
+    // 3. Save the fileKey to the pathway
+    return pathwaysService.saveVideo(slug, fileKey);
   },
 };

@@ -51,27 +51,84 @@ const getAuthHeaders = () => {
 export const notificationsService = {
   list: async ({
     page,
-    pageSize = 10,
+    pageSize = 20,
     userId,
-    isRead = false,
+    type,
+    isRead,
   }: {
     page: number;
     pageSize?: number;
     userId?: string;
-    isRead?: boolean;
+    type?: string;
+    isRead?: boolean | "true" | "false";
   }): Promise<NotificationsApiResponse> => {
     const params = new URLSearchParams({
       page: page.toString(),
       page_size: pageSize.toString(),
-      is_read: isRead.toString(),
     });
 
     if (userId) params.set("user_id", userId);
+    if (type) params.set("type", type);
+    if (isRead !== undefined) params.set("is_read", isRead.toString());
 
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/notifications?${params.toString()}`,
       {
         method: "GET",
+        headers: getAuthHeaders(),
+      },
+    );
+
+    return response.json();
+  },
+
+  listMe: async ({
+    page,
+    pageSize = 20,
+    type,
+    isRead,
+  }: {
+    page: number;
+    pageSize?: number;
+    type?: string;
+    isRead?: boolean | "true" | "false";
+  }): Promise<NotificationsApiResponse> => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      page_size: pageSize.toString(),
+    });
+
+    if (type) params.set("type", type);
+    if (isRead !== undefined) params.set("is_read", isRead.toString());
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/notifications/me?${params.toString()}`,
+      {
+        method: "GET",
+        headers: getAuthHeaders(),
+      },
+    );
+
+    return response.json();
+  },
+
+  markAsRead: async (id: string): Promise<NotificationsApiResponse> => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/notifications/${id}/read`,
+      {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+      },
+    );
+
+    return response.json();
+  },
+
+  markAllAsRead: async (): Promise<NotificationsApiResponse> => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/notifications/read-all`,
+      {
+        method: "POST",
         headers: getAuthHeaders(),
       },
     );

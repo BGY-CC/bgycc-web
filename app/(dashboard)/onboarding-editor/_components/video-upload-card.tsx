@@ -62,7 +62,10 @@ export function VideoUploadCard({
   const getUploadedVideoUrl = (result: unknown): string | undefined => {
     const root = getRecord(result);
     const data = getRecord(root?.data);
+    const pathway = getRecord(data?.pathway);
+    
     const url =
+      pathway?.video_link ||
       data?.video_link ||
       data?.video_url ||
       data?.url ||
