@@ -95,7 +95,7 @@ export function AnnouncementModal({
           </FormField>
 
           <div className="space-y-3">
-             <p className="text-sm font-bold text-primary">Delivery Options*</p>
+             <p className="text-sm font-semibold text-primary">Delivery Options*</p>
              <div className="space-y-2">
                 <Checkbox 
                     id="push" 
@@ -126,7 +126,7 @@ export function AnnouncementModal({
           </div>
 
           <div className="space-y-3">
-             <p className="text-sm font-bold text-primary">Target Audience*</p>
+             <p className="text-sm font-semibold text-primary">Target Audience*</p>
              <div className="flex gap-10">
                 <Radio 
                     id="all" 
@@ -147,7 +147,7 @@ export function AnnouncementModal({
 
           {targetAudience === "specific" && (
             <div className="space-y-3 p-4 rounded-2xl bg-background border border-border">
-                <p className="text-xs font-bold text-muted uppercase tracking-wider">Select Clubs*</p>
+                <p className="text-xs font-semibold text-muted uppercase tracking-wider">Select Clubs*</p>
                 <div className="grid grid-cols-2 gap-3">
                     {["Lagos Club", "Kano Club", "Owerri Club", "Uyo Club"].map(club => (
                         <Checkbox 

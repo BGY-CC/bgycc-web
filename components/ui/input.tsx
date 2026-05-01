@@ -60,7 +60,7 @@ Input.displayName = "Input";
 
 const baseInputClasses = [
   "flex h-11 w-full rounded-2xl border border-border bg-white px-4 py-2",
-  "text-sm text-primary font-medium placeholder:text-muted",
+  "text-sm text-primary font-normal placeholder:text-muted",
   "transition-all duration-200",
   "focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary",
   "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-background",

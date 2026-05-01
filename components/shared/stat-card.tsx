@@ -38,7 +38,7 @@ export function StatCard({ label, value, icon, change = 0, className }: StatCard
         {/* Change badge */}
         <span
           className={cn(
-            "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold",
+            "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
             isPositive
               ? "bg-success-bg text-success"
               : "bg-error-bg text-error",
@@ -50,8 +50,8 @@ export function StatCard({ label, value, icon, change = 0, className }: StatCard
       </div>
 
       <div className="mt-2 text-left">
-        <p className="text-2xl font-extrabold text-primary tracking-tight">{value}</p>
-        <p className="mt-1 text-sm font-bold text-muted">{label}</p>
+        <p className="text-2xl font-bold text-primary tracking-tight">{value}</p>
+        <p className="mt-1 text-sm font-semibold text-muted">{label}</p>
       </div>
     </div>
   );

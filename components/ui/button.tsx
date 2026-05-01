@@ -15,10 +15,10 @@ const variantClasses = {
 } as const;
 
 const sizeClasses = {
-  sm: "h-9 px-4 text-xs rounded-xl font-semibold",
-  md: "h-11 px-6 text-sm rounded-2xl font-semibold",
-  lg: "h-14 px-8 text-base rounded-2xl font-semibold",
-  icon: "h-11 w-11 rounded-2xl font-semibold",
+  sm: "h-9 px-4 text-xs rounded-xl font-medium",
+  md: "h-11 px-6 text-sm rounded-2xl font-medium",
+  lg: "h-14 px-8 text-base rounded-2xl font-medium",
+  icon: "h-11 w-11 rounded-2xl font-medium",
 } as const;
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           // Base
-          "inline-flex items-center justify-center gap-2 font-medium",
+          "inline-flex items-center justify-center gap-2 font-normal",
           "transition-colors duration-150 cursor-pointer",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
           "select-none",

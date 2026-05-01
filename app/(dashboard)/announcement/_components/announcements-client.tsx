@@ -188,13 +188,13 @@ export function AnnouncementsClient() {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center flex-wrap gap-2">
-                        <h3 className="text-[17px] font-bold text-slate-900 group-hover:text-primary transition-colors">
+                        <h3 className="text-[17px] font-semibold text-slate-900 group-hover:text-primary transition-colors">
                           {a.title}
                         </h3>
                         {delivery.map((d: string) => (
                           <Badge 
                             key={d} 
-                            className="bg-[#EEF2FF] text-[#4F46E5] border-none px-2 rounded-md text-[10px] uppercase font-bold tracking-wider"
+                            className="bg-[#EEF2FF] text-[#4F46E5] border-none px-2 rounded-md text-[10px] uppercase font-semibold tracking-wider"
                           >
                             {d}
                           </Badge>
@@ -205,7 +205,7 @@ export function AnnouncementsClient() {
                         ref={(el) => {
                           contentRefs.current[a.id] = el;
                         }}
-                        className={`mt-1 text-[14px] text-slate-500 font-medium leading-relaxed break-words ${
+                        className={`mt-1 text-[14px] text-slate-500 font-normal leading-relaxed break-words ${
                           isExpanded ? "" : "line-clamp-2"
                         }`}
                       >
@@ -215,7 +215,7 @@ export function AnnouncementsClient() {
                       {overflowMap[a.id] && (
                         <button
                           onClick={() => toggleExpand(a.id)}
-                          className="mt-1 text-xs font-bold text-primary hover:underline"
+                          className="mt-1 text-xs font-semibold text-primary hover:underline"
                         >
                           {isExpanded ? "See less" : "See more"}
                         </button>
@@ -226,13 +226,13 @@ export function AnnouncementsClient() {
                         {targets.map((t: string) => (
                           <Badge 
                             key={t} 
-                            className="bg-slate-100 text-slate-600 border-none font-semibold px-3 py-1"
+                            className="bg-slate-100 text-slate-600 border-none font-medium px-3 py-1"
                           >
                             {t}
                           </Badge>
                         ))}
                         <span className="text-slate-300 mx-1">•</span>
-                        <span className="text-[13px] text-slate-400 font-medium">
+                        <span className="text-[13px] text-slate-400 font-normal">
                           {formatDate(a.created_at)}
                         </span>
                       </div>

@@ -74,7 +74,7 @@ function PageButton({
   return (
     <button
       className={cn(
-        "inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-md px-2 text-sm font-medium transition-colors",
+        "inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-md px-2 text-sm font-normal transition-colors",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
         "disabled:pointer-events-none disabled:opacity-40",
         isActive

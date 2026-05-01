@@ -86,7 +86,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 key={href}
                 href={href}
                 className={cn(
-                  "flex items-center gap-4 rounded-2xl px-4 py-4 text-sm font-bold",
+                  "flex items-center gap-4 rounded-2xl px-4 py-4 text-sm font-semibold",
                   "transition-all duration-200",
                   isActive
                     ? "bg-primary text-white shadow-lg shadow-primary/20"
@@ -109,7 +109,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         <div className="px-4 py-8">
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="flex w-full items-center gap-4 rounded-2xl px-4 py-4 text-sm font-bold text-error hover:bg-error-bg transition-all duration-200"
+            className="flex w-full items-center gap-4 rounded-2xl px-4 py-4 text-sm font-semibold text-error hover:bg-error-bg transition-all duration-200"
           >
             <LogOut className="h-5 w-5" />
             Logout
@@ -121,7 +121,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <h2 className="text-lg font-bold text-primary">
+            <h2 className="text-lg font-semibold text-primary">
               Confirm Logout
             </h2>
 
@@ -133,7 +133,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="flex-1 rounded-xl border border-border px-4 py-3 text-sm font-bold hover:bg-gray-50"
+                className="flex-1 rounded-xl border border-border px-4 py-3 text-sm font-semibold hover:bg-gray-50"
               >
                 Cancel
               </button>
@@ -143,7 +143,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   logout();
                   setShowLogoutModal(false);
                 }}
-                className="flex-1 rounded-xl bg-error text-white px-4 py-3 text-sm font-bold hover:opacity-90"
+                className="flex-1 rounded-xl bg-error text-white px-4 py-3 text-sm font-semibold hover:opacity-90"
               >
                 Logout
               </button>

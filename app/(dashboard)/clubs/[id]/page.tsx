@@ -22,7 +22,7 @@ export default function ClubDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[400px] gap-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-primary mb-2">Invalid Club ID</h1>
+          <h1 className="text-2xl font-semibold text-primary mb-2">Invalid Club ID</h1>
           <p className="text-muted mb-6">The club ID is missing or invalid. Please go back and try again.</p>
           <Link href="/clubs" className="inline-block">
             <Button leftIcon={<ArrowLeft className="h-4 w-4" />}>
@@ -107,7 +107,7 @@ export default function ClubDetailPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-gray-900">{club.name}</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{club.name}</h2>
               <Badge variant={club.is_active ? "active" : "dormant"}>
                 {club.is_active ? "Active" : "Dormant"}
               </Badge>
@@ -116,10 +116,10 @@ export default function ClubDetailPage() {
 
             <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
               <span className="flex items-center gap-1.5">
-                <span className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
+                <span className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
                   {club.leader?.full_name?.charAt(0) || "L"}
                 </span>
-                <span className="font-medium text-gray-700">{club.leader?.full_name || "No Leader"}</span>
+                <span className="font-normal text-gray-700">{club.leader?.full_name || "No Leader"}</span>
                 <span className="text-gray-400 text-xs">Leader</span>
               </span>
               <span>{[club.city, club.state].filter(Boolean).join(", ") || "Unknown"} <span className="text-gray-400 text-xs ml-1">Region</span></span>
@@ -179,7 +179,7 @@ export default function ClubDetailPage() {
         <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-gray-900">Engagement Trends</h3>
+              <h3 className="text-sm font-medium text-gray-900">Engagement Trends</h3>
               <p className="text-xs text-gray-500">Reports &amp; logins this week</p>
             </div>
             <select className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-primary">
@@ -191,7 +191,7 @@ export default function ClubDetailPage() {
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-start justify-between">
-            <h3 className="text-sm font-semibold text-gray-900">Member Status</h3>
+            <h3 className="text-sm font-medium text-gray-900">Member Status</h3>
             <select className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-primary">
               <option>This Week</option>
             </select>
@@ -204,7 +204,7 @@ export default function ClubDetailPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Top Performers */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <h3 className="text-sm font-medium text-gray-900 mb-4 flex items-center gap-2">
             <Users className="h-4 w-4 text-gray-500" />
             Top Performers
           </h3>
@@ -217,15 +217,15 @@ export default function ClubDetailPage() {
                topPerformers.map((p: any, i: number) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <span className="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600 shrink-0">
+                  <span className="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 shrink-0">
                     {(p.full_name || "U").charAt(0)}
                   </span>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{p.full_name || "Unknown"}</p>
+                    <p className="text-sm font-normal text-gray-900">{p.full_name || "Unknown"}</p>
                     <p className="text-xs text-gray-500">Streak: {p.current_streak} days</p>
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-gray-900">{p.total_xp} XP</span>
+                <span className="text-sm font-medium text-gray-900">{p.total_xp} XP</span>
               </div>
             )))}
           </div>
@@ -233,7 +233,7 @@ export default function ClubDetailPage() {
 
         {/* At-Risk Members */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <h3 className="text-sm font-medium text-gray-900 mb-4 flex items-center gap-2">
             <Activity className="h-4 w-4 text-red-500" />
             At-Risk Members
           </h3>
@@ -246,16 +246,16 @@ export default function ClubDetailPage() {
               atRiskMembers.map((m: any, i: number) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <span className="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600 shrink-0">
+                  <span className="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 shrink-0">
                     {(m.full_name || "U").charAt(0)}
                   </span>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{m.full_name || "Unknown"}</p>
+                    <p className="text-sm font-normal text-gray-900">{m.full_name || "Unknown"}</p>
                     <p className="text-xs text-gray-500">Broken streak</p>
                   </div>
                 </div>
                 <button
-                  className="text-xs text-primary hover:underline font-medium"
+                  className="text-xs text-primary hover:underline font-normal"
                   onClick={() => m.user_id && router.push(`/users/${m.user_id}`)}
                 >
                   View

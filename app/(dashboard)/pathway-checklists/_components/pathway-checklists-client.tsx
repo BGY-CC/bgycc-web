@@ -221,9 +221,9 @@ export function PathwayChecklistsClient() {
         {/* Everyday Tasks */}
         {sectionedItems.everyday.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Everyday Tasks
-              <span className="text-sm font-medium text-slate-400">({sectionedItems.everyday.length})</span>
+              <span className="text-sm font-normal text-slate-400">({sectionedItems.everyday.length})</span>
             </h2>
             <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
               {sectionedItems.everyday.map((item) => (
@@ -241,9 +241,9 @@ export function PathwayChecklistsClient() {
         {/* Weekly Tasks */}
         {sectionedItems.weekly.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Weekly Tasks
-              <span className="text-sm font-medium text-slate-400">({sectionedItems.weekly.length})</span>
+              <span className="text-sm font-normal text-slate-400">({sectionedItems.weekly.length})</span>
             </h2>
             <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
               {sectionedItems.weekly.map((item) => (
@@ -261,9 +261,9 @@ export function PathwayChecklistsClient() {
         {/* Specific Day & Cycle Tasks */}
         {sectionedItems.specific.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Specific Day & Cycle Tasks
-              <span className="text-sm font-medium text-slate-400">({sectionedItems.specific.length})</span>
+              <span className="text-sm font-normal text-slate-400">({sectionedItems.specific.length})</span>
             </h2>
             <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
               {sectionedItems.specific.map((item) => (
@@ -280,7 +280,7 @@ export function PathwayChecklistsClient() {
 
         {filteredItems.length === 0 && (
           <div className="py-20 text-center bg-white rounded-3xl border-2 border-dashed border-gray-200">
-            <p className="text-slate-500 font-medium">No checklist items found for this pathway.</p>
+            <p className="text-slate-500 font-normal">No checklist items found for this pathway.</p>
             <Button 
               variant="secondary" 
               className="mt-4"
