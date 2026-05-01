@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Upload, RefreshCw, Trash2, Play } from "lucide-react";
 import { Badge, Button, ConfirmDialog } from "@/components/ui";
 import { useToast } from "@/components/ui";
+import { pathwaysService } from "@/lib/services/pathways";
 import { cn } from "@/lib/utils";
 
 interface VideoFile {
@@ -12,6 +13,7 @@ interface VideoFile {
   duration: string;
   uploaded: string;
   url?: string; // External link from backend (video_link field)
+  previewUrl?: string;
 }
 
 interface VideoUploadCardProps {
@@ -19,6 +21,7 @@ interface VideoUploadCardProps {
   description: string;
   initialVideo?: VideoFile;
   slug?: string; // Pathway slug for update calls
+  onUploaded?: () => void;
 }
 
 export function VideoUploadCard({
@@ -26,22 +29,119 @@ export function VideoUploadCard({
   description,
   initialVideo,
   slug,
+  onUploaded,
 }: VideoUploadCardProps) {
   const [video, setVideo] = useState<VideoFile | undefined>(initialVideo);
+  const [isUploading, setIsUploading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const hasVideo = !!video;
+  const videoSrc = video?.previewUrl || video?.url;
 
-  const handleRemove = () => {
-    setVideo(undefined);
-    setShowConfirm(false);
-    toast("Welcome video removed successfully.");
+  useEffect(() => {
+    setVideo(initialVideo);
+  }, [initialVideo]);
+
+  useEffect(() => {
+    return () => {
+      if (video?.previewUrl) URL.revokeObjectURL(video.previewUrl);
+    };
+  }, [video?.previewUrl]);
+
+  const getRecord = (value: unknown) =>
+    value && typeof value === "object"
+      ? (value as Record<string, unknown>)
+      : undefined;
+
+  const getErrorMessage = (error: unknown, fallback: string) => {
+    return error instanceof Error ? error.message : fallback;
+  };
+
+  const getUploadedVideoUrl = (result: unknown): string | undefined => {
+    const root = getRecord(result);
+    const data = getRecord(root?.data);
+    const url =
+      data?.video_link ||
+      data?.video_url ||
+      data?.url ||
+      root?.video_link ||
+      root?.video_url ||
+      root?.url;
+
+    return typeof url === "string" ? url : undefined;
+  };
+
+  const handleRemove = async () => {
+    if (!slug) {
+      setVideo(undefined);
+      setShowConfirm(false);
+      toast("Welcome video removed successfully.");
+      return;
+    }
+
+    try {
+      const result = await pathwaysService.update(slug, { video_link: null });
+      if (result.success === false) {
+        toast(result.error || "Failed to remove welcome video.", "error");
+        return;
+      }
+
+      setVideo(undefined);
+      setShowConfirm(false);
+      onUploaded?.();
+      toast("Welcome video removed successfully.");
+    } catch (error: unknown) {
+      toast(getErrorMessage(error, "Failed to remove welcome video."), "error");
+    }
   };
 
   const handleReplace = () => {
     inputRef.current?.click();
+  };
+
+  const handleFileChange = async (file: File) => {
+    if (!slug) {
+      toast("Cannot upload this video because the pathway slug is missing.", "error");
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setVideo({
+      name: file.name,
+      size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+      duration: "—",
+      uploaded: "Uploading",
+      previewUrl,
+    });
+    setIsUploading(true);
+
+    try {
+      const result = await pathwaysService.uploadVideo(slug, file);
+      if (result.success === false) {
+        throw new Error(result.error || result.message || "Upload failed");
+      }
+
+      const uploadedUrl = getUploadedVideoUrl(result);
+      setVideo({
+        name: file.name,
+        size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+        duration: "—",
+        uploaded: new Date().toISOString().split("T")[0],
+        url: uploadedUrl,
+        previewUrl,
+      });
+      onUploaded?.();
+      toast("Welcome video uploaded successfully.", "success");
+    } catch (error: unknown) {
+      setVideo(undefined);
+      URL.revokeObjectURL(previewUrl);
+      toast(getErrorMessage(error, "Failed to upload welcome video."), "error");
+    } finally {
+      setIsUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
   };
 
   return (
@@ -59,7 +159,7 @@ export function VideoUploadCard({
             </div>
           </div>
           <Badge variant={hasVideo ? "uploaded" : "no-video"} className="font-semibold px-3 py-1">
-            {hasVideo ? "Uploaded" : "No Video"}
+            {isUploading ? "Uploading" : hasVideo ? "Uploaded" : "No Video"}
           </Badge>
         </div>
 
@@ -67,16 +167,13 @@ export function VideoUploadCard({
         {hasVideo ? (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
             {/* Video thumbnail / link */}
-            {video.url ? (
-              <a
-                href={video.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative h-32 w-48 shrink-0 rounded-lg bg-gray-900 overflow-hidden flex flex-col items-center justify-center gap-1 hover:opacity-80 transition-opacity"
-              >
-                <Play className="h-8 w-8 text-white" />
-                <span className="text-white text-[10px] font-semibold uppercase tracking-wider">Watch Video</span>
-              </a>
+            {videoSrc ? (
+              <video
+                src={videoSrc}
+                controls
+                preload="metadata"
+                className="h-32 w-48 shrink-0 rounded-lg bg-gray-900 object-cover"
+              />
             ) : (
               <div className="relative h-32 w-48 shrink-0 rounded-lg bg-gray-900 overflow-hidden flex items-center justify-center">
                 <div className="text-white text-xs text-center p-2 opacity-70">
@@ -114,6 +211,7 @@ export function VideoUploadCard({
                   size="sm"
                   leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
                   onClick={handleReplace}
+                  isLoading={isUploading}
                   className="bg-background border-border text-primary hover:bg-background/80"
                 >
                   Replace Video
@@ -123,6 +221,7 @@ export function VideoUploadCard({
                   size="sm"
                   leftIcon={<Trash2 className="h-3.5 w-3.5" />}
                   onClick={() => setShowConfirm(true)}
+                  disabled={isUploading}
                   className="text-error hover:text-error hover:bg-error-bg font-semibold"
                 >
                   Remove
@@ -134,6 +233,7 @@ export function VideoUploadCard({
           /* Upload dropzone */
           <button
             onClick={() => inputRef.current?.click()}
+            disabled={isUploading}
             className={cn(
               "flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200",
               "py-10 text-center transition-colors",
@@ -144,7 +244,9 @@ export function VideoUploadCard({
               <Upload className="h-5 w-5 text-gray-500" />
             </div>
             <div>
-              <p className="text-sm font-normal text-gray-700">Click to upload welcome video</p>
+              <p className="text-sm font-normal text-gray-700">
+                {isUploading ? "Uploading welcome video..." : "Click to upload welcome video"}
+              </p>
               <p className="text-xs text-gray-400 mt-0.5">MP4, MOV, or WebM • Max 500MB</p>
             </div>
           </button>
@@ -160,13 +262,7 @@ export function VideoUploadCard({
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {
-              // Simulate upload — real upload handled in Phase 2
-              setVideo({
-                name: file.name,
-                size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-                duration: "—",
-                uploaded: new Date().toISOString().split("T")[0],
-              });
+              handleFileChange(file);
             }
           }}
         />

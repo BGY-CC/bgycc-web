@@ -54,7 +54,7 @@ function OnboardingEditorSkeleton() {
 }
 
 export default function OnboardingEditorPage() {
-  const { data: rawData, isLoading } = useQuery<any>("/pathways");
+  const { data: rawData, isLoading, refetch } = useQuery<any>("/pathways");
 
   // useQuery sets data = result.data from the API response
   // API shape: { success, data: { pathways: [...] } }
@@ -112,6 +112,7 @@ export default function OnboardingEditorPage() {
                   url: p.video_link
                 } : undefined}
                 slug={p.slug}
+                onUploaded={refetch}
               />
             ))
           ) : (
