@@ -8,16 +8,24 @@ export interface StatCardProps {
   value: string | number;
   icon: React.ReactNode;
   change?: number; // e.g. 0, +5.2, -3.1
+  changeSuffix?: string; // e.g. "%", " XP"
   className?: string;
 }
 
 /**
  * Stat card as seen on the Dashboard and sub-pages.
- * Shows: icon (top-left), % change badge (top-right), large value, label.
+ * Shows: icon (top-left), change badge (top-right), large value, label.
  */
-export function StatCard({ label, value, icon, change = 0, className }: StatCardProps) {
+export function StatCard({ 
+  label, 
+  value, 
+  icon, 
+  change = 0, 
+  changeSuffix = "%",
+  className 
+}: StatCardProps) {
   const isPositive = change >= 0;
-  const changeLabel = `${isPositive ? "+" : ""}${change.toFixed(2)}%`;
+  const changeLabel = `${isPositive ? "+" : ""}${change.toLocaleString()}${changeSuffix}`;
 
   return (
     <div
