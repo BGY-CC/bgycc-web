@@ -12,7 +12,7 @@ export default function ResourcesPage() {
         breadcrumb={[{ label: "Resources" }]}
       />
 
-      <div className="flex-1 px-3 py-4 sm:px-4 lg:px-6 max-w-7xl mx-auto w-full">
+      <div className="flex-1 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
         <ResourcesClient />
       </div>
     </div>

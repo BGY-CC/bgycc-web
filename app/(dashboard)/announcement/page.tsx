@@ -51,7 +51,7 @@ export default function AnnouncementPage() {
         breadcrumb={[{ label: "Announcements" }]}
       />
 
-      <div className="flex-1 px-3 py-4 sm:px-4 lg:px-6 max-w-7xl mx-auto w-full space-y-6">
+      <div className="flex-1 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full space-y-6">
         <div className="flex border-b border-gray-100">
           <button
             onClick={() => setActiveTab("announcements")}
@@ -132,4 +132,4 @@ export default function AnnouncementPage() {
       />
     </div>
   );
-}
+}

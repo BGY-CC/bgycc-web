@@ -190,15 +190,14 @@ export function ClubsTable({
             </div>
           )}
         </div>
+      </div>
 
-        {/* Pagination */}
-        <div className="flex items-center justify-center border-t border-border px-4 py-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={onPageChange}
-          />
-        </div>
+      <div className="flex items-center justify-center mt-12 mb-6">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
       </div>
 
       {/* Delete confirm */}
