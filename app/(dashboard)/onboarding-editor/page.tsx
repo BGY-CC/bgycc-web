@@ -104,13 +104,7 @@ export default function OnboardingEditorPage() {
                 key={p.id}
                 pathway={p.display_name || p.label}
                 description={p.description || `Welcome video for the ${p.label} pathway.`}
-                initialVideo={p.video_link ? {
-                  name: "Welcome Video",
-                  size: "External Link",
-                  duration: "—",
-                  uploaded: "Uploaded",
-                  url: p.video_link
-                } : undefined}
+                initialVideo={p.video_link ? { url: p.video_link } : undefined}
                 slug={p.slug}
                 onUploaded={refetch}
               />
