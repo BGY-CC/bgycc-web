@@ -68,5 +68,42 @@ export const pathwaysService = {
       return result;
     } catch {
       return { success: response.ok };
+    }
+  },
+
+  uploadVideo: async (slug: string, file: File) => {
+    const formData = new FormData();
+    formData.append("video", file);
+    formData.append("slug", slug);
+
+    const token =
+      typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
+    const headers = {
+      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    };
+
+    const primaryResponse = await fetch(
+      `${API_CONFIG.BASE_URL}/pathways/${slug}/upload-video`,
+      {
+        method: "POST",
+        headers,
+        body: formData,
+      },
+    );
+
+    if (primaryResponse.status !== 404) {
+      return primaryResponse.json();
+    }
+
+    const fallbackResponse = await fetch(
+      `${API_CONFIG.BASE_URL}/pathways/upload-video`,
+      {
+        method: "POST",
+        headers,
+        body: formData,
+      },
+    );
+
+    return fallbackResponse.json();
   },
 };

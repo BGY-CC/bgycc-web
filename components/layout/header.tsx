@@ -1,7 +1,8 @@
 "use client";
 
-import { Menu, Bell, Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui";
+import { NotificationsPopover } from "./notifications-popover";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -9,7 +10,7 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-10 flex h-20 items-center justify-between bg-transparent px-3 sm:px-4 md:px-8">
+    <header className="sticky top-0 z-40 flex h-20 items-center justify-between bg-transparent px-3 sm:px-4 md:px-8">
       <div className="flex items-center gap-2 sm:gap-4">
         <Button
           variant="ghost"
@@ -39,15 +40,7 @@ export function Header({ onMenuClick }: HeaderProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-2 shrink-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative h-10 w-10 text-muted hover:text-primary hover:bg-background rounded-xl"
-            aria-label="Notifications"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-error border-2 border-white" aria-hidden="true" />
-          </Button>
+          <NotificationsPopover />
 
           {/* User avatar */}
           <button
