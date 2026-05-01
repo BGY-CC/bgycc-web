@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Users, Activity, TrendingUp, MessageCircle, Pencil, Trophy, AlertTriangle, ChevronDown } from "lucide-react";
+import Image from "next/image";
 import { Badge, Button, Skeleton, useToast } from "@/components/ui";
 import { StatCard, StatCardSkeleton, PageHeader } from "@/components/shared";
 import { EngagementChart, MemberStatusChart } from "@/components/charts";
@@ -171,73 +172,82 @@ export default function ClubDetailPage() {
       <div className="flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
 
       {/* Club header */}
-      <div>
-        <Link
-          href="/clubs"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-3 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
-
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-semibold text-gray-900">{club.name}</h2>
-              <Badge variant={club.is_active ? "active" : "dormant"}>
-                {club.is_active ? "Active" : "Dormant"}
-              </Badge>
-            </div>
-            <p className="text-sm text-gray-500 mt-0.5">{club.description || "Holistic city, modern leadership approach"}</p>
-
-            <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
-              <span className="flex items-center gap-1.5">
-                <span className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
-                  {club.leader?.full_name?.charAt(0) || "L"}
-                </span>
-                <span className="font-normal text-gray-700">{club.leader?.full_name || "No Leader"}</span>
-                <span className="text-gray-400 text-xs">Leader</span>
-              </span>
-              <span>{[club.city, club.state].filter(Boolean).join(", ") || "Unknown"} <span className="text-gray-400 text-xs ml-1">Region</span></span>
-              {club.created_at && (
-                <span>{new Date(club.created_at).toLocaleDateString()} <span className="text-gray-400 text-xs ml-1">Created</span></span>
-              )}
-            </div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-gray-900">{club.name}</h1>
+            <Badge variant={club.is_active ? "active" : "dormant"} className="rounded-full px-3">
+              {club.is_active ? "Active" : "Dormant"}
+            </Badge>
           </div>
+          <p className="text-sm font-medium text-gray-400 mt-1">
+            {club.description || "Historic city, modern leadership approach."}
+          </p>
+        </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            {club.url_link && (
-              <Button
-                variant="secondary"
-                size="sm"
-                leftIcon={<MessageCircle className="h-4 w-4" />}
-                onClick={() => window.open(club.url_link, "_blank")}
-              >
-                WhatsApp
-              </Button>
-            )}
+        <div className="flex items-center gap-3">
+          {club.url_link && (
             <Button
               variant="secondary"
               size="sm"
-              onClick={async () => {
-                const result = await clubsService.update(club.id, { is_active: !club.is_active });
-                if (result.success) {
-                  toast(club.is_active ? "Club deactivated" : "Club activated");
-                  refetchClub();
-                } else {
-                  toast("Failed to update club status", "error");
-                }
-              }}
+              className="h-10 px-4 rounded-xl border-gray-200 text-gray-700 font-semibold"
+              leftIcon={<MessageCircle className="h-4 w-4" />}
+              onClick={() => window.open(club.url_link, "_blank")}
             >
-              {club.is_active ? "Deactivate" : "Activate"}
+              WhatsApp
             </Button>
-            <Button
-              size="sm"
-              leftIcon={<Pencil className="h-4 w-4" />}
-              onClick={() => setShowEdit(true)}
-            >
-              Edit Club
-            </Button>
+          )}
+          <Button
+            size="sm"
+            className="h-10 px-4 rounded-xl bg-[#1e293b] hover:bg-[#0f172a] text-white font-semibold"
+            leftIcon={<Pencil className="h-4 w-4" />}
+            onClick={() => setShowEdit(true)}
+          >
+            Edit Club
+          </Button>
+        </div>
+      </div>
+
+      {/* Info Card */}
+      <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-100 border border-gray-100 shrink-0">
+            {club.leader?.profile_picture_url ? (
+              <Image 
+                src={club.leader.profile_picture_url} 
+                alt={club.leader.full_name || "Leader"} 
+                width={48} 
+                height={48} 
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center bg-gray-50 text-gray-400 font-medium text-lg">
+                {(club.leader?.full_name || "L").charAt(0)}
+              </div>
+            )}
           </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Leader</span>
+            <span className="text-base font-medium text-gray-900">{club.leader?.full_name || "No Leader Assigned"}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Region</span>
+          <span className="text-base font-medium text-gray-900">
+            {[club.city, club.state].filter(Boolean).join(", ") || "No Region Set"}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Created</span>
+          <span className="text-base font-medium text-gray-600">
+            {club.created_at ? new Date(club.created_at).toLocaleDateString("en-US", {
+              month: "numeric",
+              day: "numeric",
+              year: "numeric"
+            }) : "N/A"}
+          </span>
         </div>
       </div>
 
