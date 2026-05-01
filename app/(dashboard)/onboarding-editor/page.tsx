@@ -44,13 +44,13 @@ export default function OnboardingEditorPage() {
               <span className="text-primary text-sm">▶</span>
             </div>
             <div>
-              <h2 className="text-[17px] font-bold text-primary tracking-tight">Pathway Videos</h2>
-              <p className="text-sm font-medium text-muted mt-1">
+              <h2 className="text-[17px] font-semibold text-primary tracking-tight">Pathway Videos</h2>
+              <p className="text-sm font-normal text-muted mt-1">
                 Manage the welcome videos that new members see during onboarding for each pathway.
               </p>
             </div>
           </div>
-          <Badge variant="warning" className="px-4 py-1.5 font-bold uppercase tracking-wider">
+          <Badge variant="warning" className="px-4 py-1.5 font-semibold uppercase tracking-wider">
             {uploaded}/{total} Videos Uploaded
           </Badge>
         </div>

@@ -33,7 +33,7 @@ const ScheduleIndicator = ({ item }: { item: ChecklistItem }) => {
           <RefreshCw className="h-3 w-3" />
           Everyday
         </Badge>
-        <span className="text-[10px] text-muted-foreground mt-1 font-medium italic">Mon - Sun</span>
+        <span className="text-[10px] text-muted-foreground mt-1 font-normal italic">Mon - Sun</span>
       </div>
     );
   }
@@ -45,7 +45,7 @@ const ScheduleIndicator = ({ item }: { item: ChecklistItem }) => {
           <Calendar className="h-3 w-3" />
           Weekly
         </Badge>
-        <span className="text-[10px] text-muted-foreground mt-1 font-medium italic">
+        <span className="text-[10px] text-muted-foreground mt-1 font-normal italic">
           {item.day_of_week !== null ? getDayName(item.day_of_week) : "Every Week"}
         </span>
       </div>
@@ -58,7 +58,7 @@ const ScheduleIndicator = ({ item }: { item: ChecklistItem }) => {
         <Clock className="h-3 w-3" />
         Specific Day
       </Badge>
-      <span className="text-[10px] text-muted-foreground mt-1 font-medium italic">
+      <span className="text-[10px] text-muted-foreground mt-1 font-normal italic">
         {item.cycle_number ? `Cycle ${item.cycle_number}, ` : ""}Day {item.day_number || 0}
       </span>
     </div>
@@ -92,10 +92,10 @@ export function ChecklistItemRow({ item, onEdit, onRemove }: ChecklistItemRowPro
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[15px] font-semibold text-slate-900 truncate">
+            <h3 className="text-[15px] font-medium text-slate-900 truncate">
               {item.name}
             </h3>
-            <Badge variant="default" className="text-[10px] font-medium bg-slate-100 text-slate-600 border-0 px-2 py-0">
+            <Badge variant="default" className="text-[10px] font-normal bg-slate-100 text-slate-600 border-0 px-2 py-0">
               {type}
             </Badge>
             {!item.is_active && (
@@ -104,7 +104,7 @@ export function ChecklistItemRow({ item, onEdit, onRemove }: ChecklistItemRowPro
               </Badge>
             )}
           </div>
-          <p className="mt-1 text-[13px] text-slate-500 font-medium line-clamp-1 max-w-[500px]">
+          <p className="mt-1 text-[13px] text-slate-500 font-normal line-clamp-1 max-w-[500px]">
             {item.description || "No description provided."}
           </p>
         </div>

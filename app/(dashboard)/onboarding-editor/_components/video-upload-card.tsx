@@ -54,11 +54,11 @@ export function VideoUploadCard({
               <Play className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[15px] font-bold text-primary tracking-tight">{pathway}</p>
-              <p className="text-[13px] font-medium text-muted mt-1">{description}</p>
+              <p className="text-[15px] font-semibold text-primary tracking-tight">{pathway}</p>
+              <p className="text-[13px] font-normal text-muted mt-1">{description}</p>
             </div>
           </div>
-          <Badge variant={hasVideo ? "uploaded" : "no-video"} className="font-bold px-3 py-1">
+          <Badge variant={hasVideo ? "uploaded" : "no-video"} className="font-semibold px-3 py-1">
             {hasVideo ? "Uploaded" : "No Video"}
           </Badge>
         </div>
@@ -75,7 +75,7 @@ export function VideoUploadCard({
                 className="relative h-32 w-48 shrink-0 rounded-lg bg-gray-900 overflow-hidden flex flex-col items-center justify-center gap-1 hover:opacity-80 transition-opacity"
               >
                 <Play className="h-8 w-8 text-white" />
-                <span className="text-white text-[10px] font-bold uppercase tracking-wider">Watch Video</span>
+                <span className="text-white text-[10px] font-semibold uppercase tracking-wider">Watch Video</span>
               </a>
             ) : (
               <div className="relative h-32 w-48 shrink-0 rounded-lg bg-gray-900 overflow-hidden flex items-center justify-center">
@@ -89,22 +89,22 @@ export function VideoUploadCard({
             {/* File info */}
             <div className="flex-1 space-y-4">
               <div className="space-y-1">
-                <p className="text-[11px] font-bold text-muted uppercase tracking-[0.1em]">File Name</p>
-                <p className="text-sm font-bold text-primary">{video.name}</p>
+                <p className="text-[11px] font-semibold text-muted uppercase tracking-[0.1em]">File Name</p>
+                <p className="text-sm font-semibold text-primary">{video.name}</p>
               </div>
 
               <div className="flex gap-8 border-y border-border py-3">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted uppercase tracking-[0.1em]">Size</p>
-                  <p className="text-xs font-bold text-primary">{video.size}</p>
+                  <p className="text-[10px] font-semibold text-muted uppercase tracking-[0.1em]">Size</p>
+                  <p className="text-xs font-semibold text-primary">{video.size}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted uppercase tracking-[0.1em]">Duration</p>
-                  <p className="text-xs font-bold text-primary">{video.duration}</p>
+                  <p className="text-[10px] font-semibold text-muted uppercase tracking-[0.1em]">Duration</p>
+                  <p className="text-xs font-semibold text-primary">{video.duration}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted uppercase tracking-[0.1em]">Uploaded</p>
-                  <p className="text-xs font-bold text-primary">{video.uploaded}</p>
+                  <p className="text-[10px] font-semibold text-muted uppercase tracking-[0.1em]">Uploaded</p>
+                  <p className="text-xs font-semibold text-primary">{video.uploaded}</p>
                 </div>
               </div>
 
@@ -123,7 +123,7 @@ export function VideoUploadCard({
                   size="sm"
                   leftIcon={<Trash2 className="h-3.5 w-3.5" />}
                   onClick={() => setShowConfirm(true)}
-                  className="text-error hover:text-error hover:bg-error-bg font-bold"
+                  className="text-error hover:text-error hover:bg-error-bg font-semibold"
                 >
                   Remove
                 </Button>
@@ -144,7 +144,7 @@ export function VideoUploadCard({
               <Upload className="h-5 w-5 text-gray-500" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-700">Click to upload welcome video</p>
+              <p className="text-sm font-normal text-gray-700">Click to upload welcome video</p>
               <p className="text-xs text-gray-400 mt-0.5">MP4, MOV, or WebM • Max 500MB</p>
             </div>
           </button>

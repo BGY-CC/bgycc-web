@@ -26,7 +26,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg text-sm">
-      <p className="font-semibold text-gray-900 mb-1">{label}</p>
+      <p className="font-medium text-gray-900 mb-1">{label}</p>
       {payload.map((p) => (
         <p key={p.name} className="capitalize" style={{ color: p.color }}>
           {p.name === "reports" ? "Reports" : "Active Users"} : {p.value}

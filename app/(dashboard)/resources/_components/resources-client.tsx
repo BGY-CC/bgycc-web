@@ -158,10 +158,10 @@ export function ResourcesClient() {
                       <FolderOpen className="h-6 w-6" />
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-primary transition-colors">
+                      <h3 className="text-lg font-semibold text-slate-900 group-hover:text-primary transition-colors">
                         {r.title}
                       </h3>
-                      <p className="mt-1 text-[14px] text-slate-500 font-medium line-clamp-2 leading-relaxed">
+                      <p className="mt-1 text-[14px] text-slate-500 font-normal line-clamp-2 leading-relaxed">
                         {r.description || "No description provided."}
                       </p>
                     </div>
@@ -199,7 +199,7 @@ export function ResourcesClient() {
                       href={r.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-medium text-slate-400 hover:text-primary hover:underline underline-offset-4 truncate transition-colors"
+                      className="text-sm font-normal text-slate-400 hover:text-primary hover:underline underline-offset-4 truncate transition-colors"
                     >
                       {r.link}
                     </a>
@@ -210,7 +210,7 @@ export function ResourcesClient() {
           ))
         ) : (
           <div className="py-20 text-center bg-white rounded-3xl border-2 border-dashed border-gray-200">
-            <p className="text-slate-500 font-medium">No resources found.</p>
+            <p className="text-slate-500 font-normal">No resources found.</p>
             {search && (
               <Button variant="secondary" className="mt-4" onClick={() => setSearch("")}>
                 Clear Search

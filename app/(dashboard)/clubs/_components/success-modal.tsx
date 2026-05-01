@@ -24,7 +24,7 @@ export function SuccessModal({
             <CheckCircle2 className="h-6 w-6 text-green-600" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
             <p className="mt-1 text-sm text-gray-500">{description}</p>
           </div>
         </div>

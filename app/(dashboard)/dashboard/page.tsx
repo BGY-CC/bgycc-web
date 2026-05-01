@@ -14,8 +14,6 @@ import { useQuery } from "@/hooks/use-query";
 import { DashboardData } from "@/lib/services/dashboard";
 import { useState } from "react";
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function DashboardPage() {
   const [period, setPeriod] = useState("week");
   const { data, isLoading } = useQuery<DashboardData>(
@@ -100,7 +98,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-start justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-gray-900">
+              <h2 className="text-sm font-medium text-gray-900">
                 Engagement Trends
               </h2>
               <p className="text-xs text-gray-500">
@@ -124,7 +122,7 @@ export default function DashboardPage() {
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-start justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-gray-900">
+              <h2 className="text-sm font-medium text-gray-900">
                 Member Status
               </h2>
               <p className="text-xs text-gray-500">Risk distribution</p>

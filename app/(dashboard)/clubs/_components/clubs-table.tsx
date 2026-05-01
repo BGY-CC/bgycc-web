@@ -66,7 +66,7 @@ export function ClubsTable({
                 ].map((col) => (
                   <th
                     key={col}
-                    className="px-4 py-5 text-[11px] font-bold text-muted uppercase tracking-[0.1em] whitespace-nowrap"
+                    className="px-4 py-5 text-[11px] font-semibold text-muted uppercase tracking-[0.1em] whitespace-nowrap"
                   >
                     {col}
                   </th>
@@ -117,7 +117,7 @@ export function ClubsTable({
                     className="hover:bg-background/50 transition-colors group"
                   >
                     {/* Club */}
-                    <td className="px-4 py-4 font-bold text-primary whitespace-nowrap">
+                    <td className="px-4 py-4 font-semibold text-primary whitespace-nowrap">
                       {club.id ? (
                         <Link
                           href={`/clubs/${club.id}`}
@@ -131,7 +131,7 @@ export function ClubsTable({
                     </td>
 
                     {/* Region */}
-                    <td className="px-4 py-4 text-subtle font-medium whitespace-nowrap">
+                    <td className="px-4 py-4 text-subtle font-normal whitespace-nowrap">
                       <span className="flex items-center gap-2">
                         <span className="text-muted text-sm">📍</span>
                         {location}
@@ -141,26 +141,26 @@ export function ClubsTable({
                     {/* Leader */}
                     <td className="px-4 py-4 whitespace-nowrap">
                       <span className="flex items-center gap-3">
-                        <span className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-xs font-bold text-primary shrink-0 shadow-sm">
+                        <span className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-xs font-semibold text-primary shrink-0 shadow-sm">
                           {(club.leader_name || "L").charAt(0)}
                         </span>
-                        <span className="text-primary font-bold">
+                        <span className="text-primary font-semibold">
                           {club.leader_name || "No Leader"}
                         </span>
                       </span>
                     </td>
 
                     {/* Members */}
-                    <td className="px-4 py-4 text-subtle font-bold">
+                    <td className="px-4 py-4 text-subtle font-semibold">
                       {club.total_members}
                     </td>
 
                     {/* Report Rate (EMPTY for now) */}
-                    <td className="px-4 py-4 text-muted font-medium">—</td>
+                    <td className="px-4 py-4 text-muted font-normal">—</td>
 
                     {/* Score (this was wrongly used earlier) */}
                     <td className="px-4 py-4">
-                      <span className="font-bold text-primary">
+                      <span className="font-semibold text-primary">
                         {club.average_streak.toFixed(1)}
                       </span>
                     </td>
@@ -169,7 +169,7 @@ export function ClubsTable({
                     <td className="px-4 py-4">
                       <Badge
                         variant={club.is_active ? "active" : "dormant"}
-                        className="font-bold px-3 py-1.5"
+                        className="font-semibold px-3 py-1.5"
                       >
                         {club.is_active ? "Active" : "Dormant"}
                       </Badge>

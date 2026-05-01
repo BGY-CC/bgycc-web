@@ -54,7 +54,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             className="h-10 w-10 rounded-full bg-blue-100 overflow-hidden border-2 border-white shadow-sm focus:ring-2 focus:ring-primary/20 shrink-0"
             aria-label="Open user menu"
           >
-            <div className="h-full w-full bg-primary flex items-center justify-center text-white text-xs font-bold select-none">
+            <div className="h-full w-full bg-primary flex items-center justify-center text-white text-xs font-semibold select-none">
               JD
             </div>
           </button>

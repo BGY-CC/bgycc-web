@@ -77,7 +77,7 @@ function ToastItem({
     <div
       role="status"
       className={cn(
-        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium shadow-xl border-l-4",
+        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-normal shadow-xl border-l-4",
         "animate-in slide-in-from-bottom-2 fade-in duration-200",
         isSuccess 
           ? "bg-slate-900 text-white border-green-500" 

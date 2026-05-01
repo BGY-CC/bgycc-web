@@ -43,13 +43,13 @@ export function ForgotPasswordForm() {
           <div className="bg-white rounded-full p-1 shadow-sm shrink-0">
             <CheckCircle2 className="h-5 w-5 text-[#4C7B10]" />
           </div>
-          <p className="text-sm font-medium text-[#4C7B10] leading-relaxed">
+          <p className="text-sm font-normal text-[#4C7B10] leading-relaxed">
             We&apos;ve sent a password reset link to your email. It may take a few minutes to arrive.
           </p>
         </div>
         <Link
           href={ROUTES.LOGIN}
-          className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-white px-6 text-sm text-primary hover:bg-background transition-all shadow-sm active:scale-95 font-bold"
+          className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-white px-6 text-sm text-primary hover:bg-background transition-all shadow-sm active:scale-95 font-semibold"
         >
           Back to Login
         </Link>

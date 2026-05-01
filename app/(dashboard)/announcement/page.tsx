@@ -59,10 +59,10 @@ export default function AnnouncementPage() {
             </div>
 
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">
+              <h2 className="text-xl font-semibold tracking-tight text-slate-900">
                 Announcements
               </h2>
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-normal text-slate-500">
                 Create and manage announcements for BGYCC users
               </p>
             </div>

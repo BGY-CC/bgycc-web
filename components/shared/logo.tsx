@@ -26,10 +26,10 @@ export function Logo({ className, size = "md" }: LogoProps) {
         priority
       />
       <div className={cn("flex flex-col leading-none", className?.includes("flex-col") && "items-center")}>
-        <span className={cn("block font-black text-primary tracking-tighter", textSize)}>
+        <span className={cn("block font-extrabold text-primary tracking-tighter", textSize)}>
           BGYCC
         </span>
-        <span className={cn("block font-bold uppercase text-accent", subtextSize, tracking)}>
+        <span className={cn("block font-semibold uppercase text-accent", subtextSize, tracking)}>
           School of Leadership
         </span>
       </div>

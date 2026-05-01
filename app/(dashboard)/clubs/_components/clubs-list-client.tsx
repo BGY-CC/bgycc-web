@@ -142,7 +142,7 @@ export function ClubsListClient() {
             {showStateDropdown && (
               <div className="absolute top-full left-0 mt-2 z-[100] bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
                 <button
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 font-semibold text-slate-600 transition-colors"
+                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 font-medium text-slate-600 transition-colors"
                   onClick={() => {
                     setFilterState("");
                     setFilterCity("");
@@ -156,7 +156,7 @@ export function ClubsListClient() {
                   <button
                     key={s}
                     className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors ${
-                      filterState === s ? "font-bold text-primary bg-slate-50" : "text-slate-600"
+                      filterState === s ? "font-semibold text-primary bg-slate-50" : "text-slate-600"
                     }`}
                     onClick={() => {
                       setFilterState(s);
@@ -189,7 +189,7 @@ export function ClubsListClient() {
               {showCityDropdown && (
                 <div className="absolute top-full left-0 mt-2 z-[100] bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
                   <button
-                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 font-semibold text-slate-600 transition-colors"
+                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 font-medium text-slate-600 transition-colors"
                     onClick={() => {
                       setFilterCity("");
                       setPage(1);
@@ -202,7 +202,7 @@ export function ClubsListClient() {
                     <button
                       key={c}
                       className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors ${
-                        filterCity === c ? "font-bold text-primary bg-slate-50" : "text-slate-600"
+                        filterCity === c ? "font-semibold text-primary bg-slate-50" : "text-slate-600"
                       }`}
                       onClick={() => {
                         setFilterCity(c);
