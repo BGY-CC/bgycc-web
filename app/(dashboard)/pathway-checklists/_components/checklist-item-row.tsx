@@ -80,7 +80,7 @@ export function ChecklistItemRow({ item, onEdit, onRemove }: ChecklistItemRowPro
     },
   ];
 
-  const type = item.metadata?.type || "Task";
+  const type = item.slug || "Task";
 
   return (
     <div className="flex items-center justify-between gap-4 py-5 border-b border-gray-100 last:border-0 hover:bg-slate-50/50 px-4 -mx-4 rounded-xl transition-all group">

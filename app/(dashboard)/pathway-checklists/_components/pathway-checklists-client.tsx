@@ -276,7 +276,6 @@ export function PathwayChecklistsClient() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Everyday Tasks
-              <span className="text-sm font-normal text-slate-400">({sectionedItems.everyday.length})</span>
             </h2>
             <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
               {sectionedItems.everyday.map((item) => (
@@ -296,7 +295,6 @@ export function PathwayChecklistsClient() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Weekly Tasks
-              <span className="text-sm font-normal text-slate-400">({sectionedItems.weekly.length})</span>
             </h2>
             <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
               {sectionedItems.weekly.map((item) => (
@@ -316,7 +314,6 @@ export function PathwayChecklistsClient() {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Specific Day & Cycle Tasks
-              <span className="text-sm font-normal text-slate-400">({sectionedItems.specific.length})</span>
             </h2>
             <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
               {sectionedItems.specific.map((item) => (
