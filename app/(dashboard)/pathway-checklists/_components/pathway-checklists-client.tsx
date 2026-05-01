@@ -222,9 +222,19 @@ export function PathwayChecklistsClient() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <Tabs value={tab} onValueChange={setTab} className="w-auto">
-          <TabsList className="bg-slate-100 p-1">
-            <TabsTrigger value="leadership" className="data-[state=active]:bg-primary data-[state=active]:text-white">Leadership Pathway</TabsTrigger>
-            <TabsTrigger value="public_speaking" className="data-[state=active]:bg-primary data-[state=active]:text-white">Public Speaking Pathway</TabsTrigger>
+          <TabsList className="bg-primary p-1">
+            <TabsTrigger
+              value="leadership"
+              className="text-white hover:bg-white hover:text-primary data-[state=active]:bg-[#B20C22] data-[state=active]:text-white data-[state=active]:hover:bg-[#B20C22] data-[state=active]:hover:text-white"
+            >
+              Leadership Pathway
+            </TabsTrigger>
+            <TabsTrigger
+              value="public_speaking"
+              className="text-white hover:bg-white hover:text-primary data-[state=active]:bg-[#B20C22] data-[state=active]:text-white data-[state=active]:hover:bg-[#B20C22] data-[state=active]:hover:text-white"
+            >
+              Public Speaking Pathway
+            </TabsTrigger>
           </TabsList>
         </Tabs>
 

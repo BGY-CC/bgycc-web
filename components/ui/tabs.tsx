@@ -70,6 +70,7 @@ export function TabsTrigger({ value, children, className }: TabsTriggerProps) {
     <button
       role="tab"
       aria-selected={isActive}
+      data-state={isActive ? "active" : "inactive"}
       onClick={() => onChange(value)}
       className={cn(
         "rounded-xl px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all duration-200 bg-[#1E2158]",
