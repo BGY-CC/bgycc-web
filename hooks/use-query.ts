@@ -10,6 +10,9 @@ interface UseQueryOptions<T> {
   onError?: (error: any) => void;
 }
 
+const QUERY_CACHE_TTL = 30_000;
+const queryCache = new Map<string, { data: unknown; timestamp: number }>();
+
 export function useQuery<T = any>(endpoint: string, options: UseQueryOptions<T> = {}) {
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(options.enabled !== false);
@@ -21,14 +24,25 @@ export function useQuery<T = any>(endpoint: string, options: UseQueryOptions<T> 
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (force = false) => {
     // Only fetch if authenticated
     if (!isAuthenticated) return;
+
+    const cached = queryCache.get(endpoint);
+    if (!force && cached && Date.now() - cached.timestamp < QUERY_CACHE_TTL) {
+      const cachedData = cached.data as T;
+      setData(cachedData);
+      setIsLoading(false);
+      setError(null);
+      if (optionsRef.current.onSuccess) optionsRef.current.onSuccess(cachedData);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
     try {
       const result = await api.get<ApiResponse<T>>(endpoint);
+      queryCache.set(endpoint, { data: result.data, timestamp: Date.now() });
       setData(result.data);
       if (optionsRef.current.onSuccess) optionsRef.current.onSuccess(result.data);
     } catch (err: any) {
@@ -46,5 +60,10 @@ export function useQuery<T = any>(endpoint: string, options: UseQueryOptions<T> 
     }
   }, [endpoint, options.enabled, authLoading, isAuthenticated, fetchData]);
 
-  return { data, isLoading: isLoading || authLoading, error, refetch: fetchData };
+  return {
+    data,
+    isLoading: isLoading || authLoading,
+    error,
+    refetch: () => fetchData(true),
+  };
 }

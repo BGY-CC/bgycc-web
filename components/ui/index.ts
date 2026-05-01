@@ -45,3 +45,6 @@ export type { PaginationProps } from "./pagination";
 
 export { ConfirmDialog } from "./confirm-dialog";
 export type { ConfirmDialogProps } from "./confirm-dialog";
+
+export { Skeleton } from "./skeleton";
+export type { SkeletonProps } from "./skeleton";

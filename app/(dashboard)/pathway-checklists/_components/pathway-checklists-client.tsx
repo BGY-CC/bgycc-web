@@ -8,14 +8,61 @@ import {
   TabsTrigger,
   Button,
   ConfirmDialog,
+  Skeleton,
   useToast,
 } from "@/components/ui";
-import { StatCard, SearchInput } from "@/components/shared";
+import { StatCard, StatCardSkeleton, SearchInput } from "@/components/shared";
 import { ChecklistItemRow } from "./checklist-item-row";
 import { ChecklistModal } from "./checklist-modal";
 import { SuccessModal } from "../../clubs/_components/success-modal";
 import { useQuery } from "@/hooks/use-query";
 import { checklistService, ChecklistItem } from "@/lib/services/checklist";
+
+function PathwayChecklistsSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <Skeleton className="h-11 w-full rounded-xl sm:w-96" />
+        <Skeleton className="h-11 w-full rounded-2xl sm:w-36" />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <StatCardSkeleton key={index} />
+        ))}
+      </div>
+
+      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <Skeleton className="h-11 w-full max-w-md rounded-2xl" />
+      </div>
+
+      <div className="space-y-8">
+        {Array.from({ length: 2 }).map((_, sectionIndex) => (
+          <div key={sectionIndex} className="space-y-4">
+            <Skeleton className="h-7 w-48" />
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+              {Array.from({ length: 4 }).map((_, rowIndex) => (
+                <div
+                  key={rowIndex}
+                  className="flex items-center justify-between border-b border-gray-100 py-4 last:border-b-0"
+                >
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-10 rounded-xl" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-44" />
+                      <Skeleton className="h-3 w-64 max-w-full" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-9 w-20 rounded-xl" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function PathwayChecklistsClient() {
   const { toast } = useToast();
@@ -167,11 +214,7 @@ export function PathwayChecklistsClient() {
   ];
 
   if (isLoading && itemsArray.length === 0) {
-    return (
-      <div className="flex h-[400px] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-      </div>
-    );
+    return <PathwayChecklistsSkeleton />;
   }
 
   return (
