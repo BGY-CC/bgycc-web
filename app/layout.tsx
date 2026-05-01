@@ -29,6 +29,7 @@ export const viewport: Viewport = {
 };
 
 import { AuthProvider } from "@/hooks/use-auth";
+import { UploadProvider } from "@/lib/contexts/upload-context";
 
 export default function RootLayout({
   children,
@@ -39,7 +40,9 @@ export default function RootLayout({
     <html lang="en" className={`${poppins.variable} h-full`}>
       <body className="antialiased font-sans h-full">
         <AuthProvider>
-          {children}
+          <UploadProvider>
+            {children}
+          </UploadProvider>
         </AuthProvider>
       </body>
     </html>

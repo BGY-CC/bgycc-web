@@ -5,7 +5,6 @@ import { Badge, Button, Skeleton } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
 import { notificationsService, NotificationsResponse, AdminNotification } from "@/lib/services/notifications";
 import { useToast } from "@/components/ui";
-import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
 export function NotificationsClient() {
@@ -143,7 +142,12 @@ export function NotificationsClient() {
                   <div className="flex items-center gap-4 text-[12px] font-medium text-slate-400">
                     <div className="flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5" />
-                      {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true })}
+                      {new Date(notif.created_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </div>
                     {notif.type && (
                       <div className="flex items-center gap-1.5 uppercase tracking-wider opacity-70">

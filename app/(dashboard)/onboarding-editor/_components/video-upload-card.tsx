@@ -8,10 +8,10 @@ import { pathwaysService } from "@/lib/services/pathways";
 import { cn } from "@/lib/utils";
 
 interface VideoFile {
-  name: string;
-  size: string;
-  duration: string;
-  uploaded: string;
+  name?: string;
+  size?: string;
+  duration?: string;
+  uploaded?: string;
   url?: string; // External link from backend (video_link field)
   previewUrl?: string;
 }
@@ -24,6 +24,8 @@ interface VideoUploadCardProps {
   onUploaded?: () => void;
 }
 
+import { useUploads } from "@/lib/contexts/upload-context";
+
 export function VideoUploadCard({
   pathway,
   description,
@@ -31,6 +33,9 @@ export function VideoUploadCard({
   slug,
   onUploaded,
 }: VideoUploadCardProps) {
+  const { uploads, startUpload, clearUpload } = useUploads();
+  const activeUpload = slug ? uploads[slug] : undefined;
+  
   const [video, setVideo] = useState<VideoFile | undefined>(initialVideo);
   const [isUploading, setIsUploading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -41,8 +46,39 @@ export function VideoUploadCard({
   const videoSrc = video?.previewUrl || video?.url;
 
   useEffect(() => {
-    setVideo(initialVideo);
-  }, [initialVideo]);
+    // If not currently uploading locally, but there's a global upload
+    if (activeUpload) {
+      if (activeUpload.status === "uploading") {
+        setIsUploading(true);
+        if (!video || video.uploaded !== "Uploading") {
+          setVideo({
+            name: activeUpload.fileName,
+            size: activeUpload.fileSize,
+            duration: "—",
+            uploaded: "Uploading",
+          });
+        }
+      } else if (activeUpload.status === "completed") {
+        setIsUploading(false);
+        setVideo({
+          name: activeUpload.fileName,
+          size: activeUpload.fileSize,
+          duration: "—",
+          uploaded: new Date().toISOString().split("T")[0],
+          url: activeUpload.resultUrl,
+        });
+        clearUpload(slug!);
+        onUploaded?.();
+      } else if (activeUpload.status === "error") {
+        setIsUploading(false);
+        toast(activeUpload.error || "Upload failed", "error");
+        clearUpload(slug!);
+        setVideo(initialVideo); // Reset to initial state
+      }
+    } else {
+      setVideo(initialVideo);
+    }
+  }, [activeUpload, initialVideo, slug]);
 
   useEffect(() => {
     return () => {
@@ -74,6 +110,61 @@ export function VideoUploadCard({
       root?.url;
 
     return typeof url === "string" ? url : undefined;
+  };
+
+  // Helper to parse filename and date from URL
+  const inferMetadataFromUrl = (url: string) => {
+    try {
+      const decodedUrl = decodeURIComponent(url);
+      const parts = decodedUrl.split("/");
+      const lastPart = parts[parts.length - 1].split("?")[0];
+      
+      // Check if it matches our R2 pattern: timestamp-filename.ext
+      const match = lastPart.match(/^(\d+)-(.*)$/);
+      if (match) {
+        const timestamp = parseInt(match[1]);
+        const filename = match[2];
+        return {
+          name: filename,
+          uploaded: new Date(timestamp).toLocaleDateString(),
+        };
+      }
+      
+      return {
+        name: lastPart || "Welcome Video",
+        uploaded: "Uploaded",
+      };
+    } catch (e) {
+      return { name: "Welcome Video", uploaded: "Uploaded" };
+    }
+  };
+
+  // Effect to infer metadata if initialVideo only has a URL
+  useEffect(() => {
+    if (initialVideo?.url && (initialVideo.name === "Welcome Video" || initialVideo.size === "External Link")) {
+      const inferred = inferMetadataFromUrl(initialVideo.url);
+      setVideo(prev => prev ? {
+        ...prev,
+        name: prev.name === "Welcome Video" || !prev.name ? inferred.name : prev.name,
+        uploaded: prev.uploaded === "Uploaded" || !prev.uploaded ? inferred.uploaded : prev.uploaded,
+      } : prev);
+    }
+  }, [initialVideo?.url]);
+
+  const handleMetadataLoaded = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    const videoElement = e.currentTarget;
+    const durationInSeconds = videoElement.duration;
+    
+    if (!isNaN(durationInSeconds)) {
+      const minutes = Math.floor(durationInSeconds / 60);
+      const seconds = Math.floor(durationInSeconds % 60);
+      const durationStr = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+      
+      setVideo(prev => prev ? {
+        ...prev,
+        duration: durationStr,
+      } : prev);
+    }
   };
 
   const handleRemove = async () => {
@@ -111,40 +202,19 @@ export function VideoUploadCard({
     }
 
     const previewUrl = URL.createObjectURL(file);
+    const fileSize = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
+    
     setVideo({
       name: file.name,
-      size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+      size: fileSize,
       duration: "—",
       uploaded: "Uploading",
       previewUrl,
     });
     setIsUploading(true);
 
-    try {
-      const result = await pathwaysService.uploadVideo(slug, file);
-      if (result.success === false) {
-        throw new Error(result.error || result.message || "Upload failed");
-      }
-
-      const uploadedUrl = getUploadedVideoUrl(result);
-      setVideo({
-        name: file.name,
-        size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-        duration: "—",
-        uploaded: new Date().toISOString().split("T")[0],
-        url: uploadedUrl,
-        previewUrl,
-      });
-      onUploaded?.();
-      toast("Welcome video uploaded successfully.", "success");
-    } catch (error: unknown) {
-      setVideo(undefined);
-      URL.revokeObjectURL(previewUrl);
-      toast(getErrorMessage(error, "Failed to upload welcome video."), "error");
-    } finally {
-      setIsUploading(false);
-      if (inputRef.current) inputRef.current.value = "";
-    }
+    // Start background upload
+    startUpload(slug, file);
   };
 
   return (
@@ -175,6 +245,7 @@ export function VideoUploadCard({
                 src={videoSrc}
                 controls
                 preload="metadata"
+                onLoadedMetadata={handleMetadataLoaded}
                 className="h-32 w-48 shrink-0 rounded-lg bg-gray-900 object-cover"
               />
             ) : (
@@ -190,21 +261,21 @@ export function VideoUploadCard({
             <div className="flex-1 space-y-4">
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold text-muted uppercase tracking-[0.1em]">File Name</p>
-                <p className="text-sm font-semibold text-primary">{video.name}</p>
+                <p className="text-sm font-semibold text-primary truncate">{video.name || "Loading..."}</p>
               </div>
-
+ 
               <div className="flex gap-8 border-y border-border py-3">
                 <div className="space-y-1">
                   <p className="text-[10px] font-semibold text-muted uppercase tracking-[0.1em]">Size</p>
-                  <p className="text-xs font-semibold text-primary">{video.size}</p>
+                  <p className="text-xs font-semibold text-primary">{video.size || "—"}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-semibold text-muted uppercase tracking-[0.1em]">Duration</p>
-                  <p className="text-xs font-semibold text-primary">{video.duration}</p>
+                  <p className="text-xs font-semibold text-primary">{video.duration || "—"}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-semibold text-muted uppercase tracking-[0.1em]">Uploaded</p>
-                  <p className="text-xs font-semibold text-primary">{video.uploaded}</p>
+                  <p className="text-xs font-semibold text-primary">{video.uploaded || "—"}</p>
                 </div>
               </div>
 
