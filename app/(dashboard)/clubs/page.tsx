@@ -16,7 +16,7 @@ export default function ClubsPage() {
         breadcrumb={[{ label: "Clubs" }]}
       />
       
-      <div className="flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-6 max-w-7xl mx-auto w-full">
+      <div className="flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
         {/* Stat cards */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {isLoading && !stats ? (

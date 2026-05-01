@@ -111,7 +111,7 @@ export default function DashboardPage() {
     <div className="flex flex-col min-h-full">
       <PageHeader title="Dashboard" breadcrumb={[]} />
 
-      <div className="flex-1 space-y-4 px-3 py-4 sm:px-4 lg:px-6 max-w-7xl mx-auto w-full">
+      <div className="flex-1 space-y-4 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
         {/* Stat cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {stats.map((s) => (

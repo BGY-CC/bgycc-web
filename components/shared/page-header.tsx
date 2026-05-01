@@ -1,3 +1,5 @@
+"use client";
+
 import { Breadcrumb, type BreadcrumbItem } from "./breadcrumb";
 import { SearchInput } from "./search-input";
 import Image from "next/image";
@@ -18,7 +20,7 @@ export function PageHeader({ title, breadcrumb }: PageHeaderProps) {
 
   return (
     <header className="w-full bg-white px-4 py-4 border-b border-gray-100 mb-6 sm:px-6 sticky top-0 z-30">
-      <div className="flex items-center justify-between gap-4 mb-4">
+      <div className="flex items-center justify-between gap-4 mb-2">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
