@@ -3,7 +3,7 @@
 import { useState, useMemo, type ReactNode } from "react";
 import { Plus, ExternalLink, Pencil, Trash2, FolderOpen, Link2, LayoutGrid } from "lucide-react";
 import { Button, ConfirmDialog, Skeleton, useToast } from "@/components/ui";
-import { SearchInput } from "@/components/shared";
+import { SearchInput, StatCard, StatCardSkeleton } from "@/components/shared";
 import { ResourceModal } from "./resource-modal";
 import { useQuery } from "@/hooks/use-query";
 import {
@@ -11,46 +11,13 @@ import {
   Resource,
 } from "@/lib/services/resources";
 
-function ResourceStatCard({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string | number;
-  icon: ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-white p-4 shadow-sm transition-all hover:shadow-md">
-      <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background text-primary">
-          {icon}
-        </div>
-        <p className="text-2xl font-semibold text-primary tracking-tight">{value}</p>
-      </div>
-      <p className="mt-2 mx-4 text-sm font-normal text-muted">{label}</p>
-    </div>
-  );
-}
-
-function ResourceStatCardSkeleton() {
-  return (
-    <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-3">
-        <Skeleton className="h-11 w-11 shrink-0 rounded-xl" />
-        <Skeleton className="h-7 w-20" />
-      </div>
-      <Skeleton className="mt-3 h-4 w-28" />
-    </div>
-  );
-}
 
 function ResourcesSkeleton() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {Array.from({ length: 2 }).map((_, index) => (
-          <ResourceStatCardSkeleton key={index} />
+          <StatCardSkeleton key={index} />
         ))}
       </div>
 
@@ -195,7 +162,7 @@ export function ResourcesClient() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {stats.map((s) => (
-          <ResourceStatCard
+          <StatCard
             key={s.label}
             label={s.label}
             value={s.value}
