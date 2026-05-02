@@ -194,22 +194,26 @@ export function PathwayChecklistsClient() {
     {
       label: "Total Checklist Items",
       value: filteredItems.length,
-      icon: <Users className="h-5 w-5 text-indigo-600" />,
+      icon: <Users />,
+      color: "#4F46E5", // Indigo-600
     },
     {
       label: "Everyday",
       value: sectionedItems.everyday.length,
-      icon: <RefreshCw className="h-5 w-5 text-[#68A43E]" />,
+      icon: <RefreshCw />,
+      color: "#68A43E",
     },
     {
       label: "Weekly",
       value: sectionedItems.weekly.length,
-      icon: <Calendar className="h-5 w-5 text-[#A98B25]" />,
+      icon: <Calendar />,
+      color: "#A98B25",
     },
     {
       label: "Specific Day",
       value: sectionedItems.specific.length,
-      icon: <Clock className="h-5 w-5 text-[#B20C22]" />,
+      icon: <Clock />,
+      color: "#B20C22",
     },
   ];
 
@@ -255,6 +259,7 @@ export function PathwayChecklistsClient() {
             label={s.label}
             value={s.value}
             icon={s.icon}
+            color={s.color}
           />
         ))}
       </div>
