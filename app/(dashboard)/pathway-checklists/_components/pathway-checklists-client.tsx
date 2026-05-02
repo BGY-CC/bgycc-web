@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, RefreshCw, Calendar, Clock, LayoutGrid, CheckCircle2 } from "lucide-react";
+import { Plus, RefreshCw, Calendar, Clock, LayoutGrid, CheckCircle2, Users } from "lucide-react";
 import {
   Tabs,
   TabsList,
@@ -194,22 +194,22 @@ export function PathwayChecklistsClient() {
     {
       label: "Total Checklist Items",
       value: filteredItems.length,
-      icon: <LayoutGrid className="h-5 w-5 text-indigo-600" />,
+      icon: <Users className="h-5 w-5 text-indigo-600" />,
     },
     {
       label: "Everyday",
       value: sectionedItems.everyday.length,
-      icon: <RefreshCw className="h-5 w-5 text-green-600" />,
+      icon: <RefreshCw className="h-5 w-5 text-[#68A43E]" />,
     },
     {
       label: "Weekly",
       value: sectionedItems.weekly.length,
-      icon: <Calendar className="h-5 w-5 text-amber-600" />,
+      icon: <Calendar className="h-5 w-5 text-[#A98B25]" />,
     },
     {
       label: "Specific Day",
       value: sectionedItems.specific.length,
-      icon: <Clock className="h-5 w-5 text-rose-600" />,
+      icon: <Clock className="h-5 w-5 text-[#B20C22]" />,
     },
   ];
 
