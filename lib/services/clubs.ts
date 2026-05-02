@@ -12,7 +12,11 @@ export interface Club {
   total_members: number;
   active_members: number;
   average_streak: number;
-  leader_name?: string; // from primary leader info
+  leader_name?: string; // legacy fallback
+  leader?: {
+    full_name?: string;
+    profile_picture_url?: string;
+  };
   created_at?: string;
   // UI legacy compatibility
   region?: string; 

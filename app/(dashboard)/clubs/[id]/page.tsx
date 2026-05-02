@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Users, Activity, TrendingUp, MessageCircle, Pencil } from "lucide-react";
+import { ArrowLeft, Users, Activity, TrendingUp, MessageCircle, Pencil, Trophy, AlertTriangle, ChevronDown } from "lucide-react";
+import Image from "next/image";
 import { Badge, Button, Skeleton, useToast } from "@/components/ui";
 import { StatCard, StatCardSkeleton, PageHeader } from "@/components/shared";
 import { EngagementChart, MemberStatusChart } from "@/components/charts";
@@ -13,40 +14,42 @@ import { useParams, useRouter } from "next/navigation";
 
 function ClubDetailSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col min-h-full">
       <PageHeader
         title="Dashboard"
         breadcrumb={[{ label: "Clubs", href: "/clubs" }, { label: "Loading" }]}
       />
 
-      <div className="space-y-4">
-        <Skeleton className="h-5 w-10" />
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-7 w-44" />
-              <Skeleton className="h-6 w-16 rounded-full" />
+      <div className="flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
+        <div className="space-y-4">
+          <Skeleton className="h-5 w-10" />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-7 w-44" />
+                <Skeleton className="h-6 w-16 rounded-full" />
+              </div>
+              <Skeleton className="h-4 w-80 max-w-full" />
+              <Skeleton className="h-4 w-72 max-w-full" />
             </div>
-            <Skeleton className="h-4 w-80 max-w-full" />
-            <Skeleton className="h-4 w-72 max-w-full" />
-          </div>
-          <div className="flex gap-2">
-            <Skeleton className="h-9 w-24 rounded-xl" />
-            <Skeleton className="h-9 w-28 rounded-xl" />
-            <Skeleton className="h-9 w-24 rounded-xl" />
+            <div className="flex gap-2">
+              <Skeleton className="h-9 w-24 rounded-xl" />
+              <Skeleton className="h-9 w-28 rounded-xl" />
+              <Skeleton className="h-9 w-24 rounded-xl" />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <StatCardSkeleton key={index} />
-        ))}
-      </div>
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <StatCardSkeleton key={index} />
+          ))}
+        </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Skeleton className="h-[340px] rounded-xl border border-gray-200 bg-white lg:col-span-2" />
-        <Skeleton className="h-[340px] rounded-xl border border-gray-200 bg-white" />
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <Skeleton className="h-[340px] rounded-xl border border-gray-200 bg-white lg:col-span-2" />
+          <Skeleton className="h-[340px] rounded-xl border border-gray-200 bg-white" />
+        </div>
       </div>
     </div>
   );
@@ -90,6 +93,16 @@ export default function ClubDetailPage() {
     { enabled: hasValidClubId },
   );
   
+  const { data: engagementData, isLoading: isLoadingEngagement } = useQuery<{ data: { date: string; reports: number; logins: number }[] }>(
+    `/clubs/${clubId}/engagement?period=7d`,
+    { enabled: hasValidClubId },
+  );
+  
+  const { data: statusData, isLoading: isLoadingStatus } = useQuery<{ data: { active: number; at_risk: number; inactive: number } }>(
+    `/clubs/${clubId}/member-status`,
+    { enabled: hasValidClubId },
+  );
+
   const { data: topPerformersData, isLoading: isLoadingTop } = useQuery<{ top_performers: any[] }>(
     `/clubs/${clubId}/top-performers`,
     { enabled: hasValidClubId },
@@ -150,89 +163,105 @@ export default function ClubDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col min-h-full">
       <PageHeader
         title="Dashboard"
         breadcrumb={[{ label: "Clubs", href: "/clubs" }, { label: club.name }]}
       />
 
+      <div className="flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
+
       {/* Club header */}
-      <div>
-        <Link
-          href="/clubs"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-3 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
-
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-semibold text-gray-900">{club.name}</h2>
-              <Badge variant={club.is_active ? "active" : "dormant"}>
-                {club.is_active ? "Active" : "Dormant"}
-              </Badge>
-            </div>
-            <p className="text-sm text-gray-500 mt-0.5">{club.description || "Holistic city, modern leadership approach"}</p>
-
-            <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
-              <span className="flex items-center gap-1.5">
-                <span className="h-5 w-5 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
-                  {club.leader?.full_name?.charAt(0) || "L"}
-                </span>
-                <span className="font-normal text-gray-700">{club.leader?.full_name || "No Leader"}</span>
-                <span className="text-gray-400 text-xs">Leader</span>
-              </span>
-              <span>{[club.city, club.state].filter(Boolean).join(", ") || "Unknown"} <span className="text-gray-400 text-xs ml-1">Region</span></span>
-              {club.created_at && (
-                <span>{new Date(club.created_at).toLocaleDateString()} <span className="text-gray-400 text-xs ml-1">Created</span></span>
-              )}
-            </div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-2">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-gray-900">{club.name}</h1>
+            <Badge variant={club.is_active ? "active" : "dormant"} className="rounded-full px-3">
+              {club.is_active ? "Active" : "Dormant"}
+            </Badge>
           </div>
+          <p className="text-sm font-medium text-gray-400 mt-1">
+            {club.description || "Historic city, modern leadership approach."}
+          </p>
+        </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            {club.url_link && (
-              <Button
-                variant="secondary"
-                size="sm"
-                leftIcon={<MessageCircle className="h-4 w-4" />}
-                onClick={() => window.open(club.url_link, "_blank")}
-              >
-                WhatsApp
-              </Button>
-            )}
+        <div className="flex items-center gap-3">
+          {club.url_link && (
             <Button
               variant="secondary"
               size="sm"
-              onClick={async () => {
-                const result = await clubsService.update(club.id, { is_active: !club.is_active });
-                if (result.success) {
-                  toast(club.is_active ? "Club deactivated" : "Club activated");
-                  refetchClub();
-                } else {
-                  toast("Failed to update club status", "error");
-                }
-              }}
+              className="h-10 px-4 rounded-xl border-gray-200 text-gray-700 font-semibold"
+              leftIcon={<MessageCircle className="h-4 w-4" />}
+              onClick={() => window.open(club.url_link, "_blank")}
             >
-              {club.is_active ? "Deactivate" : "Activate"}
+              WhatsApp
             </Button>
-            <Button
-              size="sm"
-              leftIcon={<Pencil className="h-4 w-4" />}
-              onClick={() => setShowEdit(true)}
-            >
-              Edit Club
-            </Button>
+          )}
+          <Button
+            size="sm"
+            className="h-10 px-4 rounded-xl bg-[#1e293b] hover:bg-[#0f172a] text-white font-semibold"
+            leftIcon={<Pencil className="h-4 w-4" />}
+            onClick={() => setShowEdit(true)}
+          >
+            Edit Club
+          </Button>
+        </div>
+      </div>
+
+      {/* Info Card */}
+      <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-100 border border-gray-100 shrink-0">
+            {club.leader?.profile_picture_url ? (
+              <Image 
+                src={club.leader.profile_picture_url} 
+                alt={club.leader.full_name || "Leader"} 
+                width={48} 
+                height={48} 
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center bg-gray-50 text-gray-400 font-medium text-lg">
+                {(club.leader?.full_name || "L").charAt(0)}
+              </div>
+            )}
           </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Leader</span>
+            <span className="text-base font-medium text-gray-900">{club.leader?.full_name || "No Leader Assigned"}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Region</span>
+          <span className="text-base font-medium text-gray-900">
+            {[club.city, club.state].filter(Boolean).join(", ") || "No Region Set"}
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Created</span>
+          <span className="text-base font-medium text-gray-600">
+            {club.created_at ? new Date(club.created_at).toLocaleDateString("en-US", {
+              month: "numeric",
+              day: "numeric",
+              year: "numeric"
+            }) : "N/A"}
+          </span>
         </div>
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Total Members" value={health?.demographics?.total?.toString() || club.total_members?.toString() || "0"} icon={<Users className="h-4 w-4" />} />
-        <StatCard label="Active Members" value={health?.demographics?.active?.toString() || club.active_members?.toString() || "0"} icon={<Activity className="h-4 w-4" />} />
-        <StatCard label="At Risk Members" value={health?.demographics?.at_risk?.toString() || "0"} icon={<Users className="h-4 w-4 text-red-500" />} />
-        <StatCard label="Avg Streak" value={club.average_streak?.toFixed(1) || "0.0"} icon={<TrendingUp className="h-4 w-4" />} />
+        <StatCard label="Total Members" value={health?.demographics?.total?.toLocaleString() || club.total_members?.toLocaleString() || "0"} icon={<Users className="h-4 w-4" />} change={0} />
+        <StatCard 
+          label="Active Members" 
+          value={health?.demographics?.active?.toLocaleString() || club.active_members?.toLocaleString() || "0"} 
+          icon={<Activity className="h-4 w-4" />}
+          change={0}
+        />
+        <StatCard label="At Risk Members" value={health?.demographics?.at_risk?.toLocaleString() || "0"} icon={<Users className="h-4 w-4 text-red-500" />} change={0} />
+        <StatCard label="Avg Streak" value={`${club.average_streak?.toFixed(0) || "0"}%`} icon={<TrendingUp className="h-4 w-4" />} change={0} />
       </div>
 
       {/* Charts */}
@@ -240,24 +269,39 @@ export default function ClubDetailPage() {
         <div className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-900">Engagement Trends</h3>
-              <p className="text-xs text-gray-500">Reports &amp; logins this week</p>
+              <h3 className="text-sm font-semibold text-gray-900">Engagement Trends</h3>
+              <p className="text-[11px] font-medium text-gray-400">Reports & logins this week</p>
             </div>
-            <select className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-primary">
-              <option>Last 7 Days</option>
-              <option>Last 30 Days</option>
-            </select>
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 cursor-pointer">
+              Last 7 Days <ChevronDown className="h-3.5 w-3.5" />
+            </div>
           </div>
-          <EngagementChart />
+          <EngagementChart 
+            data={engagementData?.data?.map(d => ({
+              label: new Date(d.date).toLocaleDateString(undefined, { weekday: 'short' }),
+              reports: d.reports,
+              active_users: d.logins
+            }))} 
+          />
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <div className="mb-4 flex items-start justify-between">
-            <h3 className="text-sm font-medium text-gray-900">Member Status</h3>
-            <select className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-primary">
-              <option>This Week</option>
-            </select>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">Member Status</h3>
+              <p className="text-[11px] font-medium text-gray-400">Risk distribution</p>
+            </div>
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 cursor-pointer">
+              This Week <ChevronDown className="h-3.5 w-3.5" />
+            </div>
           </div>
-          <MemberStatusChart />
+          <MemberStatusChart 
+            data={statusData?.data ? {
+              active: statusData.data.active,
+              at_risk: statusData.data.at_risk,
+              reset: statusData.data.inactive,
+              total: statusData.data.active + statusData.data.at_risk + statusData.data.inactive
+            } : undefined} 
+          />
         </div>
       </div>
 
@@ -265,8 +309,10 @@ export default function ClubDetailPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Top Performers */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h3 className="text-sm font-medium text-gray-900 mb-4 flex items-center gap-2">
-            <Users className="h-4 w-4 text-gray-500" />
+          <h3 className="text-sm font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
+              <Trophy className="h-4 w-4 text-gray-400" />
+            </div>
             Top Performers
           </h3>
           <div className="space-y-3">
@@ -282,11 +328,13 @@ export default function ClubDetailPage() {
                     {(p.full_name || "U").charAt(0)}
                   </span>
                   <div>
-                    <p className="text-sm font-normal text-gray-900">{p.full_name || "Unknown"}</p>
-                    <p className="text-xs text-gray-500">Streak: {p.current_streak} days</p>
+                    <p className="text-sm font-semibold text-gray-900">{p.full_name || "Unknown"}</p>
+                    <p className="text-xs text-gray-500 font-medium">Streak: {p.current_streak} days</p>
                   </div>
                 </div>
-                <span className="text-sm font-medium text-gray-900">{p.total_xp} XP</span>
+                <span className="text-sm font-bold text-success">
+                  {Math.min(99, Math.round((p.total_xp || 0) / 10))}%
+                </span>
               </div>
             )))}
           </div>
@@ -294,8 +342,10 @@ export default function ClubDetailPage() {
 
         {/* At-Risk Members */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h3 className="text-sm font-medium text-gray-900 mb-4 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-red-500" />
+          <h3 className="text-sm font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-red-50 flex items-center justify-center border border-red-100">
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+            </div>
             At-Risk Members
           </h3>
           <div className="space-y-3">
@@ -305,18 +355,18 @@ export default function ClubDetailPage() {
                <div className="text-sm text-gray-500">No at-risk members found.</div>
             ) : (
               atRiskMembers.map((m: any, i: number) => (
-              <div key={i} className="flex items-center justify-between">
+              <div key={i} className="flex items-center justify-between py-1">
                 <div className="flex items-center gap-2.5">
-                  <span className="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 shrink-0">
+                  <span className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600 shrink-0">
                     {(m.full_name || "U").charAt(0)}
                   </span>
                   <div>
-                    <p className="text-sm font-normal text-gray-900">{m.full_name || "Unknown"}</p>
-                    <p className="text-xs text-gray-500">Broken streak</p>
+                    <p className="text-sm font-semibold text-gray-900">{m.full_name || "Unknown"}</p>
+                    <p className="text-xs text-gray-400 font-medium">{m.current_streak === 0 ? "Broken streak" : "Low activity"}</p>
                   </div>
                 </div>
                 <button
-                  className="text-xs text-primary hover:underline font-normal"
+                  className="text-[11px] font-semibold text-gray-400 hover:text-gray-900 transition-colors"
                   onClick={() => m.user_id && router.push(`/users/${m.user_id}`)}
                 >
                   View
@@ -325,6 +375,7 @@ export default function ClubDetailPage() {
             )))}
           </div>
         </div>
+      </div>
       </div>
 
       <ClubModal

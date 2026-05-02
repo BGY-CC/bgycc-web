@@ -1,25 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import { Sidebar } from "./sidebar";
-import { Header } from "./header";
 import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui";
+import { SidebarProvider, useSidebar } from "./sidebar-context";
 
 interface AppShellProps {
   children: React.ReactNode;
 }
 
-/**
- * AppShell is the root layout wrapper for all authenticated dashboard pages.
- *
- * Responsive strategy:
- * - Mobile (<768px):  Sidebar is a drawer (off-canvas). Hamburger in header opens it.
- * - Tablet (≥768px):  Sidebar is a persistent panel, header hamburger hidden.
- * - Desktop (≥1280px): Same as tablet; main content area gains more horizontal space.
- */
-export function AppShell({ children }: AppShellProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+function AppShellContent({ children }: AppShellProps) {
+  const { isOpen, setIsOpen } = useSidebar();
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
@@ -59,19 +50,22 @@ export function AppShell({ children }: AppShellProps) {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <div className="flex h-screen overflow-hidden bg-[#f8fafc]">
+      <Sidebar isOpen={isOpen} onClose={() => setIsOpen(false)} />
 
-      {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-        <Header onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          
-          <div className="container mx-auto max-w-7xl px-3 py-4 sm:px-4 lg:px-6 bg-[#808192]/10">
-            {children}
-          </div>
+          {children}
         </main>
       </div>
     </div>
+  );
+}
+
+export function AppShell(props: AppShellProps) {
+  return (
+    <SidebarProvider>
+      <AppShellContent {...props} />
+    </SidebarProvider>
   );
 }

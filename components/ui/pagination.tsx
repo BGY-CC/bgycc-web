@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface PaginationProps {
@@ -19,72 +19,55 @@ export function Pagination({
 
   return (
     <nav
-      className={cn("flex items-center gap-1", className)}
+      className={cn("flex items-center gap-3", className)}
       aria-label="Pagination"
     >
       {/* Previous */}
-      <PageButton
+      <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        aria-label="Previous page"
+        className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
       >
-        <ChevronLeft className="h-4 w-4" />
-        <span className="hidden sm:inline text-sm">Previous</span>
-      </PageButton>
+        <ArrowLeft className="h-4 w-4" />
+        <span>Previous</span>
+      </button>
 
       {/* Page numbers */}
-      {pages.map((page, i) =>
-        page === "..." ? (
-          <span key={`ellipsis-${i}`} className="px-2 text-sm text-gray-400 select-none">
-            ...
-          </span>
-        ) : (
-          <PageButton
-            key={page}
-            onClick={() => onPageChange(page as number)}
-            isActive={page === currentPage}
-            aria-label={`Page ${page}`}
-            aria-current={page === currentPage ? "page" : undefined}
-          >
-            {page}
-          </PageButton>
-        ),
-      )}
+      <div className="flex items-center gap-1">
+        {pages.map((page, i) =>
+          page === "..." ? (
+            <span key={`ellipsis-${i}`} className="px-2 text-sm text-gray-400 select-none">
+              ...
+            </span>
+          ) : (
+            <button
+              key={page}
+              onClick={() => onPageChange(page as number)}
+              className={cn(
+                "h-9 w-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all",
+                page === currentPage
+                  ? "bg-[#1e293b] text-white shadow-md"
+                  : "text-gray-500 hover:bg-gray-100"
+              )}
+              aria-label={`Page ${page}`}
+              aria-current={page === currentPage ? "page" : undefined}
+            >
+              {page}
+            </button>
+          ),
+        )}
+      </div>
 
       {/* Next */}
-      <PageButton
+      <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        aria-label="Next page"
+        className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
       >
-        <span className="hidden sm:inline text-sm">Next</span>
-        <ChevronRight className="h-4 w-4" />
-      </PageButton>
+        <span>Next</span>
+        <ArrowRight className="h-4 w-4" />
+      </button>
     </nav>
-  );
-}
-
-// ─── Page button ──────────────────────────────────────────────────────────────
-
-function PageButton({
-  children,
-  isActive,
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { isActive?: boolean }) {
-  return (
-    <button
-      className={cn(
-        "inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-md px-2 text-sm font-normal transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
-        "disabled:pointer-events-none disabled:opacity-40",
-        isActive
-          ? "bg-primary text-white"
-          : "text-gray-700 hover:bg-gray-100",
-      )}
-      {...props}
-    >
-      {children}
-    </button>
   );
 }
 
