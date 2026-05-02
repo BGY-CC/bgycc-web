@@ -7,6 +7,7 @@ export interface StatCardProps {
   label: string;
   value: string | number;
   icon: React.ReactNode;
+  color?: string; // Hex color for icon and subtle background
   change?: number; // e.g. 0, +5.2, -3.1
   changeSuffix?: string; // e.g. "%", " XP"
   className?: string;
@@ -20,6 +21,7 @@ export function StatCard({
   label, 
   value, 
   icon, 
+  color,
   change, 
   changeSuffix = "%",
   className 
@@ -37,10 +39,19 @@ export function StatCard({
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3">
           {/* Icon */}
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background">
+          <div 
+            className={cn(
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
+              !color && "bg-background"
+            )}
+            style={color ? { 
+              backgroundColor: `${color}15`,
+              color: color 
+            } : undefined}
+          >
             {React.isValidElement(icon)
               ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
-                  className: cn("h-5 w-5 text-primary", (icon.props as any).className),
+                  className: cn("h-5 w-5", !color && "text-primary", (icon.props as any).className),
                 })
               : icon}
           </div>
