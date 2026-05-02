@@ -10,6 +10,7 @@ import { EngagementChart, MemberStatusChart } from "@/components/charts";
 import { useQuery } from "@/hooks/use-query";
 import { clubsService, Club } from "@/lib/services/clubs";
 import { ClubModal } from "../_components/club-modal";
+import { MemberDetailModal } from "@/components/shared";
 import { useParams, useRouter } from "next/navigation";
 
 function ClubDetailSkeleton() {
@@ -79,6 +80,8 @@ export default function ClubDetailPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [showEdit, setShowEdit] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [showMemberDetail, setShowMemberDetail] = useState(false);
   const clubId = Array.isArray(params.id) ? params.id[0] : params.id;
   const hasValidClubId = !!clubId && clubId !== "undefined";
 
@@ -321,22 +324,30 @@ export default function ClubDetailPage() {
             ) : topPerformers.length === 0 ? (
                <div className="text-sm text-gray-500">No top performers found.</div>
             ) : (
-               topPerformers.map((p: any, i: number) => (
-              <div key={i} className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <span className="h-7 w-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 shrink-0">
-                    {(p.full_name || "U").charAt(0)}
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{p.full_name || "Unknown"}</p>
-                    <p className="text-xs text-gray-500 font-medium">Streak: {p.current_streak} days</p>
+              topPerformers.map((p: any, i: number) => (
+                <div 
+                  key={i} 
+                  className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors group"
+                  onClick={() => {
+                    setSelectedMemberId(p.user_id);
+                    setShowMemberDetail(true);
+                  }}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-8 w-8 rounded-full bg-gray-100 group-hover:bg-white flex items-center justify-center text-xs font-bold text-gray-600 shrink-0 transition-colors">
+                      {(p.full_name || "U").charAt(0)}
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">{p.full_name || "Unknown"}</p>
+                      <p className="text-xs text-gray-400 font-medium">Streak: {p.current_streak} days</p>
+                    </div>
                   </div>
+                  <span className="text-sm font-bold text-success">
+                    {Math.min(99, Math.round((p.total_xp || 0) / 10))}%
+                  </span>
                 </div>
-                <span className="text-sm font-bold text-success">
-                  {Math.min(99, Math.round((p.total_xp || 0) / 10))}%
-                </span>
-              </div>
-            )))}
+              ))
+            )}
           </div>
         </div>
 
@@ -355,29 +366,36 @@ export default function ClubDetailPage() {
                <div className="text-sm text-gray-500">No at-risk members found.</div>
             ) : (
               atRiskMembers.map((m: any, i: number) => (
-              <div key={i} className="flex items-center justify-between py-1">
-                <div className="flex items-center gap-2.5">
-                  <span className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600 shrink-0">
-                    {(m.full_name || "U").charAt(0)}
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{m.full_name || "Unknown"}</p>
-                    <p className="text-xs text-gray-400 font-medium">{m.current_streak === 0 ? "Broken streak" : "Low activity"}</p>
+                <div 
+                  key={i} 
+                  className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors group"
+                  onClick={() => {
+                    setSelectedMemberId(m.user_id);
+                    setShowMemberDetail(true);
+                  }}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="h-8 w-8 rounded-full bg-gray-100 group-hover:bg-white flex items-center justify-center text-xs font-bold text-gray-600 shrink-0 transition-colors">
+                      {(m.full_name || "U").charAt(0)}
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">{m.full_name || "Unknown"}</p>
+                      <p className="text-xs text-gray-400 font-medium">{m.current_streak === 0 ? "Broken streak" : "Low activity"}</p>
+                    </div>
                   </div>
                 </div>
-                <button
-                  className="text-[11px] font-semibold text-gray-400 hover:text-gray-900 transition-colors"
-                  onClick={() => m.user_id && router.push(`/users/${m.user_id}`)}
-                >
-                  View
-                </button>
-              </div>
-            )))}
+              ))
+            )}
           </div>
         </div>
       </div>
       </div>
 
+      <MemberDetailModal
+        isOpen={showMemberDetail}
+        onClose={() => setShowMemberDetail(false)}
+        userId={selectedMemberId}
+      />
       <ClubModal
         open={showEdit}
         onClose={() => setShowEdit(false)}
