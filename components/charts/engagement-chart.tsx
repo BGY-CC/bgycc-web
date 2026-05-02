@@ -50,12 +50,12 @@ export function EngagementChart({ data }: { data?: ChartDataPoint[] }) {
       <AreaChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="reportsGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#1b2559" stopOpacity={0.1} />
-            <stop offset="95%" stopColor="#1b2559" stopOpacity={0} />
+            <stop offset="5%" stopColor="#1e293b" stopOpacity={0.1} />
+            <stop offset="95%" stopColor="#1e293b" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="activeUsersGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#e21d48" stopOpacity={0.1} />
-            <stop offset="95%" stopColor="#e21d48" stopOpacity={0} />
+            <stop offset="5%" stopColor="#e11d48" stopOpacity={0.1} />
+            <stop offset="95%" stopColor="#e11d48" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="5 5" stroke="#e9edf7" vertical={false} />
@@ -76,20 +76,20 @@ export function EngagementChart({ data }: { data?: ChartDataPoint[] }) {
         <Area
           type="monotone"
           dataKey="reports"
-          stroke="#1b2559"
-          strokeWidth={4}
+          stroke="#1e293b"
+          strokeWidth={3}
           fill="url(#reportsGradient)"
           dot={false}
-          activeDot={{ r: 6, fill: "#1b2559", strokeWidth: 2, stroke: "#fff" }}
+          activeDot={{ r: 4, fill: "#1e293b", strokeWidth: 2, stroke: "#fff" }}
         />
         <Area
           type="monotone"
           dataKey="active_users"
-          stroke="#e21d48"
-          strokeWidth={4}
+          stroke="#e11d48"
+          strokeWidth={3}
           fill="url(#activeUsersGradient)"
           dot={false}
-          activeDot={{ r: 6, fill: "#e21d48", strokeWidth: 2, stroke: "#fff" }}
+          activeDot={{ r: 4, fill: "#e11d48", strokeWidth: 2, stroke: "#fff" }}
         />
       </AreaChart>
     </ResponsiveContainer>

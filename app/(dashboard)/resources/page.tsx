@@ -6,13 +6,15 @@ export const metadata: Metadata = { title: "Resources" };
 
 export default function ResourcesPage() {
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col min-h-full">
       <PageHeader
         title="Resources"
         breadcrumb={[{ label: "Resources" }]}
       />
 
-      <ResourcesClient />
+      <div className="flex-1 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
+        <ResourcesClient />
+      </div>
     </div>
   );
 }
