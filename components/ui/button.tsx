@@ -12,6 +12,8 @@ const variantClasses = {
     "bg-transparent text-muted hover:bg-background hover:text-primary active:bg-border disabled:opacity-50",
   destructive:
     "bg-error text-white hover:bg-error/90 active:bg-error disabled:opacity-50 shadow-sm shadow-error/20",
+  outline:
+    "bg-transparent text-muted-foreground border border-border hover:bg-background active:bg-border disabled:opacity-50",
 } as const;
 
 const sizeClasses = {
