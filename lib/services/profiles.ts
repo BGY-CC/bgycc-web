@@ -30,6 +30,22 @@ const getAuthHeaders = () => {
 };
 
 export const profilesService = {
+  list: async (page = 1, pageSize = 20) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/users?page=${page}&page_size=${pageSize}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
+  getDetails: async (userId: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/users/${userId}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
   updateRole: async (userId: string, role: string) => {
     const response = await fetch(`${API_CONFIG.BASE_URL}/profiles/${userId}`, {
       method: "PUT",

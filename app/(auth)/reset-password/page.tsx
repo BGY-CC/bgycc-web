@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ResetPasswordForm } from "./_components/reset-password-form";
 
 export const metadata: Metadata = { title: "Set New Password" };
@@ -12,7 +13,9 @@ export default function ResetPasswordPage() {
           Enter a new password to secure your account.
         </p>
       </div>
-      <ResetPasswordForm />
+      <Suspense fallback={<div className="h-48 animate-pulse bg-gray-50 rounded-2xl" />}>
+        <ResetPasswordForm />
+      </Suspense>
     </>
   );
 }

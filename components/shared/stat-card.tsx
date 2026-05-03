@@ -7,6 +7,7 @@ export interface StatCardProps {
   label: string;
   value: string | number;
   icon: React.ReactNode;
+  color?: string; // Hex color for icon and subtle background
   change?: number; // e.g. 0, +5.2, -3.1
   changeSuffix?: string; // e.g. "%", " XP"
   className?: string;
@@ -20,12 +21,13 @@ export function StatCard({
   label, 
   value, 
   icon, 
-  change = 0, 
+  color,
+  change, 
   changeSuffix = "%",
   className 
 }: StatCardProps) {
-  const isPositive = change >= 0;
-  const changeLabel = `${isPositive ? "+" : ""}${change.toLocaleString()}${changeSuffix}`;
+  const isPositive = change !== undefined ? change >= 0 : true;
+  const changeLabel = change !== undefined ? `${isPositive ? "+" : ""}${change.toLocaleString()}${changeSuffix}` : "";
 
   return (
     <div
@@ -35,32 +37,44 @@ export function StatCard({
       )}
     >
       <div className="flex items-start justify-between">
-        {/* Icon */}
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-background text-primary">
-          {React.isValidElement(icon)
-            ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
-                className: "h-5 w-5",
-              })
-            : icon}
+        <div className="flex items-start gap-3">
+          {/* Icon */}
+          <div 
+            className={cn(
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
+              !color && "bg-background"
+            )}
+            style={color ? { 
+              backgroundColor: `${color}15`,
+              color: color 
+            } : undefined}
+          >
+            {React.isValidElement(icon)
+              ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
+                  className: cn("h-5 w-5", !color && "text-primary", (icon.props as any).className),
+                })
+              : icon}
+          </div>
+          <div className="min-w-0">
+            <p className="text-2xl font-semibold text-primary tracking-tight">{value}</p>
+            <p className="mt-1 text-sm font-normal text-muted">{label}</p>
+          </div>
         </div>
 
-        {/* Change badge */}
-        <span
-          className={cn(
-            "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
-            isPositive
-              ? "bg-success-bg text-success"
-              : "bg-error-bg text-error",
-          )}
-        >
-          <TrendingUp className={cn("h-3.5 w-3.5", isPositive ? "" : "rotate-180")} aria-hidden="true" />
-          {changeLabel}
-        </span>
-      </div>
-
-      <div className="mt-2 text-left">
-        <p className="text-2xl font-bold text-primary tracking-tight">{value}</p>
-        <p className="mt-1 text-sm font-semibold text-muted">{label}</p>
+        {/* Change badge - only show if change is provided */}
+        {change !== undefined && (
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
+              isPositive
+                ? "bg-success-bg text-success"
+                : "bg-error-bg text-error",
+            )}
+          >
+            <TrendingUp className={cn("h-3.5 w-3.5", isPositive ? "" : "rotate-180")} aria-hidden="true" />
+            {changeLabel}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -74,13 +88,12 @@ export function StatCardSkeleton({ className }: { className?: string }) {
         className,
       )}
     >
-      <div className="flex items-start justify-between">
-        <Skeleton className="h-11 w-11 rounded-xl" />
-        <Skeleton className="h-6 w-16 rounded-full" />
-      </div>
-      <div className="mt-4 space-y-2">
-        <Skeleton className="h-7 w-20" />
-        <Skeleton className="h-4 w-28" />
+      <div className="flex items-start gap-3">
+        <Skeleton className="h-11 w-11 shrink-0 rounded-xl" />
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-20" />
+          <Skeleton className="h-4 w-28" />
+        </div>
       </div>
     </div>
   );
