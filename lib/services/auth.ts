@@ -5,7 +5,10 @@ export const authService = {
     const response = await fetch(`${API_CONFIG.BASE_URL}/auth/forgotten-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ 
+        email, 
+        redirectTo: `${window.location.origin}/reset-password` 
+      }),
     });
     return response.json();
   },

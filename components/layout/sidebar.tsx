@@ -11,6 +11,7 @@ import {
   Megaphone,
   LogOut,
   X,
+  Shield,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ import { useAuth } from "@/hooks/use-auth";
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Clubs", href: "/clubs", icon: Users },
+  { label: "Leader Management", href: "/leaders", icon: Shield },
   { label: "Pathway Checklists", href: "/pathway-checklists", icon: ClipboardList },
   { label: "Onboarding Editor", href: "/onboarding-editor", icon: PenSquare },
   { label: "Resources", href: "/resources", icon: FolderOpen },
@@ -33,7 +35,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -75,11 +77,18 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-4 space-y-2">
-          {navItems.map(({ label, href, icon: Icon }) => {
-            const isActive =
-              href === "/dashboard"
-                ? pathname === "/dashboard"
-                : pathname === href || pathname.startsWith(`${href}/`);
+          {navItems
+            .filter(({ label }) => {
+              if (user?.role === "leader") {
+                return label === "Clubs";
+              }
+              return true;
+            })
+            .map(({ label, href, icon: Icon }) => {
+              const isActive =
+                href === "/dashboard"
+                  ? pathname === "/dashboard"
+                  : pathname === href || pathname.startsWith(`${href}/`);
 
             return (
               <Link
