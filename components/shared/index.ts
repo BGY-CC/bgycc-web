@@ -6,3 +6,4 @@ export { Breadcrumb } from "./breadcrumb";
 export type { BreadcrumbProps, BreadcrumbItem } from "./breadcrumb";
 export { PageHeader } from "./page-header";
 export { SearchInput } from "./search-input";
+export { UserSearchSelect } from "./user-search-select";

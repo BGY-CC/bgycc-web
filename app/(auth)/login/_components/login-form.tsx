@@ -98,12 +98,6 @@ export function LoginForm() {
         Sign in
       </Button>
 
-      <p className="text-center text-sm text-gray-500">
-        Already have an account?{" "}
-        <Link href={ROUTES.LOGIN} className="text-primary underline underline-offset-4">
-          Sign in
-        </Link>
-      </p>
     </form>
   );
 }

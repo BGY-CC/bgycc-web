@@ -73,10 +73,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!isAuthenticated && !isPublicRoute) {
       router.push(ROUTES.LOGIN);
-    } else if (isAuthenticated && isPublicRoute) {
-      router.push("/dashboard");
+    } else if (isAuthenticated) {
+      if (isPublicRoute) {
+        const target = user?.role === "leader" ? "/clubs" : "/dashboard";
+        router.push(target);
+      } else if (user?.role === "leader" && !pathname.startsWith("/clubs")) {
+        router.push("/clubs");
+      }
     }
-  }, [isAuthenticated, isLoading, pathname, router]);
+  }, [isAuthenticated, isLoading, pathname, router, user?.role]);
 
   const login = async (email: string, password: string) => {
     try {

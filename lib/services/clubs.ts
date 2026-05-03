@@ -13,7 +13,9 @@ export interface Club {
   active_members: number;
   average_streak: number;
   leader_name?: string; // legacy fallback
+  leader_id?: string;
   leader?: {
+    id?: string;
     full_name?: string;
     profile_picture_url?: string;
   };

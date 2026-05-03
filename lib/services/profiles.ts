@@ -46,6 +46,14 @@ export const profilesService = {
     return response.json();
   },
 
+  search: async (q: string, page = 1, pageSize = 20) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/users/search?q=${q}&page=${page}&page_size=${pageSize}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return response.json();
+  },
+
   updateRole: async (userId: string, role: string) => {
     const response = await fetch(`${API_CONFIG.BASE_URL}/profiles/${userId}`, {
       method: "PUT",
