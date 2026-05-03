@@ -99,6 +99,13 @@ export function ClubModal({ open, onClose, onSuccess, mode, defaultValues, clubI
     }
   }, [open, reset, defaultValues]);
 
+  // Fix: Ensure city is set after cities list is populated
+  useEffect(() => {
+    if (open && defaultValues?.city && cities.includes(defaultValues.city)) {
+      setValue("city", defaultValues.city);
+    }
+  }, [cities, defaultValues?.city, setValue, open]);
+
   const isCreate = mode === "create";
 
   return (

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/hooks/use-auth";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,8 @@ export function LoginForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const resetSuccess = searchParams.get("reset") === "success";
 
   const {
     register,
@@ -29,11 +31,11 @@ export function LoginForm() {
   const onSubmit = async (data: LoginInput) => {
     setServerError(null);
     try {
-      const success = await login(data.email, data.password);
-      if (success) {
+      const result = await login(data.email, data.password);
+      if (result.success) {
         router.push("/dashboard");
       } else {
-        setServerError("Invalid email or password. Please try again.");
+        setServerError(result.error || "Invalid email or password. Please try again.");
       }
     } catch {
       setServerError("Something went wrong. Please try again.");
@@ -44,6 +46,9 @@ export function LoginForm() {
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
       {serverError && (
         <Alert variant="error">{serverError}</Alert>
+      )}
+      {resetSuccess && (
+        <Alert variant="success">Password reset successfully. Please login with your new password.</Alert>
       )}
 
       {/* Email */}

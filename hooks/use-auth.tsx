@@ -15,7 +15,7 @@ interface AuthUser {
 interface AuthContextType {
   isAuthenticated: boolean;
   user: AuthUser | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -34,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     localStorage.removeItem("bgycc-auth");
     localStorage.removeItem("bgycc-token");
+    localStorage.removeItem("bgycc-refresh-token");
     localStorage.removeItem("bgycc-user");
     router.push(ROUTES.LOGIN);
   }, [router]);
@@ -98,13 +99,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(result.data.user);
         localStorage.setItem("bgycc-auth", "true");
         localStorage.setItem("bgycc-token", result.data.token);
+        localStorage.setItem("bgycc-refresh-token", result.data.refresh_token);
         localStorage.setItem("bgycc-user", JSON.stringify(result.data.user));
-        return true;
+        return { success: true };
       }
-      return false;
-    } catch (error) {
+      return { 
+        success: false, 
+        error: result.error || result.message || "Invalid email or password. Please try again." 
+      };
+    } catch (error: any) {
       console.error("Login failed:", error);
-      return false;
+      return { 
+        success: false, 
+        error: "Something went wrong. Please check your connection and try again." 
+      };
     }
   };
 

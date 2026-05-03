@@ -85,15 +85,17 @@ export function ModalHeader({
   icon,
   title,
   description,
+  className,
 }: {
   icon?: React.ReactNode;
   title: string;
   description?: string;
+  className?: string;
 }) {
   const ctx = React.useContext(ModalContext);
 
   return (
-    <div className="mb-5">
+    <div className={cn("mb-5", className)}>
       {/* Close button */}
       {ctx && (
         <button

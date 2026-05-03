@@ -8,12 +8,14 @@ import { cn } from "@/lib/utils";
 
 export interface ToastItem {
   id: string;
-  message: string;
+  message?: string;
+  title?: string;
+  description?: string;
   variant?: "success" | "error";
 }
 
 interface ToastContextValue {
-  toast: (message: string, variant?: ToastItem["variant"]) => void;
+  toast: (message: string | { title: string; description?: string }, variant?: ToastItem["variant"]) => void;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -32,9 +34,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<ToastItem[]>([]);
 
   const toast = React.useCallback(
-    (message: string, variant: ToastItem["variant"] = "success") => {
+    (msg: string | { title: string; description?: string }, variant: ToastItem["variant"] = "success") => {
       const id = Math.random().toString(36).slice(2);
-      setToasts((prev) => [...prev, { id, message, variant }]);
+      const toastData = typeof msg === "string" 
+        ? { id, message: msg, variant } 
+        : { id, title: msg.title, description: msg.description, variant };
+        
+      setToasts((prev) => [...prev, toastData]);
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
       }, 4000);
@@ -77,7 +83,7 @@ function ToastItem({
     <div
       role="status"
       className={cn(
-        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-normal shadow-xl border-l-4",
+        "flex items-start gap-3 rounded-xl px-4 py-3 text-sm font-normal shadow-xl border-l-4 min-w-[300px]",
         "animate-in slide-in-from-bottom-2 fade-in duration-200",
         isSuccess 
           ? "bg-slate-900 text-white border-green-500" 
@@ -85,11 +91,20 @@ function ToastItem({
       )}
     >
       {isSuccess ? (
-        <CheckCircle2 className="h-5 w-5 shrink-0 text-green-400" />
+        <CheckCircle2 className="h-5 w-5 shrink-0 text-green-400 mt-0.5" />
       ) : (
-        <AlertCircle className="h-5 w-5 shrink-0 text-red-400" />
+        <AlertCircle className="h-5 w-5 shrink-0 text-red-400 mt-0.5" />
       )}
-      <span>{item.message}</span>
+      <div className="flex-1">
+        {item.title ? (
+          <div className="flex flex-col gap-1">
+            <span className="font-bold">{item.title}</span>
+            {item.description && <span className="text-gray-400 text-xs">{item.description}</span>}
+          </div>
+        ) : (
+          <span>{item.message}</span>
+        )}
+      </div>
       <button
         onClick={() => onDismiss(item.id)}
         className="ml-2 opacity-70 hover:opacity-100 transition-opacity"
