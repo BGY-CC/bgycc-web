@@ -13,4 +13,5 @@ export const ROUTES = {
   ONBOARDING_EDITOR: "/onboarding-editor",
   RESOURCES: "/resources",
   ANNOUNCEMENT: "/announcement",
+  USERS: "/users",
 } as const;
