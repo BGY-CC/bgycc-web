@@ -135,10 +135,10 @@ export default function ClubDetailPage() {
         toast("Club updated successfully");
         refetchClub();
       } else {
-        alert(result.error || result.message || "Failed to update club");
+        toast(result.error || result.message || "Failed to update club", "error");
       }
     } catch (error: any) {
-      alert(error.message || "An error occurred while updating the club");
+      toast(error.message || "An error occurred while updating the club", "error");
     }
   };
 

@@ -9,7 +9,9 @@ import { ClubModal } from "./club-modal";
 import { SuccessModal } from "./success-modal";
 import { useQuery } from "@/hooks/use-query";
 import { clubsService, Club, PaginatedClubs } from "@/lib/services/clubs";
+import { profilesService } from "@/lib/services/profiles";
 import { filterAndNormalizeClubs } from "@/lib/services/club-utils";
+import { useAuth } from "@/hooks/use-auth";
 // @ts-ignore – no types bundled
 import { getStates, getLgas } from "nigeria-state-lga-data";
 
@@ -40,6 +42,7 @@ function ClubsTableSkeleton() {
 
 export function ClubsListClient() {
   const { toast } = useToast();
+  const { user: currentUser } = useAuth();
   const [showCreate, setShowCreate] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [editingClub, setEditingClub] = useState<Club | null>(null);
@@ -71,14 +74,26 @@ export function ClubsListClient() {
 
   const handleCreate = async (formData: any) => {
     try {
+      // If current user is a leader, they are the leader of the club they create
+      const leaderId = currentUser?.role === "leader" ? currentUser.id : formData.leaderId;
+
+      // If we are assigning a user as a leader, we should ideally check their status
+      // but for now we'll just pass the leader_id to the service.
+      
       const result = await clubsService.create({
         name: formData.name,
         state: formData.state,
         city: formData.city,
         description: formData.description,
         url_link: formData.whatsappLink,
+        leader_id: leaderId,
         country: "Nigeria",
       });
+
+      if (result.success && leaderId && currentUser?.role !== "leader") {
+        // Promote to leader if they aren't one already (Admin assignment)
+        await profilesService.updateRole(leaderId, "leader");
+      }
       if (result.success) {
         setShowCreate(false);
         setShowSuccess(true);
@@ -104,8 +119,14 @@ export function ClubsListClient() {
         city: formData.city,
         description: formData.description,
         url_link: formData.whatsappLink,
+        leader_id: formData.leaderId,
         country: "Nigeria",
       });
+
+      if (result.success && formData.leaderId && formData.leaderId !== editingClub.leader?.id) {
+        // Promote new leader
+        await profilesService.updateRole(formData.leaderId, "leader");
+      }
       if (result.success) {
         setEditingClub(null);
         toast("Club updated successfully", "success");
@@ -289,11 +310,12 @@ export function ClubsListClient() {
         }}
         onSuccess={editingClub ? handleEdit : handleCreate}
         mode={editingClub ? "edit" : "create"}
+        clubId={editingClub?.id}
         defaultValues={
           editingClub
             ? {
                 name: editingClub.name,
-                leader: editingClub.leader_name || "",
+                leaderId: editingClub.leader?.id || editingClub.leader_id || "",
                 state: editingClub.state,
                 city: editingClub.city,
                 description: editingClub.description,

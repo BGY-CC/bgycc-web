@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,14 +18,18 @@ import {
   Select,
   Textarea,
 } from "@/components/ui";
+import { UserSearchSelect } from "@/components/shared";
+import { useAuth } from "@/hooks/use-auth";
+import { Controller } from "react-hook-form";
+import { UserProfile } from "@/lib/services/profiles";
 import type { Club } from "./types";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 const clubSchema = z.object({
   name: z.string().min(1, "Club name is required"),
-  // Leader is optional — can be assigned later
-  leader: z.string().optional(),
+  // Leader ID instead of name
+  leaderId: z.string().optional(),
   state: z.string().min(1, "State is required"),
   city: z.string().min(1, "City / LGA is required"),
   whatsappLink: z
@@ -48,22 +52,27 @@ interface ClubModalProps {
   onSuccess: (data: ClubFormData) => void;
   mode: "create" | "edit";
   defaultValues?: Partial<ClubFormData>;
+  clubId?: string;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ClubModal({ open, onClose, onSuccess, mode, defaultValues }: ClubModalProps) {
+export function ClubModal({ open, onClose, onSuccess, mode, defaultValues, clubId }: ClubModalProps) {
+  const { user } = useAuth();
+  const [selectedUserObj, setSelectedUserObj] = useState<UserProfile | null>(null);
   const {
     register,
     handleSubmit,
     reset,
     watch,
+    control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ClubFormData>({
     resolver: zodResolver(clubSchema),
     defaultValues: {
       name: defaultValues?.name ?? "",
-      leader: defaultValues?.leader ?? "",
+      leaderId: defaultValues?.leaderId ?? "",
       state: defaultValues?.state ?? "",
       city: defaultValues?.city ?? "",
       whatsappLink: defaultValues?.whatsappLink ?? "",
@@ -79,16 +88,23 @@ export function ClubModal({ open, onClose, onSuccess, mode, defaultValues }: Clu
     if (open) {
       reset({
         name: defaultValues?.name ?? "",
-        leader: defaultValues?.leader ?? "",
+        leaderId: defaultValues?.leaderId ?? "",
         state: defaultValues?.state ?? "",
         city: defaultValues?.city ?? "",
         whatsappLink: defaultValues?.whatsappLink ?? "",
         description: defaultValues?.description ?? "",
       });
     } else {
-      reset({ name: "", leader: "", state: "", city: "", whatsappLink: "", description: "" });
+      reset({ name: "", leaderId: "", state: "", city: "", whatsappLink: "", description: "" });
     }
   }, [open, reset, defaultValues]);
+
+  // Fix: Ensure city is set after cities list is populated
+  useEffect(() => {
+    if (open && defaultValues?.city && cities.includes(defaultValues.city)) {
+      setValue("city", defaultValues.city);
+    }
+  }, [cities, defaultValues?.city, setValue, open]);
 
   const isCreate = mode === "create";
 
@@ -108,9 +124,44 @@ export function ClubModal({ open, onClose, onSuccess, mode, defaultValues }: Clu
             <Input placeholder="What is your club name?" {...register("name")} />
           </FormField>
 
-          <FormField label="Assign Leader" error={errors.leader?.message}>
-            <Input placeholder="Search Leader Name (optional)" {...register("leader")} />
-          </FormField>
+          {user?.role !== "leader" && (
+            <div className="space-y-1">
+              <Controller
+                name="leaderId"
+                control={control}
+                render={({ field }) => (
+                  <UserSearchSelect
+                    label="Assign Leader"
+                    placeholder="Search for a user or leader..."
+                    value={field.value}
+                    onChange={(id, userObj) => {
+                      field.onChange(id);
+                      setSelectedUserObj(userObj);
+                    }}
+                    error={errors.leaderId?.message}
+                    disabled={mode === "edit" && !!defaultValues?.leaderId && field.value === defaultValues.leaderId}
+                  />
+                )}
+              />
+              {selectedUserObj?.club_id && selectedUserObj.club_id !== clubId && (
+                <p className="text-xs text-error font-medium">
+                  Warning: This user is already assigned to another club.
+                </p>
+              )}
+              {mode === "edit" && !!defaultValues?.leaderId && watch("leaderId") === defaultValues.leaderId && (
+                <p className="text-[10px] text-muted">
+                  A leader must be unassigned before another can be set.{" "}
+                  <button
+                    type="button"
+                    onClick={() => setValue("leaderId", "")}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Unassign Current Leader
+                  </button>
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <FormField label="State" required error={errors.state?.message}>

@@ -31,19 +31,69 @@ export function useApi() {
     };
   };
 
+  // Shared promise for concurrent refresh attempts
+  let refreshPromise: Promise<boolean> | null = null;
+
+  const refreshAccessToken = async () => {
+    if (refreshPromise) return refreshPromise;
+
+    refreshPromise = (async () => {
+      try {
+        const refreshToken = localStorage.getItem("bgycc-refresh-token");
+        if (!refreshToken) return false;
+
+        const response = await fetch(`${API_CONFIG.BASE_URL}/auth/refresh-session`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+
+        const result = await response.json();
+        if (response.ok && result.success) {
+          localStorage.setItem("bgycc-token", result.data.token);
+          localStorage.setItem("bgycc-refresh-token", result.data.refresh_token);
+          return true;
+        }
+        return false;
+      } catch (err) {
+        console.error("Token refresh failed:", err);
+        return false;
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+
+    return refreshPromise;
+  };
+
   const request = useCallback(async <T = any>(endpoint: string, options: RequestInit = {}): Promise<T> => {
     const url = `${API_CONFIG.BASE_URL}${endpoint}`;
-    const headers = {
-      ...getAuthHeaders(),
-      ...(options.headers || {}),
+    
+    const executeRequest = async () => {
+      const headers = {
+        ...getAuthHeaders(),
+        ...(options.headers || {}),
+      };
+      return fetch(url, { ...options, headers });
     };
 
     try {
-      const response = await fetch(url, { ...options, headers });
+      let response = await executeRequest();
+
+      // If unauthorized, try to refresh
+      if (response.status === 401) {
+        const refreshed = await refreshAccessToken();
+        
+        if (refreshed) {
+          // Retry the request with new token
+          response = await executeRequest();
+        }
+      }
 
       if (response.status === 401) {
         if (typeof window !== 'undefined') {
           localStorage.removeItem("bgycc-token");
+          localStorage.removeItem("bgycc-refresh-token");
           localStorage.removeItem("bgycc-auth");
           window.dispatchEvent(new CustomEvent("unauthorized"));
         }
@@ -63,7 +113,7 @@ export function useApi() {
       }
       throw error;
     }
-  }, []); // getAuthHeaders doesn't change as it's just a getter
+  }, []); 
 
   return useMemo(() => ({
     get: <T = any>(endpoint: string, options?: RequestInit) => 

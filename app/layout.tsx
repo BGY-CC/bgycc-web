@@ -37,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable} h-full`}>
+    <html lang="en" className={`${poppins.variable} h-full`} suppressHydrationWarning>
       <body className="antialiased font-sans h-full">
         <AuthProvider>
           <UploadProvider>
