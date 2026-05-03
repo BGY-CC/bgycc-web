@@ -405,7 +405,7 @@ export default function ClubDetailPage() {
         mode="edit"
         defaultValues={{
           name: club.name,
-          leader: club.leader?.full_name || "",
+          leaderId: club.leader?.id || "",
           state: club.state,
           city: club.city,
           description: club.description,
