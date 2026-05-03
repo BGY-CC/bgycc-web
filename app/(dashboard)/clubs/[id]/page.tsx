@@ -40,7 +40,7 @@ function ClubDetailSkeleton() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <StatCardSkeleton key={index} />
           ))}
@@ -252,7 +252,7 @@ export default function ClubDetailPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total Members" value={health?.demographics?.total?.toLocaleString() || club.total_members?.toLocaleString() || "0"} icon={<Users className="h-4 w-4" />} change={0} />
         <StatCard 
           label="Active Members" 
