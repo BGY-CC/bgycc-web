@@ -190,7 +190,7 @@ export default function ClubDetailPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           {club.url_link && (
             <Button
               variant="secondary"
@@ -340,7 +340,7 @@ export default function ClubDetailPage() {
                       {(p.full_name || "U").charAt(0)}
                     </span>
                     <div>
-                      <p className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">{p.full_name || "Unknown"}</p>
+                      <p className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors truncate max-w-[120px] sm:max-w-[200px]">{p.full_name || "Unknown"}</p>
                       <p className="text-xs text-gray-400 font-medium">Streak: {p.current_streak} days</p>
                     </div>
                   </div>
@@ -381,7 +381,7 @@ export default function ClubDetailPage() {
                       {(m.full_name || "U").charAt(0)}
                     </span>
                     <div>
-                      <p className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">{m.full_name || "Unknown"}</p>
+                      <p className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors truncate max-w-[150px] sm:max-w-[250px]">{m.full_name || "Unknown"}</p>
                       <p className="text-xs text-gray-400 font-medium">{m.current_streak === 0 ? "Broken streak" : "Low activity"}</p>
                     </div>
                   </div>

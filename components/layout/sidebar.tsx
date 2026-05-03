@@ -85,6 +85,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               <Link
                 key={href}
                 href={href}
+                onClick={onClose}
                 className={cn(
                   "flex items-center gap-4 rounded-2xl px-4 py-4 text-sm font-semibold",
                   "transition-all duration-200",
