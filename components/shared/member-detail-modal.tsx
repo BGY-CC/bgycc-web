@@ -15,7 +15,7 @@ interface MemberDetailModalProps {
 }
 
 export function MemberDetailModal({ userId, isOpen, onClose }: MemberDetailModalProps) {
-  const { data, isLoading } = useQuery<{ profile: UserProfile }>(
+  const { data, isLoading, error } = useQuery<{ profile: UserProfile }>(
     `/users/${userId}`,
     { enabled: !!userId && isOpen }
   );
@@ -52,15 +52,19 @@ export function MemberDetailModal({ userId, isOpen, onClose }: MemberDetailModal
               <Skeleton className="h-48 w-full rounded-2xl" />
             </div>
           </div>
-        ) : !profile ? (
+        ) : !profile || error ? (
           <div className="p-12 flex flex-col items-center justify-center gap-4 text-center">
             <div className="h-16 w-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500 border border-red-100">
-              <Search className="h-8 w-8" />
+              {error ? <Shield className="h-8 w-8" /> : <Search className="h-8 w-8" />}
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">Member Not Found</h3>
+              <h3 className="text-lg font-bold text-gray-900">
+                {error ? "Access Denied" : "Member Not Found"}
+              </h3>
               <p className="text-sm text-gray-500 mt-1 max-w-[280px]">
-                We couldn't retrieve the details for this member.
+                {error 
+                  ? (error as any).message || "You don't have permission to view this member." 
+                  : "We couldn't retrieve the details for this member."}
               </p>
             </div>
             <Button variant="secondary" onClick={onClose}>Close</Button>

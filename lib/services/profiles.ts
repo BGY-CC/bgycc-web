@@ -1,6 +1,7 @@
 import { API_CONFIG } from "../api";
 
 export interface UserProfile {
+  role_assigned_at: any;
   id: string;
   email: string;
   phone: string | null;
@@ -19,6 +20,15 @@ export interface UserProfile {
   created_at: string;
   updated_at: string;
   status: "active" | "at_risk" | "reset" | "missed" | null;
+  club?: {
+    id: string;
+    name: string;
+    city: string;
+    state: string;
+  };
+  club_members?: {
+    joined_at: string;
+  }[];
 }
 
 const getAuthHeaders = () => {

@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, UserCheck, UserMinus, Shield } from "lucide-react";
+import { CheckCircle2, XCircle, Shield } from "lucide-react";
 import {
   Badge,
-  ActionMenu,
+  Button,
   Pagination,
-  type DropdownItem,
   ConfirmDialog,
 } from "@/components/ui";
 import { UserProfile } from "@/lib/services/profiles";
@@ -18,7 +17,6 @@ interface LeadersTableProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   onUpdateRole: (userId: string, newRole: string) => void;
-  onViewDetails: (userId: string) => void;
 }
 
 export function LeadersTable({
@@ -27,103 +25,104 @@ export function LeadersTable({
   totalPages,
   onPageChange,
   onUpdateRole,
-  onViewDetails,
 }: LeadersTableProps) {
   const [roleChangeTarget, setRoleChangeTarget] = useState<{ user: UserProfile; newRole: string } | null>(null);
 
   return (
     <>
-      <div className="rounded-2xl border border-border bg-white overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm font-sans">
-            <thead>
-              <tr className="border-b border-border text-left">
-                {[
-                  "User",
-                  "Email",
-                  "Role",
-                  "Status",
-                  "Club",
-                  "Joined",
-                  "Actions",
-                ].map((col) => (
-                  <th
-                     key={col}
-                     className="px-4 py-5 text-[11px] font-semibold text-muted uppercase tracking-[0.1em] whitespace-nowrap"
-                  >
-                    {col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {users.map((user) => {
-                const isLeader = user.role === "leader";
-                
-                const menuItems: DropdownItem[] = [
-                  {
-                    label: "View Details",
-                    icon: <Eye className="h-4 w-4" />,
-                    onClick: () => onViewDetails(user.id),
-                  },
-                  {
-                    label: isLeader ? "Unassign Leader" : "Assign as Leader",
-                    icon: isLeader ? <UserMinus className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />,
-                    onClick: () => setRoleChangeTarget({ user, newRole: isLeader ? "member" : "leader" }),
-                    variant: isLeader ? "destructive" : "default",
-                  },
-                ];
+      <div className="space-y-4">
+        {users.map((user) => {
+          const isLeader = user.role === "leader";
+          const clubLocation = user.club ? `${user.club.city} ${user.club.state}` : "No club location";
+          const platformJoinedDate = user.created_at 
+            ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+            : "N/A";
+          
+          const leaderSinceDate = user.role_assigned_at 
+            ? new Date(user.role_assigned_at).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) 
+            : user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) : null;
+          
+          return (
+            <div 
+              key={user.id} 
+              className="bg-white p-5 rounded-2xl border border-border shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 group hover:shadow-md transition-all"
+            >
+              <div className="flex items-center gap-5 w-full sm:w-auto">
+                {/* Avatar */}
+                <div className="h-16 w-16 rounded-full bg-background border-2 border-white shadow-sm flex items-center justify-center text-xl font-bold text-primary shrink-0 overflow-hidden">
+                  {user.profile_picture_url ? (
+                    <img 
+                      src={user.profile_picture_url} 
+                      alt={user.full_name || ""} 
+                      className="h-full w-full object-cover" 
+                    />
+                  ) : (
+                    (user.full_name || user.email || "U").charAt(0).toUpperCase()
+                  )}
+                </div>
 
-                return (
-                  <tr key={user.id} className="hover:bg-background/50 transition-colors group">
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-xs font-semibold text-primary shrink-0 shadow-sm overflow-hidden">
-                          {user.profile_picture_url ? (
-                            <img src={user.profile_picture_url} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            (user.full_name || user.email || "U").charAt(0).toUpperCase()
-                          )}
-                        </div>
-                        <span className="text-primary font-semibold">
-                          {user.full_name || "Unknown"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-subtle whitespace-nowrap">
-                      {user.email}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <Badge variant={isLeader ? "active" : "default"} className="gap-1 font-semibold">
-                        {isLeader && <Shield className="h-3 w-3" />}
-                        {user.role || "Member"}
+                {/* User Info */}
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-lg font-bold text-primary">
+                      {user.full_name || "Unknown User"}
+                    </span>
+                    {isLeader && (
+                      <Badge className="bg-red-50 text-red-600 border-red-100 font-normal px-2 py-0.5 rounded-full">
+                        Leader
                       </Badge>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <Badge variant={(user.status === "active" || !user.status) ? "active" : "dormant"} className="font-semibold">
-                        {user.status || "active"}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-4 text-subtle whitespace-nowrap">
-                      {user.club_id ? "Assigned" : "Unassigned"}
-                    </td>
-                    <td className="px-4 py-4 text-muted whitespace-nowrap">
-                      {user.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}
-                    </td>
-                    <td className="px-4 py-4">
-                      <ActionMenu items={menuItems} align="right" />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {users.length === 0 && (
-            <div className="py-12 text-center text-gray-500">
-              No users found matching your criteria.
+                    )}
+                  </div>
+                  <p className="text-sm text-subtle font-medium">
+                    {user.email}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted font-normal mt-1">
+                    <span>{clubLocation}</span>
+                    <span className="hidden xs:inline">•</span>
+                    <span>Joined {platformJoinedDate}</span>
+                    {isLeader && leaderSinceDate && (
+                      <>
+                        <span className="hidden xs:inline">•</span>
+                        <span>Leader since {leaderSinceDate}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-3 w-full sm:w-auto sm:justify-end">
+                {isLeader ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    leftIcon={<XCircle className="h-4 w-4" />}
+                    className="rounded-xl font-normal border-red-200 text-red-600 hover:bg-red-50 h-10 px-4"
+                    onClick={() => setRoleChangeTarget({ user, newRole: "member" })}
+                  >
+                    Revoke leader
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    leftIcon={<CheckCircle2 className="h-4 w-4" />}
+                    className="rounded-xl font-normal bg-[#1E293B] hover:bg-[#0F172A] text-white h-10 px-4"
+                    onClick={() => setRoleChangeTarget({ user, newRole: "leader" })}
+                  >
+                    Assign leader
+                  </Button>
+                )}
+              </div>
             </div>
-          )}
-        </div>
+          );
+        })}
+        {users.length === 0 && (
+          <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-border">
+            <Shield className="h-12 w-12 text-muted mx-auto mb-3 opacity-20" />
+            <p className="text-muted font-medium">No users found matching your criteria.</p>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-center mt-12 mb-6">
@@ -144,7 +143,12 @@ export function LeadersTable({
           }
         }}
         title={roleChangeTarget?.newRole === "leader" ? "Assign Leader Role" : "Remove Leader Role"}
-        description={`Are you sure you want to ${roleChangeTarget?.newRole === "leader" ? "promote" : "demote"} ${roleChangeTarget?.user?.full_name || "this user"} to ${roleChangeTarget?.newRole}?`}
+        description={roleChangeTarget?.newRole === "leader" 
+          ? `Are you sure you want to promote ${(roleChangeTarget?.user?.full_name || "this user").toUpperCase()} to leader?` 
+          : `${(roleChangeTarget?.user?.full_name || "This user").toUpperCase()} will lose all leader-level permissions in the BGYCC app. They'll remain a regular member.`}
+        confirmLabel={roleChangeTarget?.newRole === "leader" ? "Assign" : "Yes, revoke access"}
+        variant={roleChangeTarget?.newRole === "leader" ? "primary" : "destructive"}
+        icon={roleChangeTarget?.newRole === "leader" ? <CheckCircle2 className="h-6 w-6 text-green-500" /> : <XCircle className="h-6 w-6 text-red-500" />}
       />
     </>
   );

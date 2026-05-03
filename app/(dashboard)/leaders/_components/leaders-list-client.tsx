@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Search } from "lucide-react";
+import { Filter, Search } from "lucide-react";
 import { Button, Skeleton, useToast } from "@/components/ui";
 import { SearchInput, MemberDetailModal } from "@/components/shared";
 import { LeadersTable } from "./leaders-table";
+import { LeaderStats } from "./leader-stats";
 import { useQuery } from "@/hooks/use-query";
 import { profilesService, UserProfile } from "@/lib/services/profiles";
 import { cn } from "@/lib/utils";
@@ -13,34 +14,48 @@ export function LeadersListClient() {
   const { toast } = useToast();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string>("all"); // all, leader, member
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showMemberDetail, setShowMemberDetail] = useState(false);
+  const [roleFilter, setRoleFilter] = useState<string>("all"); // all, leader, member
+  const [statusFilter, setStatusFilter] = useState<string>("all"); // all, active, at_risk, reset, missed
+
+  const { data: statsData, isLoading: isLoadingStats } = useQuery<{ stats: { active_leaders: number; regular_members: number; total_users: number } }>(
+    "/users/stats",
+    { enabled: true }
+  );
 
   const params = new URLSearchParams();
   params.set("page", page.toString());
-  if (search) params.set("q", search);
-  // Note: The backend /users endpoint might not support role filter directly in query params 
-  // if it's not implemented yet. I'll check lib/services/profiles.ts again.
-  // Assuming we filter client-side if needed, but better to support it in service.
+  if (search) params.set("search", search);
 
-  const { data, isLoading, refetch } = useQuery<{ users: UserProfile[]; total_pages: number }>(
+  const { data, isLoading, refetch } = useQuery<{ users: UserProfile[]; total_pages: number; total: number }>(
     `/users?${params.toString()}`,
     { enabled: true }
   );
 
   const filteredUsers = (data?.users || []).filter(user => {
+    if (user.role === "super_admin" || user.role === "admin") return false;
     if (roleFilter === "leader") return user.role === "leader";
     if (roleFilter === "member") return user.role !== "leader";
+    
+    if (statusFilter !== "all" && user.status !== statusFilter) return false;
+    
     return true;
   });
 
   const handleUpdateRole = async (userId: string, newRole: string) => {
     try {
+      const userToUpdate = data?.users.find(u => u.id === userId);
       const result = await profilesService.updateRole(userId, newRole);
       if (result.success) {
-        toast(`User role updated to ${newRole} successfully`, "success");
+        if (newRole === "leader") {
+          toast({
+            title: `${userToUpdate?.full_name || "User"} is now a leader`,
+            description: "They now have leader-level access on the BGYCC App"
+          });
+        } else {
+          toast(`Revoked leader access from ${userToUpdate?.full_name || "User"}`);
+        }
         refetch();
       } else {
         toast(result.message || "Failed to update user role", "error");
@@ -55,58 +70,90 @@ export function LeadersListClient() {
     setShowMemberDetail(true);
   };
 
+  const tabs = [
+    { label: `All Users (${statsData?.stats.total_users || 0})`, value: "all" },
+    { label: `Leaders (${statsData?.stats.active_leaders || 0})`, value: "leader" },
+    { label: `Members (${statsData?.stats.regular_members || 0})`, value: "member" },
+  ];
+
   return (
     <>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-wrap items-center gap-2 bg-white lg:p-5 rounded-xl shadow-sm border border-gray-100">
+      <LeaderStats stats={statsData?.stats} isLoading={isLoadingStats} />
+
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mt-10">
+        {/* Search */}
+        <div className="w-full lg:w-auto">
           <SearchInput
-            placeholder="Search users by name or email..."
-            containerClassName="w-full max-w-md"
+            placeholder="Search by email or username"
+            containerClassName="w-full lg:w-[320px]"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
               setPage(1);
             }}
           />
+        </div>
 
-          <div className="relative">
+        {/* Filters & Tabs */}
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+          <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
+            {tabs.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => {
+                  setRoleFilter(tab.value);
+                  setPage(1);
+                }}
+                className={cn(
+                  "px-4 py-2 text-sm font-normal rounded-lg transition-all",
+                  roleFilter === tab.value
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-muted hover:text-primary"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          
+          <div className="relative group">
             <Button
-              variant="secondary"
-              size="sm"
-              rightIcon={<ChevronDown className="h-4 w-4" />}
-              onClick={() => setShowRoleDropdown((p) => !p)}
+              variant="outline"
+              className="rounded-xl border-gray-200 text-subtle flex items-center gap-0 sm:gap-2 px-3 sm:px-4"
+              leftIcon={<Filter className="h-4 w-4" />}
             >
-              {roleFilter === "all" ? "All Users" : roleFilter === "leader" ? "Leaders" : "Not Leaders"}
+              <select 
+                className="absolute inset-0 opacity-0 cursor-pointer w-full"
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="at_risk">At Risk</option>
+                <option value="reset">Reset</option>
+                <option value="missed">Missed</option>
+              </select>
+              <span className="hidden sm:inline">
+                {statusFilter === "all" ? "Leader Status" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1).replace("_", " ")}
+              </span>
             </Button>
-            {showRoleDropdown && (
-              <div className="absolute top-full left-0 mt-2 z-[100] bg-white border border-slate-200 rounded-xl shadow-xl min-w-[160px] animate-in fade-in zoom-in-95 duration-200">
-                {[
-                  { label: "All Users", value: "all" },
-                  { label: "Leaders", value: "leader" },
-                  { label: "Not Leaders", value: "member" },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    className={cn(
-                      "w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors",
-                      roleFilter === option.value ? "font-semibold text-primary bg-slate-50" : "text-slate-600"
-                    )}
-                    onClick={() => {
-                      setRoleFilter(option.value);
-                      setPage(1);
-                      setShowRoleDropdown(false);
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="flex items-center justify-between mt-6 mb-2">
+        <p className="text-sm text-subtle font-medium">
+          Showing {filteredUsers.length} of {data?.total || 0} users
+        </p>
+        <p className="text-sm text-subtle font-medium">
+          Sorted by leader status
+        </p>
+      </div>
+
+      <div className="mt-4">
         {isLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -120,7 +167,6 @@ export function LeadersListClient() {
             totalPages={data?.total_pages || 1}
             onPageChange={setPage}
             onUpdateRole={handleUpdateRole}
-            onViewDetails={handleViewDetails}
           />
         )}
       </div>
