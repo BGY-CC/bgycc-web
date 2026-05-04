@@ -12,7 +12,6 @@ import {
 import { ConfirmDialog } from "@/components/ui";
 import { useToast } from "@/components/ui";
 import { Club } from "@/lib/services/clubs";
-import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 interface ClubsTableProps {
