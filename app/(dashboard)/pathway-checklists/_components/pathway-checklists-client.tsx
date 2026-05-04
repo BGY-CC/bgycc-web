@@ -284,7 +284,7 @@ export function PathwayChecklistsClient() {
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Everyday Tasks
             </h2>
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100 sm:bg-transparent sm:border-0 sm:p-0 sm:shadow-none sm:divide-y-0 sm:space-y-4">
               {sectionedItems.everyday.map((item) => (
                 <ChecklistItemRow
                   key={item.id}
@@ -303,7 +303,7 @@ export function PathwayChecklistsClient() {
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Weekly Tasks
             </h2>
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100 sm:bg-transparent sm:border-0 sm:p-0 sm:shadow-none sm:divide-y-0 sm:space-y-4">
               {sectionedItems.weekly.map((item) => (
                 <ChecklistItemRow
                   key={item.id}
@@ -322,7 +322,7 @@ export function PathwayChecklistsClient() {
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Specific Day & Cycle Tasks
             </h2>
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100 sm:bg-transparent sm:border-0 sm:p-0 sm:shadow-none sm:divide-y-0 sm:space-y-4">
               {sectionedItems.specific.map((item) => (
                 <ChecklistItemRow
                   key={item.id}
