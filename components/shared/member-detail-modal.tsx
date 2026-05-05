@@ -36,17 +36,16 @@ export function MemberDetailModal({ userId, isOpen, onClose }: MemberDetailModal
         {isLoading ? (
           <div className="p-8 space-y-6">
             <div className="flex items-center gap-4">
-              <Skeleton className="h-20 w-20 rounded-full" />
+              
               <div className="space-y-2">
                 <Skeleton className="h-6 w-48" />
                 <Skeleton className="h-4 w-32" />
               </div>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCardSkeleton />
               <StatCardSkeleton />
-              <StatCardSkeleton />
-              <StatCardSkeleton />
+              
             </div>
             <div className="space-y-4">
               <Skeleton className="h-48 w-full rounded-2xl" />
@@ -72,7 +71,7 @@ export function MemberDetailModal({ userId, isOpen, onClose }: MemberDetailModal
         ) : (
           <div className="flex flex-col">
             {/* Header Section */}
-            <div className="bg-white p-8 border-b border-gray-100 relative">
+            <div className="bg-white p-4 sm:p-8 border-b border-gray-100 relative">
               <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
                 <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-sm shrink-0">
                   {profile.profile_picture_url ? (
@@ -98,18 +97,18 @@ export function MemberDetailModal({ userId, isOpen, onClose }: MemberDetailModal
                       {profile.status || "Unknown"}
                     </Badge>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-sm text-gray-500">
-                    <div className="flex items-center gap-1.5 font-medium truncate">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-sm text-gray-500 overflow-hidden">
+                    <div className="flex items-center gap-1.5 font-medium min-w-0">
                       <Mail className="h-4 w-4 text-gray-400 shrink-0" />
-                      {profile.email}
+                      <span className="truncate">{profile.email}</span>
                     </div>
                     {profile.phone && (
                       <div className="hidden sm:block h-4 w-px bg-gray-200" />
                     )}
                     {profile.phone && (
-                      <div className="flex items-center gap-1.5 font-medium">
+                      <div className="flex items-center gap-1.5 font-medium min-w-0">
                         <Phone className="h-4 w-4 text-gray-400 shrink-0" />
-                        {profile.phone}
+                        <span className="truncate">{profile.phone}</span>
                       </div>
                     )}
                   </div>
@@ -130,9 +129,9 @@ export function MemberDetailModal({ userId, isOpen, onClose }: MemberDetailModal
             </div>
 
             {/* Scrollable Content */}
-            <div className="p-8 space-y-8 overflow-y-auto max-h-[calc(85vh-140px)]">
+            <div className="p-4 sm:p-8 space-y-8 overflow-y-auto max-h-[calc(85vh-140px)]">
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
                   label="Current Streak"
                   value={`${profile.status === 'at_risk' ? 0 : 7} days`}

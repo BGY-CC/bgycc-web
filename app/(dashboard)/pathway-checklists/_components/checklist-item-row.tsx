@@ -23,29 +23,29 @@ const getDayName = (day: number) => {
   return days[day] || "Unknown";
 };
 
-const ScheduleIndicator = ({ item }: { item: ChecklistItem }) => {
+const ScheduleIndicator = ({ item, className }: { item: ChecklistItem; className?: string }) => {
   const scheduleType = item.metadata?.schedule || (item.day_of_week !== null ? "Weekly" : "Everyday");
 
   if (scheduleType === "Everyday") {
     return (
-      <div className="flex flex-col items-end">
-        <Badge variant="outline" className="text-[10px] text-green-600 border-green-200 bg-green-50 flex items-center gap-1">
+      <div className={cn("flex items-center gap-2", className)}>
+        <Badge variant="outline" className="text-[10px] text-green-600 border-green-200 bg-green-50 flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-full">
           <RefreshCw className="h-3 w-3" />
           Everyday
         </Badge>
-        <span className="text-[10px] text-muted-foreground mt-1 font-normal italic">Mon - Sun</span>
+        <span className="text-[10px] text-muted-foreground font-normal italic whitespace-nowrap">Mon - Sun</span>
       </div>
     );
   }
 
   if (scheduleType === "Weekly") {
     return (
-      <div className="flex flex-col items-end">
-        <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-200 bg-amber-50 flex items-center gap-1">
+      <div className={cn("flex items-center gap-2", className)}>
+        <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-200 bg-amber-50 flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-full">
           <Calendar className="h-3 w-3" />
           Weekly
         </Badge>
-        <span className="text-[10px] text-muted-foreground mt-1 font-normal italic">
+        <span className="text-[10px] text-muted-foreground font-normal italic whitespace-nowrap">
           {item.day_of_week !== null ? getDayName(item.day_of_week) : "Every Week"}
         </span>
       </div>
@@ -53,12 +53,12 @@ const ScheduleIndicator = ({ item }: { item: ChecklistItem }) => {
   }
 
   return (
-    <div className="flex flex-col items-end">
-      <Badge variant="outline" className="text-[10px] text-rose-600 border-rose-200 bg-rose-50 flex items-center gap-1">
+    <div className={cn("flex items-center gap-2", className)}>
+      <Badge variant="outline" className="text-[10px] text-rose-600 border-rose-200 bg-rose-50 flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-full">
         <Clock className="h-3 w-3" />
         Specific Day
       </Badge>
-      <span className="text-[10px] text-muted-foreground mt-1 font-normal italic">
+      <span className="text-[10px] text-muted-foreground font-normal italic whitespace-nowrap">
         {item.cycle_number ? `Cycle ${item.cycle_number}, ` : ""}Day {item.day_number || 0}
       </span>
     </div>
@@ -83,37 +83,46 @@ export function ChecklistItemRow({ item, onEdit, onRemove }: ChecklistItemRowPro
   const type = item.slug || "Task";
 
   return (
-    <div className="flex items-center justify-between gap-4 py-5 border-b border-gray-100 last:border-0 hover:bg-slate-50/50 px-4 -mx-4 rounded-xl transition-all group">
-      <div className="flex items-center gap-4 min-w-0">
+    <div className="flex flex-col sm:flex-row sm:items-center py-5 sm:py-6 border-b border-gray-100 sm:border sm:bg-white sm:rounded-2xl sm:shadow-sm last:border-0 sm:last:border hover:bg-slate-50/50 sm:hover:bg-white sm:hover:shadow-md sm:hover:border-primary/20 px-4 sm:px-6 -mx-4 sm:mx-0 transition-all duration-300 group gap-4">
+      <div className="flex items-start gap-4 min-w-0 flex-1">
         {/* Task icon */}
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 text-slate-600 group-hover:scale-105 group-hover:bg-primary group-hover:text-white transition-all duration-300">
           {getTaskIcon(type)}
         </div>
 
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[15px] font-medium text-slate-900 truncate">
+            <h3 className="text-base font-bold text-slate-900 leading-tight">
               {item.name}
             </h3>
-            <Badge variant="default" className="text-[10px] font-normal bg-slate-100 text-slate-600 border-0 px-2 py-0">
+            <Badge variant="default" className="text-[10px] font-medium bg-slate-100 text-slate-500 border-0 px-2 py-0.5 rounded-full">
               {type}
             </Badge>
             {!item.is_active && (
-              <Badge variant="outline" className="text-[10px] px-2 py-0 border-gray-300 text-gray-400">
+              <Badge variant="outline" className="text-[10px] px-2 py-0.5 border-gray-300 text-gray-400 rounded-full">
                 Inactive
               </Badge>
             )}
           </div>
-          <p className="mt-1 text-[13px] text-slate-500 font-normal line-clamp-1 max-w-[500px]">
+          <p className="mt-1 text-sm text-slate-500 font-normal line-clamp-2 max-w-full">
             {item.description || "No description provided."}
           </p>
         </div>
       </div>
-
-      <div className="flex items-center gap-8 shrink-0">
-        <ScheduleIndicator item={item} />
-        <ActionMenu items={menuItems} />
+      
+      <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-8">
+        <ScheduleIndicator 
+          item={item} 
+          className="sm:flex-col sm:items-end sm:gap-1 mt-4 sm:mt-0"
+        />
+        
+        <div className="shrink-0">
+          <ActionMenu items={menuItems} />
+        </div>
       </div>
     </div>
   );
 }
+
+
+

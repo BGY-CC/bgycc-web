@@ -90,28 +90,29 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   ? pathname === "/dashboard"
                   : pathname === href || pathname.startsWith(`${href}/`);
 
-              return (
-                <Link
-                  key={href}
-                  href={href}
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={onClose}
+                className={cn(
+                  "flex items-center gap-4 rounded-2xl px-4 py-4 text-sm font-semibold",
+                  "transition-all duration-200",
+                  isActive
+                    ? "bg-primary text-white shadow-lg shadow-primary/20"
+                    : "text-subtle hover:bg-gray-50 hover:text-primary"
+                )}
+              >
+                <Icon
                   className={cn(
-                    "flex items-center gap-4 rounded-2xl px-4 py-4 text-sm font-semibold",
-                    "transition-all duration-200",
-                    isActive
-                      ? "bg-primary text-white shadow-lg shadow-primary/20"
-                      : "text-subtle hover:bg-gray-50 hover:text-primary"
+                    "h-5 w-5 shrink-0",
+                    isActive ? "text-white" : "text-muted"
                   )}
-                >
-                  <Icon
-                    className={cn(
-                      "h-5 w-5 shrink-0",
-                      isActive ? "text-white" : "text-muted"
-                    )}
-                  />
-                  {label}
-                </Link>
-              );
-            })}
+                />
+                {label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Logout button */}

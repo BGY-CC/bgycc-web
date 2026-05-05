@@ -26,7 +26,7 @@ function PathwayChecklistsSkeleton() {
         <Skeleton className="h-11 w-full rounded-2xl sm:w-36" />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
           <StatCardSkeleton key={index} />
         ))}
@@ -225,19 +225,21 @@ export function PathwayChecklistsClient() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Tabs value={tab} onValueChange={setTab} className="w-auto">
-          <TabsList className="bg-primary p-1">
+        <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto">
+          <TabsList className="bg-primary p-1 w-full sm:w-auto overflow-x-auto no-scrollbar">
             <TabsTrigger
               value="leadership"
-              className="text-white hover:bg-white hover:text-primary data-[state=active]:bg-[#B20C22] data-[state=active]:text-white data-[state=active]:hover:bg-[#B20C22] data-[state=active]:hover:text-white"
+              className="flex-1 sm:flex-none text-white hover:bg-white hover:text-primary data-[state=active]:bg-[#B20C22] data-[state=active]:text-white data-[state=active]:hover:bg-[#B20C22] data-[state=active]:hover:text-white px-2 sm:px-5"
             >
-              Leadership Pathway
+              <span className="sm:hidden">Leadership</span>
+              <span className="hidden sm:inline">Leadership Pathway</span>
             </TabsTrigger>
             <TabsTrigger
               value="public_speaking"
-              className="text-white hover:bg-white hover:text-primary data-[state=active]:bg-[#B20C22] data-[state=active]:text-white data-[state=active]:hover:bg-[#B20C22] data-[state=active]:hover:text-white"
+              className="flex-1 sm:flex-none text-white hover:bg-white hover:text-primary data-[state=active]:bg-[#B20C22] data-[state=active]:text-white data-[state=active]:hover:bg-[#B20C22] data-[state=active]:hover:text-white px-2 sm:px-5"
             >
-              Public Speaking Pathway
+              <span className="sm:hidden">Public Speaking</span>
+              <span className="hidden sm:inline">Public Speaking Pathway</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -252,7 +254,7 @@ export function PathwayChecklistsClient() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
           <StatCard
             key={s.label}
@@ -268,7 +270,7 @@ export function PathwayChecklistsClient() {
       <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
         <SearchInput
           placeholder="Search Checklist Items..."
-          containerClassName="max-w-md"
+          containerClassName="w-full sm:max-w-md"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -282,7 +284,7 @@ export function PathwayChecklistsClient() {
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Everyday Tasks
             </h2>
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100 sm:bg-transparent sm:border-0 sm:p-0 sm:shadow-none sm:divide-y-0 sm:space-y-4">
               {sectionedItems.everyday.map((item) => (
                 <ChecklistItemRow
                   key={item.id}
@@ -301,7 +303,7 @@ export function PathwayChecklistsClient() {
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Weekly Tasks
             </h2>
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100 sm:bg-transparent sm:border-0 sm:p-0 sm:shadow-none sm:divide-y-0 sm:space-y-4">
               {sectionedItems.weekly.map((item) => (
                 <ChecklistItemRow
                   key={item.id}
@@ -320,7 +322,7 @@ export function PathwayChecklistsClient() {
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Specific Day & Cycle Tasks
             </h2>
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100 sm:bg-transparent sm:border-0 sm:p-0 sm:shadow-none sm:divide-y-0 sm:space-y-4">
               {sectionedItems.specific.map((item) => (
                 <ChecklistItemRow
                   key={item.id}
