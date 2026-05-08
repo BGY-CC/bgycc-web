@@ -161,10 +161,10 @@ export function ClubsListClient() {
     <>
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-wrap items-center gap-2 bg-white lg:p-5 rounded-xl shadow-sm border border-gray-100">
+        <div className="flex flex-1 flex-wrap items-center gap-3 bg-white p-4 lg:p-5 rounded-xl shadow-sm border border-gray-100">
           <SearchInput
             placeholder="Search clubs by name..."
-            containerClassName="w-full max-w-xs"
+            containerClassName="w-full sm:max-w-xs"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -172,106 +172,110 @@ export function ClubsListClient() {
             }}
           />
 
-          {/* State / Region filter */}
-          <div className="relative">
-            <Button
-              variant="secondary"
-              size="sm"
-              rightIcon={<ChevronDown className="h-4 w-4" />}
-              onClick={() => {
-                setShowStateDropdown((p) => !p);
-                setShowCityDropdown(false);
-              }}
-            >
-              {filterState || "All States"}
-            </Button>
-            {showStateDropdown && (
-              <div className="absolute top-full left-0 mt-2 z-[100] bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
-                <button
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 font-medium text-slate-600 transition-colors"
+          <div className="flex flex-1 items-center justify-between gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2">
+              {/* State / Region filter */}
+              <div className="relative">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  rightIcon={<ChevronDown className="h-4 w-4" />}
                   onClick={() => {
-                    setFilterState("");
-                    setFilterCity("");
-                    setPage(1);
-                    setShowStateDropdown(false);
+                    setShowStateDropdown((p) => !p);
+                    setShowCityDropdown(false);
                   }}
                 >
-                  All States
-                </button>
-                {allStates.map((s) => (
-                  <button
-                    key={s}
-                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors ${
-                      filterState === s ? "font-semibold text-primary bg-slate-50" : "text-slate-600"
-                    }`}
+                  {filterState || "All States"}
+                </Button>
+                {showStateDropdown && (
+                  <div className="absolute top-full left-0 mt-2 z-[100] bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
+                    <button
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 font-medium text-slate-600 transition-colors"
+                      onClick={() => {
+                        setFilterState("");
+                        setFilterCity("");
+                        setPage(1);
+                        setShowStateDropdown(false);
+                      }}
+                    >
+                      All States
+                    </button>
+                    {allStates.map((s) => (
+                      <button
+                        key={s}
+                        className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors ${
+                          filterState === s ? "font-semibold text-primary bg-slate-50" : "text-slate-600"
+                        }`}
+                        onClick={() => {
+                          setFilterState(s);
+                          setFilterCity("");
+                          setPage(1);
+                          setShowStateDropdown(false);
+                        }}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* City filter — only visible after state is selected */}
+              {filterState && cities.length > 0 && (
+                <div className="relative">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    rightIcon={<ChevronDown className="h-4 w-4" />}
                     onClick={() => {
-                      setFilterState(s);
-                      setFilterCity("");
-                      setPage(1);
+                      setShowCityDropdown((p) => !p);
                       setShowStateDropdown(false);
                     }}
                   >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* City filter — only visible after state is selected */}
-          {filterState && cities.length > 0 && (
-            <div className="relative">
-              <Button
-                variant="secondary"
-                size="sm"
-                rightIcon={<ChevronDown className="h-4 w-4" />}
-                onClick={() => {
-                  setShowCityDropdown((p) => !p);
-                  setShowStateDropdown(false);
-                }}
-              >
-                {filterCity || "All LGAs"}
-              </Button>
-              {showCityDropdown && (
-                <div className="absolute top-full left-0 mt-2 z-[100] bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
-                  <button
-                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 font-medium text-slate-600 transition-colors"
-                    onClick={() => {
-                      setFilterCity("");
-                      setPage(1);
-                      setShowCityDropdown(false);
-                    }}
-                  >
-                    All LGAs
-                  </button>
-                  {cities.map((c) => (
-                    <button
-                      key={c}
-                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors ${
-                        filterCity === c ? "font-semibold text-primary bg-slate-50" : "text-slate-600"
-                      }`}
-                      onClick={() => {
-                        setFilterCity(c);
-                        setPage(1);
-                        setShowCityDropdown(false);
-                      }}
-                    >
-                      {c}
-                    </button>
-                  ))}
+                    {filterCity || "All LGAs"}
+                  </Button>
+                  {showCityDropdown && (
+                    <div className="absolute top-full left-0 mt-2 z-[100] bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
+                      <button
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 font-medium text-slate-600 transition-colors"
+                        onClick={() => {
+                          setFilterCity("");
+                          setPage(1);
+                          setShowCityDropdown(false);
+                        }}
+                      >
+                        All LGAs
+                      </button>
+                      {cities.map((c) => (
+                        <button
+                          key={c}
+                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 transition-colors ${
+                            filterCity === c ? "font-semibold text-primary bg-slate-50" : "text-slate-600"
+                          }`}
+                          onClick={() => {
+                            setFilterCity(c);
+                            setPage(1);
+                            setShowCityDropdown(false);
+                          }}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
 
-          <Button
-            className="ml-auto"
-            size="sm"
-            leftIcon={<Plus className="h-4 w-4" />}
-            onClick={() => setShowCreate(true)}
-          >
-            Create Club
-          </Button>
+            <Button
+              className="sm:ml-auto"
+              size="sm"
+              leftIcon={<Plus className="h-4 w-4" />}
+              onClick={() => setShowCreate(true)}
+            >
+              Create Club
+            </Button>
+          </div>
         </div>
       </div>
 
