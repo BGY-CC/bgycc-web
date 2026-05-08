@@ -56,7 +56,9 @@ function OnboardingEditorSkeleton() {
 }
 
 export default function OnboardingEditorPage() {
-  const { data: rawData, isLoading, refetch } = useQuery<any>("/pathways");
+  const { data: rawData, isLoading, refetch } = useQuery<
+    Pathway[] | { pathways?: Pathway[]; data?: { pathways?: Pathway[] } }
+  >("/pathways");
 
   // useQuery sets data = result.data from the API response
   // API shape: { success, data: { pathways: [...] } }

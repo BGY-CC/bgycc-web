@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Filter, Search } from "lucide-react";
+import { Filter } from "lucide-react";
 import { Button, Skeleton, useToast } from "@/components/ui";
 import { SearchInput, MemberDetailModal } from "@/components/shared";
 import { LeadersTable } from "./leaders-table";
@@ -14,7 +14,7 @@ export function LeadersListClient() {
   const { toast } = useToast();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedUserId] = useState<string | null>(null);
   const [showMemberDetail, setShowMemberDetail] = useState(false);
   const [roleFilter, setRoleFilter] = useState<string>("all"); // all, leader, member
   const [statusFilter, setStatusFilter] = useState<string>("all"); // all, active, at_risk, reset, missed
@@ -60,14 +60,9 @@ export function LeadersListClient() {
       } else {
         toast(result.message || "Failed to update user role", "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred", "error");
     }
-  };
-
-  const handleViewDetails = (userId: string) => {
-    setSelectedUserId(userId);
-    setShowMemberDetail(true);
   };
 
   const tabs = [

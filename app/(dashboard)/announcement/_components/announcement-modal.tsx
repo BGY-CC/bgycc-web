@@ -28,12 +28,19 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+interface AnnouncementDefaultValues {
+  title?: string | null;
+  content?: string | null;
+  club_id?: string | null;
+  metadata?: Record<string, unknown> | null;
+}
+
 interface AnnouncementModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: (data: FormData) => void;
   mode: "add" | "edit";
-  defaultValues?: any;
+  defaultValues?: AnnouncementDefaultValues;
 }
 
 export function AnnouncementModal({
@@ -43,6 +50,11 @@ export function AnnouncementModal({
   mode,
   defaultValues,
 }: AnnouncementModalProps) {
+  const meta = (defaultValues?.metadata ?? {}) as {
+    delivery?: string[];
+    target?: string | string[];
+  };
+
   const {
     register,
     handleSubmit,
@@ -55,12 +67,14 @@ export function AnnouncementModal({
     defaultValues: {
       title: defaultValues?.title ?? "",
       content: defaultValues?.content ?? "",
-      deliveryOptions: defaultValues?.metadata?.delivery ?? ["IN-APP"],
+      deliveryOptions: meta.delivery ?? ["IN-APP"],
       targetAudience: defaultValues?.club_id ? "specific" : "all",
-      selectedClubs: defaultValues?.metadata?.target ? (Array.isArray(defaultValues.metadata.target) ? defaultValues.metadata.target : [defaultValues.metadata.target]) : [],
+      selectedClubs: meta.target ? (Array.isArray(meta.target) ? meta.target : [meta.target]) : [],
     },
   });
 
+  // react-hook-form's watch() is intentionally non-memoizable; safe in this controlled form.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const targetAudience = watch("targetAudience");
   const deliveryOptions = watch("deliveryOptions") || [];
   const selectedClubs = watch("selectedClubs") || [];

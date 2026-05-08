@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, Pencil, Trash2, PowerOff } from "lucide-react";
+import { Eye, Pencil, PowerOff } from "lucide-react";
 import {
   Badge,
   ActionMenu,

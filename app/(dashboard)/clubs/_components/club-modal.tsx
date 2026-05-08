@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Users } from "lucide-react";
-// @ts-ignore – no types bundled
+// @ts-expect-error – no types bundled
 import { getStates, getLgas } from "nigeria-state-lga-data";
 import {
   Modal,
@@ -22,7 +22,6 @@ import { UserSearchSelect } from "@/components/shared";
 import { useAuth } from "@/hooks/use-auth";
 import { Controller } from "react-hook-form";
 import { UserProfile } from "@/lib/services/profiles";
-import type { Club } from "./types";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -80,9 +79,14 @@ export function ClubModal({ open, onClose, onSuccess, mode, defaultValues, clubI
     },
   });
 
+  // react-hook-form's watch() is intentionally non-memoizable; safe in this controlled form.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedState = watch("state");
   const allStates: string[] = getStates();
-  const cities: string[] = selectedState ? getLgas(selectedState) : [];
+  const cities: string[] = useMemo(
+    () => (selectedState ? getLgas(selectedState) : []),
+    [selectedState],
+  );
 
   useEffect(() => {
     if (open) {

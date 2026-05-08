@@ -29,7 +29,7 @@ describe("cn (class name merger)", () => {
   });
 
   it("handles undefined and null inputs gracefully", () => {
-    expect(cn("base", undefined, null as any)).toBe("base");
+    expect(cn("base", undefined, null as unknown as string)).toBe("base");
   });
 
   it("handles an empty call", () => {

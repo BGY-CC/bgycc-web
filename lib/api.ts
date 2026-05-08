@@ -15,12 +15,48 @@ export const API_CONFIG = {
 /**
  * Standard API Response interface
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data: T;
   message?: string;
   error?: string;
 }
+
+// Module-level shared promise to deduplicate concurrent refresh attempts.
+const refreshState: { promise: Promise<boolean> | null } = { promise: null };
+
+const refreshAccessToken = (): Promise<boolean> => {
+  if (refreshState.promise) return refreshState.promise;
+
+  const promise = (async () => {
+    try {
+      const refreshToken = localStorage.getItem("bgycc-refresh-token");
+      if (!refreshToken) return false;
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}/auth/refresh-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+
+      const result = await response.json();
+      if (response.ok && result.success) {
+        localStorage.setItem("bgycc-token", result.data.token);
+        localStorage.setItem("bgycc-refresh-token", result.data.refresh_token);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Token refresh failed:", err);
+      return false;
+    } finally {
+      refreshState.promise = null;
+    }
+  })();
+
+  refreshState.promise = promise;
+  return promise;
+};
 
 export function useApi() {
   const getAuthHeaders = () => {
@@ -31,42 +67,7 @@ export function useApi() {
     };
   };
 
-  // Shared promise for concurrent refresh attempts
-  let refreshPromise: Promise<boolean> | null = null;
-
-  const refreshAccessToken = async () => {
-    if (refreshPromise) return refreshPromise;
-
-    refreshPromise = (async () => {
-      try {
-        const refreshToken = localStorage.getItem("bgycc-refresh-token");
-        if (!refreshToken) return false;
-
-        const response = await fetch(`${API_CONFIG.BASE_URL}/auth/refresh-session`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refresh_token: refreshToken }),
-        });
-
-        const result = await response.json();
-        if (response.ok && result.success) {
-          localStorage.setItem("bgycc-token", result.data.token);
-          localStorage.setItem("bgycc-refresh-token", result.data.refresh_token);
-          return true;
-        }
-        return false;
-      } catch (err) {
-        console.error("Token refresh failed:", err);
-        return false;
-      } finally {
-        refreshPromise = null;
-      }
-    })();
-
-    return refreshPromise;
-  };
-
-  const request = useCallback(async <T = any>(endpoint: string, options: RequestInit = {}): Promise<T> => {
+  const request = useCallback(async <T = unknown>(endpoint: string, options: RequestInit = {}): Promise<T> => {
     const url = `${API_CONFIG.BASE_URL}${endpoint}`;
     
     const executeRequest = async () => {
@@ -107,28 +108,29 @@ export function useApi() {
       }
 
       return result;
-    } catch (error: any) {
-      if (error.message !== "Unauthorized") {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message !== "Unauthorized") {
         console.error(`API Error [${url}]:`, error);
       }
       throw error;
     }
-  }, []); 
+  }, []);
 
   return useMemo(() => ({
-    get: <T = any>(endpoint: string, options?: RequestInit) => 
+    get: <T = unknown>(endpoint: string, options?: RequestInit) =>
       request<T>(endpoint, { ...options, method: "GET" }),
-    
-    post: <T = any>(endpoint: string, body: any, options?: RequestInit) => 
+
+    post: <T = unknown>(endpoint: string, body: unknown, options?: RequestInit) =>
       request<T>(endpoint, { ...options, method: "POST", body: JSON.stringify(body) }),
-    
-    put: <T = any>(endpoint: string, body: any, options?: RequestInit) => 
+
+    put: <T = unknown>(endpoint: string, body: unknown, options?: RequestInit) =>
       request<T>(endpoint, { ...options, method: "PUT", body: JSON.stringify(body) }),
-    
-    patch: <T = any>(endpoint: string, body: any, options?: RequestInit) => 
+
+    patch: <T = unknown>(endpoint: string, body: unknown, options?: RequestInit) =>
       request<T>(endpoint, { ...options, method: "PATCH", body: JSON.stringify(body) }),
-    
-    delete: <T = any>(endpoint: string, options?: RequestInit) => 
+
+    delete: <T = unknown>(endpoint: string, options?: RequestInit) =>
       request<T>(endpoint, { ...options, method: "DELETE" }),
   }), [request]);
 }

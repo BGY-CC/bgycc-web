@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, type ReactNode } from "react";
-import { Plus, ExternalLink, Pencil, Trash2, FolderOpen, Link2, LayoutGrid } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, ExternalLink, Pencil, Trash2, FolderOpen, Link2 } from "lucide-react";
 import { Button, ConfirmDialog, Skeleton, useToast } from "@/components/ui";
 import { SearchInput, StatCard, StatCardSkeleton } from "@/components/shared";
 import { ResourceModal } from "./resource-modal";
@@ -62,7 +62,11 @@ export function ResourcesClient() {
   const [deleteTarget, setDeleteTarget] = useState<Resource | null>(null);
   const [search, setSearch] = useState("");
 
-  const { data: rawData, isLoading, refetch } = useQuery<any>(`/resources`);
+  type ResourcesRawData =
+    | Resource[]
+    | { resources?: Resource[]; data?: { resources?: Resource[] } };
+
+  const { data: rawData, isLoading, refetch } = useQuery<ResourcesRawData>(`/resources`);
 
   const resources: Resource[] = useMemo(() => {
     if (Array.isArray(rawData)) return rawData;
@@ -89,7 +93,13 @@ export function ResourcesClient() {
     },
   ];
 
-  const handleAdd = async (formData: any) => {
+  interface ResourceFormData {
+    title: string;
+    description?: string;
+    link?: string;
+  }
+
+  const handleAdd = async (formData: ResourceFormData) => {
     try {
       const result = await resourcesService.create({
         title: formData.title,
@@ -106,12 +116,12 @@ export function ResourcesClient() {
       } else {
         toast(result.error || "Failed to add resource", "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred", "error");
     }
   };
 
-  const handleEdit = async (formData: any) => {
+  const handleEdit = async (formData: ResourceFormData) => {
     if (!editTarget) return;
     try {
       const result = await resourcesService.update(editTarget.id, {
@@ -127,8 +137,8 @@ export function ResourcesClient() {
       } else {
         toast(result.error || "Failed to update resource", "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred", "error");
     }
   };
 
@@ -143,8 +153,8 @@ export function ResourcesClient() {
       } else {
         toast(result.error || "Failed to delete resource", "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred", "error");
     }
   };
 

@@ -14,7 +14,7 @@ export interface Announcement {
   event_date: string | null;
   event_time?: string | null;
   event_location: string | null;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;

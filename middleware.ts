@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { ROUTES } from "@/lib/constants";
 
-export function middleware(request: NextRequest) {
+export function middleware() {
   // Since we are using localStorage for auth in Phase 1 (client-side only),
   // we can't easily check auth status in middleware (server-side) without a cookie.
   // For now, we'll let the client-side AuthProvider handle redirects.
   // In Phase 2, we would check for an 'auth_token' cookie here.
-  
+
   return NextResponse.next();
 }
 

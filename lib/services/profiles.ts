@@ -1,7 +1,7 @@
 import { API_CONFIG } from "../api";
 
 export interface UserProfile {
-  role_assigned_at: any;
+  role_assigned_at: string | null;
   id: string;
   email: string;
   phone: string | null;

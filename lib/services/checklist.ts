@@ -14,7 +14,7 @@ export interface ChecklistItem {
   resource_url: string | null;
   is_active: boolean;
   is_curriculum_based: boolean;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface CurriculumItem {
@@ -26,7 +26,7 @@ export interface CurriculumItem {
   media_url: string;
   media_type: "video" | "audio" | "image" | "text";
   xp_value: number | null;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }

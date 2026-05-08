@@ -79,19 +79,25 @@ export function AnnouncementsClient() {
   };
 
   const { data: rawData, isLoading, refetch } =
-    useQuery<any>(`/community/announcements`);
+    useQuery<unknown>(`/community/announcements`);
 
   const announcements: Announcement[] = useMemo(() => {
-    const list = Array.isArray(rawData)
-      ? rawData
-      : rawData?.announcements ?? rawData?.data?.announcements ?? [];
+    const source = rawData as
+      | Announcement[]
+      | { announcements?: Announcement[]; data?: { announcements?: Announcement[] } }
+      | null
+      | undefined;
 
-    return list.map((a: any) => {
-      let metadata = a.metadata;
+    const list: Announcement[] = Array.isArray(source)
+      ? source
+      : source?.announcements ?? source?.data?.announcements ?? [];
+
+    return list.map((a) => {
+      let metadata: Record<string, unknown> | null | undefined = a.metadata;
       if (typeof metadata === "string") {
         try {
           metadata = JSON.parse(metadata);
-        } catch (e) {
+        } catch {
           metadata = {};
         }
       }
@@ -141,12 +147,18 @@ export function AnnouncementsClient() {
       } else {
         toast(result.error || "Failed to delete announcement");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred");
     }
   };
 
-  const handleEdit = async (formData: any) => {
+  const handleEdit = async (formData: {
+    title: string;
+    content: string;
+    deliveryOptions: string[];
+    targetAudience: "all" | "specific";
+    selectedClubs?: string[];
+  }) => {
     if (!editTarget) return;
 
     try {
@@ -169,8 +181,8 @@ export function AnnouncementsClient() {
       } else {
         toast(result.error || "Failed to update announcement");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred");
     }
   };
 
@@ -182,7 +194,7 @@ export function AnnouncementsClient() {
         day: "numeric",
         year: "numeric",
       }).format(date);
-    } catch (e) {
+    } catch {
       return dateString;
     }
   };

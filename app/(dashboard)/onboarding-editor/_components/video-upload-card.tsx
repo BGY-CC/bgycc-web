@@ -49,6 +49,7 @@ export function VideoUploadCard({
     // If not currently uploading locally, but there's a global upload
     if (activeUpload) {
       if (activeUpload.status === "uploading") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsUploading(true);
         if (!video || video.uploaded !== "Uploading") {
           setVideo({
@@ -78,6 +79,7 @@ export function VideoUploadCard({
     } else {
       setVideo(initialVideo);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeUpload, initialVideo, slug]);
 
   useEffect(() => {
@@ -86,30 +88,8 @@ export function VideoUploadCard({
     };
   }, [video?.previewUrl]);
 
-  const getRecord = (value: unknown) =>
-    value && typeof value === "object"
-      ? (value as Record<string, unknown>)
-      : undefined;
-
   const getErrorMessage = (error: unknown, fallback: string) => {
     return error instanceof Error ? error.message : fallback;
-  };
-
-  const getUploadedVideoUrl = (result: unknown): string | undefined => {
-    const root = getRecord(result);
-    const data = getRecord(root?.data);
-    const pathway = getRecord(data?.pathway);
-    
-    const url =
-      pathway?.video_link ||
-      data?.video_link ||
-      data?.video_url ||
-      data?.url ||
-      root?.video_link ||
-      root?.video_url ||
-      root?.url;
-
-    return typeof url === "string" ? url : undefined;
   };
 
   // Helper to parse filename and date from URL
@@ -118,7 +98,7 @@ export function VideoUploadCard({
       const decodedUrl = decodeURIComponent(url);
       const parts = decodedUrl.split("/");
       const lastPart = parts[parts.length - 1].split("?")[0];
-      
+
       // Check if it matches our R2 pattern: timestamp-filename.ext
       const match = lastPart.match(/^(\d+)-(.*)$/);
       if (match) {
@@ -129,12 +109,12 @@ export function VideoUploadCard({
           uploaded: new Date(timestamp).toLocaleDateString(),
         };
       }
-      
+
       return {
         name: lastPart || "Welcome Video",
         uploaded: "Uploaded",
       };
-    } catch (e) {
+    } catch {
       return { name: "Welcome Video", uploaded: "Uploaded" };
     }
   };
@@ -143,12 +123,14 @@ export function VideoUploadCard({
   useEffect(() => {
     if (initialVideo?.url && (initialVideo.name === "Welcome Video" || initialVideo.size === "External Link")) {
       const inferred = inferMetadataFromUrl(initialVideo.url);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVideo(prev => prev ? {
         ...prev,
         name: prev.name === "Welcome Video" || !prev.name ? inferred.name : prev.name,
         uploaded: prev.uploaded === "Uploaded" || !prev.uploaded ? inferred.uploaded : prev.uploaded,
       } : prev);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialVideo?.url]);
 
   const handleMetadataLoaded = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {

@@ -67,14 +67,15 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       } else {
         throw new Error(result.error || result.message || "Upload failed");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Background upload error:", error);
+      const message = error instanceof Error ? error.message : "An unexpected error occurred";
       setUploads((prev) => ({
         ...prev,
         [slug]: {
           ...prev[slug],
           status: "error",
-          error: error.message || "An unexpected error occurred",
+          error: message,
         },
       }));
     }
