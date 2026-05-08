@@ -66,7 +66,7 @@ describe("dashboardService.getDashboardData", () => {
     );
   });
 
-  it("omits Authorization header when token absent", async () => {
+  it("omits Authorization header when token absent (line 42)", async () => {
     localStorage.clear();
     const fetchMock = mockFetch({});
     vi.stubGlobal("fetch", fetchMock);

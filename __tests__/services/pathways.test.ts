@@ -103,6 +103,26 @@ describe("pathwaysService.delete", () => {
     expect(calledUrl).toContain("leadership");
     expect(calledUrl).not.toMatch(/\s/);
   });
+
+  it("parses JSON body for non-204/200 responses (lines 66-68)", async () => {
+    const body = { success: false, error: "Not found" };
+    vi.stubGlobal("fetch", mockFetch(body, 404));
+
+    const result = await pathwaysService.delete("missing-slug");
+    expect(result).toEqual(body);
+  });
+
+  it("falls back gracefully when json() throws (lines 69-70)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: vi.fn().mockRejectedValue(new Error("Not JSON")),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await pathwaysService.delete("bad-slug");
+    expect(result).toEqual({ success: false });
+  });
 });
 
 describe("pathwaysService.saveVideo", () => {
@@ -160,6 +180,31 @@ describe("pathwaysService.uploadVideo", () => {
     expect(fetchMock.mock.calls[2][0]).toBe(`${BASE_URL}/pathways/leadership/video`);
 
     expect(result).toEqual(saveResponse);
+  });
+
+  it("returns error when R2 direct upload fails (line 116)", async () => {
+    const signedUrlResponse = {
+      success: true,
+      data: { uploadUrl: "https://r2.example.com/upload", fileKey: "my/file.mp4" },
+    };
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: vi.fn().mockResolvedValue(signedUrlResponse),
+      })
+      // R2 upload fails
+      .mockResolvedValueOnce({ ok: false, status: 403 });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const file = new File([""], "test.mp4", { type: "video/mp4" });
+    const result = await pathwaysService.uploadVideo("leadership", file);
+
+    expect(result).toEqual({ success: false, error: "Direct upload to R2 failed" });
+    // Only 2 calls — signed URL + R2 upload (no saveVideo call)
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("aborts early if signed URL request fails", async () => {

@@ -87,6 +87,26 @@ describe("detailedResourcesService.delete", () => {
     expect(calledUrl).toContain("dres-xyz");
     expect(calledUrl).not.toMatch(/\s/);
   });
+
+  it("parses JSON body for non-204/200 responses (lines 64-66)", async () => {
+    const body = { success: false, error: "Not found" };
+    vi.stubGlobal("fetch", mockFetch(body, 404));
+
+    const result = await detailedResourcesService.delete("dres-missing");
+    expect(result).toEqual(body);
+  });
+
+  it("falls back gracefully when json() throws (lines 67-68)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: vi.fn().mockRejectedValue(new Error("Not JSON")),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await detailedResourcesService.delete("dres-bad");
+    expect(result).toEqual({ success: false });
+  });
 });
 
 describe("detailedResourcesService.uploadImage", () => {

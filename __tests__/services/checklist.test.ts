@@ -92,4 +92,24 @@ describe("checklistService.delete", () => {
     expect(calledUrl).toContain("task-trim");
     expect(calledUrl).not.toMatch(/\s/);
   });
+
+  it("parses JSON body for non-204/200 responses (lines 77-79)", async () => {
+    const body = { success: false, error: "Not found" };
+    vi.stubGlobal("fetch", mockFetch(body, 404));
+
+    const result = await checklistService.delete("missing-slug");
+    expect(result).toEqual(body);
+  });
+
+  it("falls back gracefully when json() throws (line 81)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: vi.fn().mockRejectedValue(new Error("Not JSON")),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await checklistService.delete("bad-slug");
+    expect(result).toEqual({ success: false });
+  });
 });

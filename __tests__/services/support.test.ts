@@ -53,6 +53,17 @@ describe("supportService.list", () => {
       })
     );
   });
+
+  it("omits Authorization header when token is absent (lines 18-21)", async () => {
+    localStorage.clear();
+    const fetchMock = mockFetch({ tickets: [] });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await supportService.list();
+
+    const headers = fetchMock.mock.calls[0][1].headers;
+    expect(headers).not.toHaveProperty("Authorization");
+  });
 });
 
 describe("supportService.getDetails", () => {

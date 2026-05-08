@@ -12,8 +12,13 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "lcov", "html"],
       include: ["lib/**"],
-      exclude: ["node_modules", ".next"],
+      exclude: [
+        "node_modules",
+        ".next",
+        "lib/api.ts", // useApi is a React hook — covered by integration tests, not unit tests
+      ],
     },
+
   },
   resolve: {
     alias: {
