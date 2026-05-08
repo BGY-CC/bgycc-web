@@ -11,7 +11,7 @@ export default function PathwayChecklistsPage() {
         title="Pathway Checklists"
         breadcrumb={[{ label: "Pathway Checklists" }]}
       />
-      <div className="flex-1 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
+      <div className="flex-1 px-4 py-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
         <PathwayChecklistsClient />
       </div>
     </div>

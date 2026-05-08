@@ -16,9 +16,9 @@ export default function ClubsPage() {
         breadcrumb={[{ label: "Clubs" }]}
       />
       
-      <div className="flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
+      <div className="flex-1 space-y-6 px-4 py-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
         {/* Stat cards */}
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {isLoading && !stats ? (
             Array.from({ length: 4 }).map((_, index) => (
               <StatCardSkeleton key={index} />

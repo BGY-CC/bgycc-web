@@ -23,7 +23,7 @@ function ClubDetailSkeleton() {
         breadcrumb={[{ label: "Clubs", href: "/clubs" }, { label: "Loading" }]}
       />
 
-      <div className="flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
+      <div className="flex-1 space-y-6 px-4 py-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
         <div className="space-y-4">
           <Skeleton className="h-5 w-10" />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -43,7 +43,7 @@ function ClubDetailSkeleton() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <StatCardSkeleton key={index} />
           ))}
@@ -174,7 +174,7 @@ export default function ClubDetailPage() {
         breadcrumb={[{ label: "Clubs", href: "/clubs" }, { label: club.name }]}
       />
 
-      <div className="flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
+      <div className="flex-1 space-y-6 px-4 py-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
 
       {/* Club header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-2">
@@ -190,7 +190,7 @@ export default function ClubDetailPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           {club.url_link && (
             <Button
               variant="secondary"
@@ -257,7 +257,7 @@ export default function ClubDetailPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total Members" value={health?.demographics?.total?.toLocaleString() || club.total_members?.toLocaleString() || "0"} icon={<Users className="h-4 w-4" />} change={0} />
         <StatCard 
           label="Active Members" 
@@ -340,7 +340,7 @@ export default function ClubDetailPage() {
                       {(p.full_name || "U").charAt(0)}
                     </span>
                     <div>
-                      <p className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">{p.full_name || "Unknown"}</p>
+                      <p className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors truncate max-w-[120px] sm:max-w-[200px]">{p.full_name || "Unknown"}</p>
                       <p className="text-xs text-gray-400 font-medium">Streak: {p.current_streak} days</p>
                     </div>
                   </div>
@@ -381,7 +381,7 @@ export default function ClubDetailPage() {
                       {(m.full_name || "U").charAt(0)}
                     </span>
                     <div>
-                      <p className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">{m.full_name || "Unknown"}</p>
+                      <p className="text-sm font-bold text-gray-900 group-hover:text-primary transition-colors truncate max-w-[150px] sm:max-w-[250px]">{m.full_name || "Unknown"}</p>
                       <p className="text-xs text-gray-400 font-medium">{m.current_streak === 0 ? "Broken streak" : "Low activity"}</p>
                     </div>
                   </div>
