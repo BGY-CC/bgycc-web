@@ -1,11 +1,11 @@
 "use client";
 
 import { Breadcrumb, type BreadcrumbItem } from "./breadcrumb";
-import { SearchInput } from "./search-input";
 import Image from "next/image";
 import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui";
 import { useSidebar } from "../layout/sidebar-context";
+import { useCommandPalette } from "./command-palette-context";
 
 import { useAuth } from "@/hooks/use-auth";
 
@@ -19,6 +19,7 @@ interface PageHeaderProps {
  */
 export function PageHeader({ title, breadcrumb }: PageHeaderProps) {
   const { setIsOpen } = useSidebar();
+  const { open: openPalette } = useCommandPalette();
   const { user } = useAuth();
 
   const getInitials = () => {
@@ -50,16 +51,28 @@ export function PageHeader({ title, breadcrumb }: PageHeaderProps) {
         
         <div className="flex items-center gap-4 flex-1 max-w-2xl justify-end">
           <div className="hidden sm:block w-full max-w-md">
-            <SearchInput 
-              placeholder="Search..." 
-              className="bg-[#f1f5f9] border-none h-11 rounded-xl"
-              containerClassName="w-full"
-            />
+            <button
+              type="button"
+              onClick={openPalette}
+              aria-label="Open search (Cmd or Ctrl + K)"
+              className="group flex h-11 w-full items-center gap-2 rounded-xl bg-[#f1f5f9] px-3 text-left transition-colors hover:bg-[#e2e8f0] focus:outline-none focus:ring-2 focus:ring-primary/20"
+            >
+              <Search className="h-4 w-4 text-gray-400 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-sm text-gray-400 truncate">Search…</span>
+              <kbd className="inline-flex items-center gap-0.5 rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[11px] font-medium text-gray-500 shrink-0">
+                <span className="text-[10px]">⌘</span>K
+              </kbd>
+            </button>
           </div>
-          
+
           <div className="flex shrink-0 items-center gap-3">
             <div className="sm:hidden">
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={openPalette}
+                aria-label="Open search"
+              >
                 <Search className="h-5 w-5" />
               </Button>
             </div>

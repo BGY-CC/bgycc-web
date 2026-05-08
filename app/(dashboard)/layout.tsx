@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AppShell } from "@/components/layout";
 import { ToastProvider } from "@/components/ui";
+import { CommandPalette, CommandPaletteProvider } from "@/components/shared";
 
 export const metadata: Metadata = {
   title: {
@@ -21,7 +22,10 @@ export default function DashboardLayout({
 }) {
   return (
     <ToastProvider>
-      <AppShell>{children}</AppShell>
+      <CommandPaletteProvider>
+        <AppShell>{children}</AppShell>
+        <CommandPalette />
+      </CommandPaletteProvider>
     </ToastProvider>
   );
 }

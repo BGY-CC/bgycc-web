@@ -7,3 +7,5 @@ export type { BreadcrumbProps, BreadcrumbItem } from "./breadcrumb";
 export { PageHeader } from "./page-header";
 export { SearchInput } from "./search-input";
 export { UserSearchSelect } from "./user-search-select";
+export { CommandPalette } from "./command-palette";
+export { CommandPaletteProvider, useCommandPalette } from "./command-palette-context";
