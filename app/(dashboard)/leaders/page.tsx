@@ -9,12 +9,14 @@ export const metadata: Metadata = {
 
 export default function LeadersPage() {
   return (
-    <div className="flex flex-col min-h-full">
-      <PageHeader
-        title="Leader Management"
-        breadcrumb={[{ label: "Leaders" }]}
-      />
-      
+    <div className="flex flex-col min-h-full lg:h-full bg-[#F8FAFC]">
+      <div className="shrink-0">
+        <PageHeader
+          title="Leader Management"
+          breadcrumb={[{ label: "Leader management" }]}
+        />
+      </div>
+
       <div className="flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
         <LeadersListClient />
       </div>

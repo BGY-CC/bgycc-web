@@ -16,7 +16,7 @@ function OnboardingEditorSkeleton() {
         breadcrumb={[{ label: "Onboarding Editor" }]}
       />
 
-      <div className="flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
+      <div className="flex-1 space-y-6 px-4 py-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
         <div className="rounded-3xl border border-border bg-white p-8 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -79,7 +79,7 @@ export default function OnboardingEditorPage() {
         breadcrumb={[{ label: "Onboarding Editor" }]}
       />
 
-      <div className="flex-1 space-y-6 px-3 py-4 sm:px-4 lg:px-2.5 max-w-[1600px] mx-auto w-full">
+      <div className="flex-1 space-y-6 px-4 py-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
         {/* Section header */}
         <div className="rounded-3xl border border-border bg-white p-8 shadow-sm">
           <div className="flex items-start justify-between">

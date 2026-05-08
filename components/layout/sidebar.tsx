@@ -11,7 +11,7 @@ import {
   Megaphone,
   LogOut,
   X,
-  Shield,
+  UserRoundCheck,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -21,11 +21,11 @@ import { useAuth } from "@/hooks/use-auth";
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Clubs", href: "/clubs", icon: Users },
-  { label: "Leader Management", href: "/leaders", icon: Shield },
   { label: "Pathway Checklists", href: "/pathway-checklists", icon: ClipboardList },
   { label: "Onboarding Editor", href: "/onboarding-editor", icon: PenSquare },
   { label: "Resources", href: "/resources", icon: FolderOpen },
   { label: "Announcement", href: "/announcement", icon: Megaphone },
+  { label: "Leader Management", href: "/leaders", icon: UserRoundCheck },
 ];
 
 interface SidebarProps {
@@ -90,28 +90,29 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   ? pathname === "/dashboard"
                   : pathname === href || pathname.startsWith(`${href}/`);
 
-              return (
-                <Link
-                  key={href}
-                  href={href}
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={onClose}
+                className={cn(
+                  "flex items-center gap-4 rounded-2xl px-4 py-4 text-sm font-semibold",
+                  "transition-all duration-200",
+                  isActive
+                    ? "bg-primary text-white shadow-lg shadow-primary/20"
+                    : "text-subtle hover:bg-gray-50 hover:text-primary"
+                )}
+              >
+                <Icon
                   className={cn(
-                    "flex items-center gap-4 rounded-2xl px-4 py-4 text-sm font-semibold",
-                    "transition-all duration-200",
-                    isActive
-                      ? "bg-primary text-white shadow-lg shadow-primary/20"
-                      : "text-subtle hover:bg-gray-50 hover:text-primary"
+                    "h-5 w-5 shrink-0",
+                    isActive ? "text-white" : "text-muted"
                   )}
-                >
-                  <Icon
-                    className={cn(
-                      "h-5 w-5 shrink-0",
-                      isActive ? "text-white" : "text-muted"
-                    )}
-                  />
-                  {label}
-                </Link>
-              );
-            })}
+                />
+                {label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Logout button */}

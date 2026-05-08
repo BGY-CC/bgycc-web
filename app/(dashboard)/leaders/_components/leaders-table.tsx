@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, XCircle, Shield } from "lucide-react";
+import { CheckCircle2, XCircle, Trash2, Shield } from "lucide-react";
 import {
   Badge,
   Button,
@@ -78,11 +78,11 @@ export function LeadersTable({
                   </p>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted font-normal mt-1">
                     <span>{clubLocation}</span>
-                    <span className="hidden xs:inline">•</span>
+                    <span>•</span>
                     <span>Joined {platformJoinedDate}</span>
                     {isLeader && leaderSinceDate && (
                       <>
-                        <span className="hidden xs:inline">•</span>
+                        <span>•</span>
                         <span>Leader since {leaderSinceDate}</span>
                       </>
                     )}
@@ -148,7 +148,7 @@ export function LeadersTable({
           : `${(roleChangeTarget?.user?.full_name || "This user").toUpperCase()} will lose all leader-level permissions in the BGYCC app. They'll remain a regular member.`}
         confirmLabel={roleChangeTarget?.newRole === "leader" ? "Assign" : "Yes, revoke access"}
         variant={roleChangeTarget?.newRole === "leader" ? "primary" : "destructive"}
-        icon={roleChangeTarget?.newRole === "leader" ? <CheckCircle2 className="h-6 w-6 text-green-500" /> : <XCircle className="h-6 w-6 text-red-500" />}
+        icon={roleChangeTarget?.newRole === "leader" ? <CheckCircle2 className="h-6 w-6 text-green-500" /> : <Trash2 className="h-6 w-6 text-red-500" />}
       />
     </>
   );
