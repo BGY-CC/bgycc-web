@@ -68,7 +68,7 @@ export function ClubsListClient() {
   );
 
   // Sort clubs alphabetically by name
-  const validClubs = filterAndNormalizeClubs((data?.clubs as Record<string, unknown>[]) || []).sort((a, b) =>
+  const validClubs = filterAndNormalizeClubs((data?.clubs as unknown as Record<string, unknown>[]) || []).sort((a, b) =>
     a.name.localeCompare(b.name)
   );
 

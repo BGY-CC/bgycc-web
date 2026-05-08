@@ -1,4 +1,4 @@
-import { API_CONFIG } from "../api";
+import { API_CONFIG, readJson } from "../api";
 
 export interface UserProfile {
   role_assigned_at: string | null;
@@ -45,7 +45,7 @@ export const profilesService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   getDetails: async (userId: string) => {
@@ -53,7 +53,7 @@ export const profilesService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   search: async (q: string, page = 1, pageSize = 20) => {
@@ -61,7 +61,7 @@ export const profilesService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   updateRole: async (userId: string, role: string) => {
@@ -70,6 +70,6 @@ export const profilesService = {
       headers: getAuthHeaders(),
       body: JSON.stringify({ role }),
     });
-    return response.json();
+    return readJson(response);
   },
 };

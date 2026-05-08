@@ -1,4 +1,4 @@
-import { API_CONFIG } from "../api";
+import { API_CONFIG, readJson } from "../api";
 
 export interface ChecklistItem {
   id: string;
@@ -45,7 +45,7 @@ export const checklistService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   create: async (data: Partial<ChecklistItem>) => {
@@ -54,7 +54,7 @@ export const checklistService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
   update: async (slug: string, data: Partial<ChecklistItem>) => {
@@ -63,7 +63,7 @@ export const checklistService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
   delete: async (slug: string) => {
@@ -71,12 +71,11 @@ export const checklistService = {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
-    
+
     if (response.status === 204 || response.status === 200) return { success: true };
-    
+
     try {
-      const result = await response.json();
-      return result;
+      return await readJson(response);
     } catch {
       return { success: response.ok };
     }

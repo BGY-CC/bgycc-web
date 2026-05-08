@@ -1,4 +1,4 @@
-import { API_CONFIG } from "../api";
+import { API_CONFIG, ServiceResult, readJson } from "../api";
 
 export interface Club {
   id: string;
@@ -75,7 +75,7 @@ export const clubsService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   search: async (q: string, page = 1, pageSize = 20) => {
@@ -83,7 +83,7 @@ export const clubsService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   list: async (filters: { state?: string; city?: string; name?: string; page?: number; page_size?: number } = {}) => {
@@ -95,7 +95,7 @@ export const clubsService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   create: async (data: Partial<Club>) => {
@@ -104,7 +104,7 @@ export const clubsService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
   getDetails: async (id: string) => {
@@ -112,7 +112,7 @@ export const clubsService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   update: async (id: string, data: Partial<Club>) => {
@@ -121,21 +121,20 @@ export const clubsService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
-  delete: async (id: string) => {
+  delete: async (id: string): Promise<ServiceResult> => {
     const response = await fetch(`${API_CONFIG.BASE_URL}/clubs/${id.trim()}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
-    
+
     if (response.status === 204) return { success: true };
-    
+
     const text = await response.text();
     try {
-      const result = text ? JSON.parse(text) : { success: response.ok };
-      return result;
+      return text ? (JSON.parse(text) as ServiceResult) : { success: response.ok };
     } catch {
       return { success: response.ok };
     }
@@ -147,7 +146,7 @@ export const clubsService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   getTopPerformers: async (id: string, limit = 10) => {
@@ -155,7 +154,7 @@ export const clubsService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 };
 

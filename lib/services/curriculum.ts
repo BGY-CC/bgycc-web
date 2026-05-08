@@ -1,4 +1,4 @@
-import { API_CONFIG } from "../api";
+import { API_CONFIG, readJson } from "../api";
 import { CurriculumItem } from "./checklist";
 
 const getAuthHeaders = () => {
@@ -15,7 +15,7 @@ export const curriculumService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   create: async (data: Partial<CurriculumItem>) => {
@@ -24,7 +24,7 @@ export const curriculumService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
   update: async (id: string, data: Partial<CurriculumItem>) => {
@@ -33,7 +33,7 @@ export const curriculumService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
   delete: async (id: string) => {
@@ -41,12 +41,11 @@ export const curriculumService = {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
-    
+
     if (response.status === 204 || response.status === 200) return { success: true };
-    
+
     try {
-      const result = await response.json();
-      return result;
+      return await readJson(response);
     } catch {
       return { success: response.ok };
     }

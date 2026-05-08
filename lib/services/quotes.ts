@@ -1,4 +1,4 @@
-import { API_CONFIG } from "../api";
+import { API_CONFIG, readJson } from "../api";
 
 export interface Quote {
   id: string;
@@ -28,7 +28,7 @@ export const quotesService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   create: async (data: Partial<Quote>) => {
@@ -37,7 +37,7 @@ export const quotesService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
   update: async (id: string, data: Partial<Quote>) => {
@@ -46,7 +46,7 @@ export const quotesService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
   delete: async (id: string) => {
@@ -55,6 +55,6 @@ export const quotesService = {
       headers: getAuthHeaders(),
     });
     if (response.status === 204) return { success: true };
-    return response.json();
+    return readJson(response);
   },
 };

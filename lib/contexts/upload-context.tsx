@@ -44,11 +44,20 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
     }));
 
     try {
-      const result = await pathwaysService.uploadVideo(slug, file);
-      
+      const result = await pathwaysService.uploadVideo(slug, file) as {
+        success?: boolean;
+        error?: string;
+        message?: string;
+        video_link?: string;
+        data?: {
+          pathway?: { video_link?: string };
+          video_link?: string;
+        };
+      };
+
       if (result.success) {
-        const videoLink = result.data?.pathway?.video_link || 
-                         result.data?.video_link || 
+        const videoLink = result.data?.pathway?.video_link ||
+                         result.data?.video_link ||
                          result.video_link;
 
         setUploads((prev) => ({

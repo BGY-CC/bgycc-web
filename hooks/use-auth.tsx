@@ -3,13 +3,21 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { ROUTES } from "@/lib/constants";
-import { API_CONFIG } from "@/lib/api";
+import { API_CONFIG, readJson, ServiceResult } from "@/lib/api";
 
 interface AuthUser {
   id: string;
   email: string;
   role: string;
+  full_name?: string | null;
+  profile_picture_url?: string | null;
   [key: string]: unknown;
+}
+
+interface LoginData {
+  user: AuthUser;
+  token: string;
+  refresh_token: string;
 }
 
 interface AuthContextType {
@@ -95,9 +103,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
 
-      const result = await response.json();
+      const result = await readJson<ServiceResult<LoginData>>(response);
 
-      if (response.ok && result.success) {
+      if (response.ok && result.success && result.data) {
         setIsAuthenticated(true);
         setUser(result.data.user);
         localStorage.setItem("bgycc-auth", "true");
@@ -106,9 +114,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("bgycc-user", JSON.stringify(result.data.user));
         return { success: true };
       }
-      return { 
-        success: false, 
-        error: result.error || result.message || "Invalid email or password. Please try again." 
+      return {
+        success: false,
+        error: result.error || result.message || "Invalid email or password. Please try again."
       };
     } catch (error: unknown) {
       console.error("Login failed:", error);
