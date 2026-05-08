@@ -7,13 +7,20 @@ import {
   AlertTriangle,
   RefreshCw,
   Mic,
+  ChevronDown,
 } from "lucide-react";
 import { StatCard, StatCardSkeleton, PageHeader } from "@/components/shared";
 import { Skeleton } from "@/components/ui";
 import { EngagementChart, MemberStatusChart } from "@/components/charts";
 import { useQuery } from "@/hooks/use-query";
 import { DashboardData } from "@/lib/services/dashboard";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+const PERIOD_OPTIONS = [
+  { value: "week", label: "This Week" },
+  { value: "month", label: "This Month" },
+  { value: "year", label: "This Year" },
+];
 
 function DashboardSkeleton() {
   return (
@@ -52,9 +59,25 @@ function DashboardSkeleton() {
 
 export default function DashboardPage() {
   const [period, setPeriod] = useState("week");
+  const [periodOpen, setPeriodOpen] = useState(false);
+  const periodRef = useRef<HTMLDivElement>(null);
   const { data, isLoading } = useQuery<DashboardData>(
     `/dashboard?period=${period}`,
   );
+
+  useEffect(() => {
+    if (!periodOpen) return;
+    function onPointerDown(e: PointerEvent) {
+      if (periodRef.current && !periodRef.current.contains(e.target as Node)) {
+        setPeriodOpen(false);
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [periodOpen]);
+
+  const periodLabel =
+    PERIOD_OPTIONS.find((o) => o.value === period)?.label ?? "This Week";
 
   const stats = data
     ? [
@@ -138,15 +161,45 @@ export default function DashboardPage() {
                   Reports & active users this {period}
                 </p>
               </div>
-              <select
-                value={period}
-                onChange={(e) => setPeriod(e.target.value)}
-                className="text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-                <option value="year">This Year</option>
-              </select>
+              <div ref={periodRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setPeriodOpen((p) => !p)}
+                  aria-haspopup="listbox"
+                  aria-expanded={periodOpen}
+                  className="inline-flex items-center gap-1 text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  {periodLabel}
+                  <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+                </button>
+                {periodOpen && (
+                  <ul
+                    role="listbox"
+                    className="absolute right-0 top-full mt-1 z-[100] min-w-[140px] bg-white border border-gray-200 rounded-md shadow-lg py-1 animate-in fade-in zoom-in-95 duration-150"
+                  >
+                    {PERIOD_OPTIONS.map((opt) => (
+                      <li key={opt.value}>
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={period === opt.value}
+                          onClick={() => {
+                            setPeriod(opt.value);
+                            setPeriodOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 ${
+                            period === opt.value
+                              ? "text-primary font-medium"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
             <EngagementChart data={data?.engagement_trends} />
           </div>

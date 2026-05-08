@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Users, Activity, TrendingUp, MessageCircle, Pencil, Trophy, AlertTriangle, ChevronDown } from "lucide-react";
 import Image from "next/image";
@@ -11,6 +11,12 @@ import { useQuery } from "@/hooks/use-query";
 import { clubsService, Club } from "@/lib/services/clubs";
 import { ClubModal } from "../_components/club-modal";
 import { useParams } from "next/navigation";
+
+const ENGAGEMENT_PERIOD_OPTIONS = [
+  { value: "7d", label: "Last 7 Days" },
+  { value: "30d", label: "Last 30 Days" },
+  { value: "90d", label: "Last 90 Days" },
+];
 
 function ClubDetailSkeleton() {
   return (
@@ -111,8 +117,30 @@ export default function ClubDetailPage() {
     { enabled: hasValidClubId },
   );
 
+  const [engagementPeriod, setEngagementPeriod] = useState("7d");
+  const [engagementPeriodOpen, setEngagementPeriodOpen] = useState(false);
+  const engagementPeriodRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!engagementPeriodOpen) return;
+    function onPointerDown(e: PointerEvent) {
+      if (
+        engagementPeriodRef.current &&
+        !engagementPeriodRef.current.contains(e.target as Node)
+      ) {
+        setEngagementPeriodOpen(false);
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [engagementPeriodOpen]);
+
+  const engagementPeriodLabel =
+    ENGAGEMENT_PERIOD_OPTIONS.find((o) => o.value === engagementPeriod)?.label ??
+    "Last 7 Days";
+
   const { data: engagementData } = useQuery<{ data: { date: string; reports: number; logins: number }[] }>(
-    `/clubs/${clubId}/engagement?period=7d`,
+    `/clubs/${clubId}/engagement?period=${engagementPeriod}`,
     { enabled: hasValidClubId },
   );
 
@@ -294,18 +322,54 @@ export default function ClubDetailPage() {
           <div className="mb-4 flex items-start justify-between">
             <div>
               <h3 className="text-sm font-semibold text-gray-900">Engagement Trends</h3>
-              <p className="text-[11px] font-medium text-gray-400">Reports & logins this week</p>
+              <p className="text-[11px] font-medium text-gray-400">Reports & logins · {engagementPeriodLabel.toLowerCase()}</p>
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 cursor-pointer">
-              Last 7 Days <ChevronDown className="h-3.5 w-3.5" />
+            <div ref={engagementPeriodRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setEngagementPeriodOpen((p) => !p)}
+                aria-haspopup="listbox"
+                aria-expanded={engagementPeriodOpen}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary rounded-md px-1 py-0.5"
+              >
+                {engagementPeriodLabel}
+                <ChevronDown className="h-3.5 w-3.5" />
+              </button>
+              {engagementPeriodOpen && (
+                <ul
+                  role="listbox"
+                  className="absolute right-0 top-full mt-1 z-[100] min-w-[140px] bg-white border border-gray-200 rounded-md shadow-lg py-1 animate-in fade-in zoom-in-95 duration-150"
+                >
+                  {ENGAGEMENT_PERIOD_OPTIONS.map((opt) => (
+                    <li key={opt.value}>
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={engagementPeriod === opt.value}
+                        onClick={() => {
+                          setEngagementPeriod(opt.value);
+                          setEngagementPeriodOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 ${
+                          engagementPeriod === opt.value
+                            ? "text-primary font-medium"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
-          <EngagementChart 
+          <EngagementChart
             data={engagementData?.data?.map(d => ({
               label: new Date(d.date).toLocaleDateString(undefined, { weekday: 'short' }),
               reports: d.reports,
               active_users: d.logins
-            }))} 
+            }))}
           />
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
