@@ -61,8 +61,8 @@ export function MemberDetailModal({ userId, isOpen, onClose }: MemberDetailModal
                 {error ? "Access Denied" : "Member Not Found"}
               </h3>
               <p className="text-sm text-gray-500 mt-1 max-w-[280px]">
-                {error 
-                  ? (error as any).message || "You don't have permission to view this member." 
+                {error
+                  ? (error instanceof Error ? error.message : null) || "You don't have permission to view this member."
                   : "We couldn't retrieve the details for this member."}
               </p>
             </div>
@@ -189,7 +189,7 @@ export function MemberDetailModal({ userId, isOpen, onClose }: MemberDetailModal
                     {profile.bio && (
                       <div className="mt-8 pt-6 border-t border-gray-50 space-y-2">
                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Member Bio</p>
-                        <p className="text-sm text-gray-600 leading-relaxed italic font-medium">"{profile.bio}"</p>
+                        <p className="text-sm text-gray-600 leading-relaxed italic font-medium">&quot;{profile.bio}&quot;</p>
                       </div>
                     )}
                   </div>

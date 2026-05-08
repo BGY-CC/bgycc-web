@@ -42,10 +42,12 @@ export function NotificationsClient() {
     return `${base}?${params.toString()}`;
   }, [filters]);
 
-  const { data: rawData, isLoading, refetch } = useQuery<any>(endpoint);
+  const { data: rawData, isLoading, refetch } = useQuery<unknown>(endpoint);
 
   // Handle various response shapes
-  const response: NotificationsResponse | undefined = rawData?.data || rawData;
+  const wrapped = rawData as { data?: NotificationsResponse } | NotificationsResponse | null | undefined;
+  const response: NotificationsResponse | undefined =
+    (wrapped && "data" in wrapped ? wrapped.data : (wrapped as NotificationsResponse | undefined)) ?? undefined;
   const notifications = response?.notifications || [];
   const unreadCount = response?.unread_count || 0;
 
@@ -57,8 +59,8 @@ export function NotificationsClient() {
       } else {
         toast(result.error || "Failed to mark notification as read", "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred", "error");
     }
   };
 
@@ -71,8 +73,8 @@ export function NotificationsClient() {
       } else {
         toast(result.error || "Failed to mark all as read", "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred", "error");
     }
   };
 
@@ -285,7 +287,7 @@ export function NotificationsClient() {
             </div>
             <h3 className="text-lg font-semibold text-slate-900 mb-2">No notifications found</h3>
             <p className="text-sm text-slate-500 max-w-xs mx-auto">
-              Try adjusting your filters to find what you're looking for.
+              Try adjusting your filters to find what you&apos;re looking for.
             </p>
             {(filters.status !== "all" || filters.type !== "all" || filters.userId) && (
               <Button

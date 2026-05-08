@@ -7,13 +7,12 @@ import Link from "next/link";
 import { ArrowLeft, Users, Activity, TrendingUp, MessageCircle, Pencil, Trophy, AlertTriangle, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { Badge, Button, Skeleton, useToast } from "@/components/ui";
-import { StatCard, StatCardSkeleton, PageHeader } from "@/components/shared";
+import { StatCard, StatCardSkeleton, PageHeader, MemberDetailModal } from "@/components/shared";
 import { EngagementChart, MemberStatusChart } from "@/components/charts";
 import { useQuery } from "@/hooks/use-query";
 import { clubsService, Club } from "@/lib/services/clubs";
 import { ClubModal } from "../_components/club-modal";
-import { MemberDetailModal } from "@/components/shared";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 function ClubDetailSkeleton() {
   return (
@@ -79,7 +78,6 @@ function MemberListSkeleton() {
 
 export default function ClubDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const { toast } = useToast();
   const [showEdit, setShowEdit] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
@@ -93,22 +91,39 @@ export default function ClubDetailPage() {
     { enabled: hasValidClubId },
   );
   
-  const { data: healthData, isLoading: isLoadingHealth } = useQuery<{ demographics: any; at_risk_members: any[] }>(
+  interface AtRiskMember {
+    user_id: string;
+    full_name?: string | null;
+    current_streak?: number;
+  }
+  interface TopPerformer {
+    user_id: string;
+    full_name?: string | null;
+    current_streak?: number;
+    total_xp?: number;
+  }
+  interface Demographics {
+    gender_distribution?: { male?: number; female?: number };
+    age_distribution?: Record<string, number>;
+    [key: string]: unknown;
+  }
+
+  const { data: healthData, isLoading: isLoadingHealth } = useQuery<{ demographics: Demographics; at_risk_members: AtRiskMember[] }>(
     `/clubs/${clubId}/member-health`,
     { enabled: hasValidClubId },
   );
-  
-  const { data: engagementData, isLoading: isLoadingEngagement } = useQuery<{ data: { date: string; reports: number; logins: number }[] }>(
+
+  const { data: engagementData } = useQuery<{ data: { date: string; reports: number; logins: number }[] }>(
     `/clubs/${clubId}/engagement?period=7d`,
     { enabled: hasValidClubId },
   );
-  
-  const { data: statusData, isLoading: isLoadingStatus } = useQuery<{ data: { active: number; at_risk: number; inactive: number } }>(
+
+  const { data: statusData } = useQuery<{ data: { active: number; at_risk: number; inactive: number } }>(
     `/clubs/${clubId}/member-status`,
     { enabled: hasValidClubId },
   );
 
-  const { data: topPerformersData, isLoading: isLoadingTop } = useQuery<{ top_performers: any[] }>(
+  const { data: topPerformersData, isLoading: isLoadingTop } = useQuery<{ top_performers: TopPerformer[] }>(
     `/clubs/${clubId}/top-performers`,
     { enabled: hasValidClubId },
   );
@@ -118,7 +133,13 @@ export default function ClubDetailPage() {
   const topPerformers = topPerformersData?.top_performers || [];
   const atRiskMembers = healthData?.at_risk_members || [];
 
-  const handleEdit = async (formData: any) => {
+  const handleEdit = async (formData: {
+    name: string;
+    state: string;
+    city: string;
+    description?: string;
+    whatsappLink?: string;
+  }) => {
     if (!club) return;
     try {
       const result = await clubsService.update(club.id, {
@@ -137,8 +158,8 @@ export default function ClubDetailPage() {
       } else {
         toast(result.error || result.message || "Failed to update club", "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred while updating the club", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred while updating the club", "error");
     }
   };
 
@@ -326,7 +347,7 @@ export default function ClubDetailPage() {
             ) : topPerformers.length === 0 ? (
                <div className="text-sm text-gray-500">No top performers found.</div>
             ) : (
-              topPerformers.map((p: any, i: number) => (
+              topPerformers.map((p, i: number) => (
                 <div 
                   key={i} 
                   className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors group"
@@ -367,7 +388,7 @@ export default function ClubDetailPage() {
             ) : atRiskMembers.length === 0 ? (
                <div className="text-sm text-gray-500">No at-risk members found.</div>
             ) : (
-              atRiskMembers.map((m: any, i: number) => (
+              atRiskMembers.map((m, i: number) => (
                 <div 
                   key={i} 
                   className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors group"

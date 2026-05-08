@@ -41,7 +41,7 @@ export function ResetPasswordForm() {
       } else {
         setServerError(result.error || "Failed to reset password. The link may have expired.");
       }
-    } catch (err: any) {
+    } catch {
       setServerError("An unexpected error occurred. Please try again.");
     }
   };

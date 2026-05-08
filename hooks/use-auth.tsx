@@ -9,7 +9,7 @@ interface AuthUser {
   id: string;
   email: string;
   role: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface AuthContextType {
@@ -40,12 +40,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   useEffect(() => {
-    // Check if user is logged in from localStorage
+    // Check if user is logged in from localStorage. Hydrating from a synchronous
+    // external store (localStorage) inside an effect is the canonical use case
+    // for setting state during an effect.
     const authStatus = localStorage.getItem("bgycc-auth");
     const token = localStorage.getItem("bgycc-token");
     const savedUser = localStorage.getItem("bgycc-user");
 
     if (authStatus === "true" && token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsAuthenticated(true);
       if (savedUser) {
         try {
@@ -107,11 +110,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         success: false, 
         error: result.error || result.message || "Invalid email or password. Please try again." 
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login failed:", error);
-      return { 
-        success: false, 
-        error: "Something went wrong. Please check your connection and try again." 
+      return {
+        success: false,
+        error: "Something went wrong. Please check your connection and try again."
       };
     }
   };

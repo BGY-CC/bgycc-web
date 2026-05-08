@@ -3,6 +3,10 @@ import { renderHook, act } from "@testing-library/react";
 import { UploadProvider, useUploads } from "@/lib/contexts/upload-context";
 import * as pathwaysService from "@/lib/services/pathways";
 
+type UploadVideoResult = Awaited<
+  ReturnType<typeof pathwaysService.pathwaysService.uploadVideo>
+>;
+
 describe("UploadProvider / useUploads", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -31,7 +35,7 @@ describe("UploadProvider / useUploads", () => {
     const uploadVideoMock = vi.spyOn(pathwaysService.pathwaysService, "uploadVideo").mockResolvedValue({
       success: true,
       data: { pathway: { video_link: "https://cdn.example.com/video.mp4" } },
-    } as any);
+    } as unknown as UploadVideoResult);
 
     const { result } = renderHook(() => useUploads(), {
       wrapper: UploadProvider,
@@ -53,7 +57,7 @@ describe("UploadProvider / useUploads", () => {
     vi.spyOn(pathwaysService.pathwaysService, "uploadVideo").mockResolvedValue({
       success: true,
       data: { video_link: "https://cdn.example.com/v2.mp4" },
-    } as any);
+    } as unknown as UploadVideoResult);
 
     const { result } = renderHook(() => useUploads(), {
       wrapper: UploadProvider,
@@ -73,7 +77,7 @@ describe("UploadProvider / useUploads", () => {
     vi.spyOn(pathwaysService.pathwaysService, "uploadVideo").mockResolvedValue({
       success: true,
       data: {},
-    } as any);
+    } as unknown as UploadVideoResult);
 
     const { result } = renderHook(() => useUploads(), {
       wrapper: UploadProvider,
@@ -94,7 +98,7 @@ describe("UploadProvider / useUploads", () => {
     vi.spyOn(pathwaysService.pathwaysService, "uploadVideo").mockResolvedValue({
       success: false,
       error: "Upload failed on server",
-    } as any);
+    } as unknown as UploadVideoResult);
 
     const { result } = renderHook(() => useUploads(), {
       wrapper: UploadProvider,
@@ -136,7 +140,7 @@ describe("UploadProvider / useUploads", () => {
     vi.spyOn(pathwaysService.pathwaysService, "uploadVideo").mockResolvedValue({
       success: true,
       data: { video_link: "https://cdn.example.com/done.mp4" },
-    } as any);
+    } as unknown as UploadVideoResult);
 
     const { result } = renderHook(() => useUploads(), {
       wrapper: UploadProvider,
@@ -161,7 +165,7 @@ describe("UploadProvider / useUploads", () => {
     vi.spyOn(pathwaysService.pathwaysService, "uploadVideo").mockResolvedValue({
       success: true,
       data: { video_link: "https://cdn.example.com/sized.mp4" },
-    } as any);
+    } as unknown as UploadVideoResult);
 
     const { result } = renderHook(() => useUploads(), {
       wrapper: UploadProvider,

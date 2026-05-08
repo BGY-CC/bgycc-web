@@ -81,8 +81,6 @@ export const pathwaysService = {
   },
 
   uploadVideo: async (slug: string, file: File) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
-    
     // 1. Get signed upload URL
     const getUrlResponse = await fetch(
       `${API_CONFIG.BASE_URL}/pathways/${slug}/video/upload-url`,

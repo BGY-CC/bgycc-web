@@ -12,7 +12,7 @@ import { clubsService, Club, PaginatedClubs } from "@/lib/services/clubs";
 import { profilesService } from "@/lib/services/profiles";
 import { filterAndNormalizeClubs } from "@/lib/services/club-utils";
 import { useAuth } from "@/hooks/use-auth";
-// @ts-ignore – no types bundled
+// @ts-expect-error – no types bundled
 import { getStates, getLgas } from "nigeria-state-lga-data";
 
 function ClubsTableSkeleton() {
@@ -68,11 +68,20 @@ export function ClubsListClient() {
   );
 
   // Sort clubs alphabetically by name
-  const validClubs = filterAndNormalizeClubs(data?.clubs || []).sort((a, b) => 
+  const validClubs = filterAndNormalizeClubs((data?.clubs as Record<string, unknown>[]) || []).sort((a, b) =>
     a.name.localeCompare(b.name)
   );
 
-  const handleCreate = async (formData: any) => {
+  interface ClubFormPayload {
+    name: string;
+    leaderId?: string;
+    state: string;
+    city: string;
+    description?: string;
+    whatsappLink?: string;
+  }
+
+  const handleCreate = async (formData: ClubFormPayload) => {
     try {
       // If current user is a leader, they are the leader of the club they create
       const leaderId = currentUser?.role === "leader" ? currentUser.id : formData.leaderId;
@@ -105,12 +114,12 @@ export function ClubsListClient() {
             : result.message || "Failed to create club";
         toast(errMsg, "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred while creating the club", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred while creating the club", "error");
     }
   };
 
-  const handleEdit = async (formData: any) => {
+  const handleEdit = async (formData: ClubFormPayload) => {
     if (!editingClub) return;
     try {
       const result = await clubsService.update(editingClub.id, {
@@ -138,8 +147,8 @@ export function ClubsListClient() {
             : result.message || "Failed to update club";
         toast(errMsg, "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred while updating the club", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred while updating the club", "error");
     }
   };
 
@@ -152,8 +161,8 @@ export function ClubsListClient() {
       } else {
         toast("Failed to deactivate club", "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred", "error");
     }
   };
 

@@ -24,7 +24,7 @@ export default function NotFound() {
 
       <h2 className="mb-3 text-2xl font-bold text-gray-900">Page not found</h2>
       <p className="mb-10 max-w-md text-gray-500">
-        Sorry, we couldn't find the page you're looking for. It might have been moved, deleted, or never existed.
+        Sorry, we couldn&apos;t find the page you&apos;re looking for. It might have been moved, deleted, or never existed.
       </p>
 
       <div className="flex flex-col sm:flex-row gap-3">

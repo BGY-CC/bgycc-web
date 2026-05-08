@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, RefreshCw, Calendar, Clock, LayoutGrid, CheckCircle2, Users } from "lucide-react";
+import { Plus, RefreshCw, Calendar, Clock, Users } from "lucide-react";
 import {
   Tabs,
   TabsList,
@@ -73,9 +73,26 @@ export function PathwayChecklistsClient() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { data: rawData, isLoading, refetch } = useQuery<any>("/checklist");
+  interface ChecklistApiResponse {
+    leadership?: ChecklistItem[];
+    public_speaking?: ChecklistItem[];
+    data?: { leadership?: ChecklistItem[]; public_speaking?: ChecklistItem[] };
+  }
+  type ChecklistRawData = ChecklistItem[] | ChecklistApiResponse;
 
-  const handleAdd = async (formData: any) => {
+  const { data: rawData, isLoading, refetch } = useQuery<ChecklistRawData>("/checklist");
+
+  interface ChecklistFormData {
+    title: string;
+    description?: string;
+    type?: string;
+    schedule: string;
+    day_of_week?: string;
+    day_number?: string;
+    cycle_number?: string;
+  }
+
+  const handleAdd = async (formData: ChecklistFormData) => {
     try {
       const slug = formData.title
         .toLowerCase()
@@ -86,17 +103,17 @@ export function PathwayChecklistsClient() {
         name: formData.title,
         slug,
         description: formData.description || "",
-        pathway: (tab === "leadership" ? "leadership" : "public_speaking") as any,
-        day_of_week: formData.schedule === "Weekly" ? parseInt(formData.day_of_week) : null,
-        day_number: formData.schedule === "Specific Day" ? parseInt(formData.day_number) : null,
-        cycle_number: formData.schedule === "Specific Day" ? parseInt(formData.cycle_number) : null,
-        xp_value: 1, 
+        pathway: tab === "leadership" ? "leadership" : "public_speaking",
+        day_of_week: formData.schedule === "Weekly" ? parseInt(formData.day_of_week ?? "0") : null,
+        day_number: formData.schedule === "Specific Day" ? parseInt(formData.day_number ?? "0") : null,
+        cycle_number: formData.schedule === "Specific Day" ? parseInt(formData.cycle_number ?? "0") : null,
+        xp_value: 1,
         is_active: true,
         is_curriculum_based: false,
-        metadata: { 
-          type: formData.type, 
+        metadata: {
+          type: formData.type,
           schedule: formData.schedule,
-          is_admin_created: true 
+          is_admin_created: true
         }
       });
 
@@ -107,20 +124,20 @@ export function PathwayChecklistsClient() {
       } else {
         toast(result.error || "Failed to add checklist item", "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred", "error");
     }
   };
 
-  const handleEdit = async (formData: any) => {
+  const handleEdit = async (formData: ChecklistFormData) => {
     if (!editTarget) return;
     try {
       const result = await checklistService.update(editTarget.slug, {
         name: formData.title,
         description: formData.description,
-        day_of_week: formData.schedule === "Weekly" ? parseInt(formData.day_of_week) : null,
-        day_number: formData.schedule === "Specific Day" ? parseInt(formData.day_number) : null,
-        cycle_number: formData.schedule === "Specific Day" ? parseInt(formData.cycle_number) : null,
+        day_of_week: formData.schedule === "Weekly" ? parseInt(formData.day_of_week ?? "0") : null,
+        day_number: formData.schedule === "Specific Day" ? parseInt(formData.day_number ?? "0") : null,
+        cycle_number: formData.schedule === "Specific Day" ? parseInt(formData.cycle_number ?? "0") : null,
         metadata: { ...editTarget.metadata, type: formData.type, schedule: formData.schedule }
       });
 
@@ -131,8 +148,8 @@ export function PathwayChecklistsClient() {
       } else {
         toast(result.error || "Failed to update item", "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred", "error");
     }
   };
 
@@ -147,15 +164,15 @@ export function PathwayChecklistsClient() {
       } else {
         toast(result.error || "Failed to remove item", "error");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred", "error");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred", "error");
     }
   };
 
-  const itemsArray = useMemo(() => {
+  const itemsArray = useMemo<ChecklistItem[]>(() => {
     if (Array.isArray(rawData)) return rawData;
     if (rawData) {
-      const src = rawData?.leadership ? rawData : rawData?.data ?? rawData;
+      const src = rawData.leadership ? rawData : rawData.data ?? rawData;
       return [
         ...(Array.isArray(src.leadership) ? src.leadership : []),
         ...(Array.isArray(src.public_speaking) ? src.public_speaking : []),
@@ -165,7 +182,7 @@ export function PathwayChecklistsClient() {
   }, [rawData]);
 
   const filteredItems = useMemo(() => {
-    return itemsArray.filter((item: any) => {
+    return itemsArray.filter((item) => {
       const itemPathway = typeof item.pathway === 'string' ? item.pathway : "";
       const matchesTab = itemPathway.toLowerCase().includes(tab.toLowerCase());
       const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());

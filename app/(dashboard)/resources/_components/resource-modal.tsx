@@ -9,7 +9,6 @@ import {
   Modal,
   ModalContent,
   ModalHeader,
-  ModalFooter,
   Button,
   FormField,
   Input,

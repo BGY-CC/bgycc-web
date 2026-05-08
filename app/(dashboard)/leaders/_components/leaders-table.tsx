@@ -8,8 +8,8 @@ import {
   Pagination,
   ConfirmDialog,
 } from "@/components/ui";
+import Image from "next/image";
 import { UserProfile } from "@/lib/services/profiles";
-import { cn } from "@/lib/utils";
 
 interface LeadersTableProps {
   users: UserProfile[];
@@ -51,10 +51,12 @@ export function LeadersTable({
                 {/* Avatar */}
                 <div className="h-16 w-16 rounded-full bg-background border-2 border-white shadow-sm flex items-center justify-center text-xl font-bold text-primary shrink-0 overflow-hidden">
                   {user.profile_picture_url ? (
-                    <img 
-                      src={user.profile_picture_url} 
-                      alt={user.full_name || ""} 
-                      className="h-full w-full object-cover" 
+                    <Image
+                      src={user.profile_picture_url}
+                      alt={user.full_name || ""}
+                      width={64}
+                      height={64}
+                      className="h-full w-full object-cover"
                     />
                   ) : (
                     (user.full_name || user.email || "U").charAt(0).toUpperCase()

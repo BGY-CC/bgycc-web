@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, User, X, Check } from "lucide-react";
+import { Search, User, X } from "lucide-react";
+import Image from "next/image";
 import { Input, Skeleton } from "@/components/ui";
 import { profilesService, UserProfile } from "@/lib/services/profiles";
 import { cn } from "@/lib/utils";
@@ -152,7 +153,7 @@ export function UserSearchSelect({
                 <div className="flex items-center">
                   <div className="flex-shrink-0 h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center">
                     {user.profile_picture_url ? (
-                      <img src={user.profile_picture_url} alt="" className="h-6 w-6 rounded-full" />
+                      <Image src={user.profile_picture_url} alt="" width={24} height={24} className="h-6 w-6 rounded-full" />
                     ) : (
                       <User className="h-3 w-3 text-gray-500" />
                     )}

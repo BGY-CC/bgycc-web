@@ -1,5 +1,5 @@
 import * as React from "react";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -51,7 +51,7 @@ export function StatCard({
           >
             {React.isValidElement(icon)
               ? React.cloneElement(icon as React.ReactElement<{ className?: string }>, {
-                  className: cn("h-5 w-5", !color && "text-primary", (icon.props as any).className),
+                  className: cn("h-5 w-5", !color && "text-primary", (icon.props as { className?: string }).className),
                 })
               : icon}
           </div>

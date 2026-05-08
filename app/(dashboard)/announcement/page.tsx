@@ -17,7 +17,13 @@ export default function AnnouncementPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [activeTab, setActiveTab] = useState<"announcements" | "notifications">("announcements");
 
-  const handleAdd = async (formData: any) => {
+  const handleAdd = async (formData: {
+    title: string;
+    content: string;
+    deliveryOptions: string[];
+    targetAudience: "all" | "specific";
+    selectedClubs?: string[];
+  }) => {
     try {
       const result = await announcementsService.create({
         title: formData.title,
@@ -39,8 +45,8 @@ export default function AnnouncementPage() {
       } else {
         toast(result.error || "Failed to send announcement");
       }
-    } catch (error: any) {
-      toast(error.message || "An error occurred");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "An error occurred");
     }
   };
 
