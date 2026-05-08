@@ -8,6 +8,11 @@ node_modules/
 out/
 build/
 
+# ─── Cloudflare / OpenNext build output & generated types ────────────────────
+.open-next/
+.wrangler/
+cloudflare-env.d.ts
+
 # ─── Environment variables ───────────────────────────────────────────────────
 .env
 .env.local
@@ -15,6 +20,8 @@ build/
 .env.test.local
 .env.production.local
 .env*.local
+.dev.vars
+.dev.vars.*
 
 # ─── Design assets (not source code) ─────────────────────────────────────────
 BGYCC APP/

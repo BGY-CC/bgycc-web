@@ -1,7 +1,5 @@
 "use client";
 
-export const runtime = "edge";
-
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Users, Activity, TrendingUp, MessageCircle, Pencil, Trophy, AlertTriangle, ChevronDown } from "lucide-react";
