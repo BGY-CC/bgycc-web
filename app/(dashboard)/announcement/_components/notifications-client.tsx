@@ -1,15 +1,48 @@
 "use client";
 
-import { Bell, CheckCircle, Mail, Clock, MoreHorizontal } from "lucide-react";
-import { Badge, Button, Skeleton } from "@/components/ui";
+import { useState, useMemo } from "react";
+import { Bell, CheckCircle, Mail, Clock, Search, Filter, X } from "lucide-react";
+import { Badge, Button, Skeleton, Input, Select, Tabs, TabsList, TabsTrigger } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
-import { notificationsService, NotificationsResponse, AdminNotification } from "@/lib/services/notifications";
+import { notificationsService, NotificationsResponse } from "@/lib/services/notifications";
 import { useToast } from "@/components/ui";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+
+const NOTIFICATION_TYPES = [
+  { value: "all", label: "All Types" },
+  { value: "support_ticket_created", label: "Support Ticket" },
+  { value: "announcement", label: "Announcement" },
+  { value: "member_joined", label: "Member Joined" },
+  { value: "club_created", label: "Club Created" },
+];
 
 export function NotificationsClient() {
   const { toast } = useToast();
-  const { data: rawData, isLoading, refetch } = useQuery<any>("/notifications/me");
+  const { user: authUser } = useAuth();
+  const isAdmin = authUser?.role === "admin";
+
+  const [filters, setFilters] = useState({
+    status: "all", // "all", "unread", "read"
+    type: "all",
+    userId: "",
+  });
+
+  const endpoint = useMemo(() => {
+    const params = new URLSearchParams();
+    
+    if (filters.status === "unread") params.set("is_read", "false");
+    else if (filters.status === "read") params.set("is_read", "true");
+    
+    if (filters.type !== "all") params.set("type", filters.type);
+    if (filters.userId) params.set("user_id", filters.userId);
+    
+    // Use admin endpoint if userId is set, otherwise use "me" endpoint
+    const base = filters.userId ? "/notifications" : "/notifications/me";
+    return `${base}?${params.toString()}`;
+  }, [filters]);
+
+  const { data: rawData, isLoading, refetch } = useQuery<any>(endpoint);
 
   // Handle various response shapes
   const response: NotificationsResponse | undefined = rawData?.data || rawData;
@@ -43,6 +76,14 @@ export function NotificationsClient() {
     }
   };
 
+  const clearFilters = () => {
+    setFilters({
+      status: "all",
+      type: "all",
+      userId: "",
+    });
+  };
+
   if (isLoading && notifications.length === 0) {
     return (
       <div className="space-y-4">
@@ -66,7 +107,7 @@ export function NotificationsClient() {
     <div className="space-y-6">
       {/* Notifications Header */}
       <div className="rounded-2xl bg-white border border-gray-100 p-6 sm:p-8 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600">
               <Bell className="h-6 w-6" />
@@ -81,22 +122,83 @@ export function NotificationsClient() {
             </div>
           </div>
 
-          {unreadCount > 0 && (
-            <Button
-              variant="outline"
-              leftIcon={<CheckCircle className="h-4 w-4" />}
-              onClick={handleMarkAllAsRead}
-              className="shrink-0 border-gray-200 text-slate-600 hover:bg-slate-50 rounded-xl py-6 px-6"
-            >
-              Mark all as read
-            </Button>
-          )}
+          <div className="flex flex-wrap items-center gap-3">
+            {unreadCount > 0 && (
+              <Button
+                variant="outline"
+                leftIcon={<CheckCircle className="h-4 w-4" />}
+                onClick={handleMarkAllAsRead}
+                className="shrink-0 border-gray-200 text-slate-600 hover:bg-slate-50 rounded-xl py-2 px-4 h-10"
+              >
+                Mark all as read
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Filters Section */}
+        <div className="mt-8 pt-8 border-t border-gray-50">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <Tabs 
+                value={filters.status} 
+                onValueChange={(val) => setFilters(f => ({ ...f, status: val }))}
+              >
+                <TabsList className="bg-slate-100/80 p-1 rounded-xl">
+                  <TabsTrigger value="all" className="rounded-lg px-4 py-1.5 text-[11px] bg-transparent data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">All</TabsTrigger>
+                  <TabsTrigger value="unread" className="rounded-lg px-4 py-1.5 text-[11px] bg-transparent data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Unread</TabsTrigger>
+                  <TabsTrigger value="read" className="rounded-lg px-4 py-1.5 text-[11px] bg-transparent data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Read</TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-slate-400" />
+                <Select
+                  value={filters.type}
+                  onChange={(e) => setFilters(f => ({ ...f, type: e.target.value }))}
+                  className="w-[160px] h-9 text-xs rounded-xl"
+                >
+                  {NOTIFICATION_TYPES.map(type => (
+                    <option key={type.value} value={type.value}>{type.label}</option>
+                  ))}
+                </Select>
+              </div>
+
+              {isAdmin && (
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                  <Input
+                    placeholder="Search by User ID..."
+                    value={filters.userId}
+                    onChange={(e) => setFilters(f => ({ ...f, userId: e.target.value }))}
+                    className="pl-9 w-[220px] h-9 text-xs rounded-xl border-gray-200"
+                  />
+                </div>
+              )}
+            </div>
+
+            {(filters.status !== "all" || filters.type !== "all" || filters.userId) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                leftIcon={<X className="h-3.5 w-3.5" />}
+                className="text-slate-500 hover:text-slate-700 h-9 px-3 rounded-xl text-xs"
+              >
+                Clear Filters
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Notifications List */}
       <div className="space-y-4">
-        {notifications.length > 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Skeleton className="h-8 w-8 rounded-full" />
+          </div>
+        ) : notifications.length > 0 ? (
           notifications.map((notif) => (
             <div
               key={notif.id}
@@ -154,6 +256,11 @@ export function NotificationsClient() {
                         • {notif.type.replace(/_/g, " ")}
                       </div>
                     )}
+                    {isAdmin && notif.user && (
+                      <div className="flex items-center gap-1.5 text-indigo-500 font-semibold">
+                        • {notif.user.full_name}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -176,10 +283,19 @@ export function NotificationsClient() {
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 border border-slate-100 text-slate-300 mx-auto mb-6">
               <Bell className="h-10 w-10" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">No notifications yet</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No notifications found</h3>
             <p className="text-sm text-slate-500 max-w-xs mx-auto">
-              When you have updates or alerts, they'll appear here.
+              Try adjusting your filters to find what you're looking for.
             </p>
+            {(filters.status !== "all" || filters.type !== "all" || filters.userId) && (
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                className="mt-6 rounded-xl border-gray-200"
+              >
+                Clear all filters
+              </Button>
+            )}
           </div>
         )}
       </div>

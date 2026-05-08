@@ -56,7 +56,7 @@ export function StatCard({
               : icon}
           </div>
           <div className="min-w-0">
-            <p className="text-2xl font-semibold text-primary tracking-tight">{value}</p>
+            <p className="text-xl font-semibold text-primary tracking-tight">{value}</p>
             <p className="mt-1 text-sm font-normal text-muted">{label}</p>
           </div>
         </div>
