@@ -221,7 +221,7 @@ export function AnnouncementsClient() {
           announcements.map((a) => {
             const content = a.content ?? "";
             const isExpanded = !!expanded[a.id];
-            const delivery = a.metadata?.delivery || [];
+            const delivery = (Array.isArray(a.metadata?.delivery) ? a.metadata.delivery : []) as string[];
             const targets = Array.isArray(a.metadata?.target) 
               ? a.metadata.target 
               : a.metadata?.target 

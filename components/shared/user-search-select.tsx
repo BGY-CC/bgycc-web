@@ -34,10 +34,11 @@ export function UserSearchSelect({
   // Fetch initial user if value is provided
   useEffect(() => {
     if (value && !selectedUser) {
-      profilesService.getDetails(value).then(res => {
-        if (res.success) {
-          setSelectedUser(res.data);
-          setQuery(res.data.full_name || res.data.email || "");
+      profilesService.getDetails(value).then((res) => {
+        const data = res.data as UserProfile | undefined;
+        if (res.success && data) {
+          setSelectedUser(data);
+          setQuery(data.full_name || data.email || "");
         }
       });
     }
@@ -59,8 +60,9 @@ export function UserSearchSelect({
         setIsLoading(true);
         try {
           const res = await profilesService.search(query);
-          if (res.success) {
-            setResults(res.data.users || []);
+          const data = res.data as { users?: UserProfile[] } | undefined;
+          if (res.success && data) {
+            setResults(data.users || []);
           }
         } catch (error) {
           console.error("Failed to search users", error);

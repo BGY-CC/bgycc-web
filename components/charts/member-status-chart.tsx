@@ -53,7 +53,7 @@ export function MemberStatusChart({ data }: MemberStatusProps) {
               ))}
             </Pie>
             <Tooltip
-              formatter={(value: number | string) => [`${value} members`, `${getPercent(Number(value || 0))}%`]}
+              formatter={(value) => [`${value} members`, `${getPercent(Number(value ?? 0))}%`]}
               contentStyle={{
                 borderRadius: "8px",
                 border: "1px solid #e5e7eb",

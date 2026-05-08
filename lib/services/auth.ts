@@ -1,16 +1,16 @@
-import { API_CONFIG } from "../api";
+import { API_CONFIG, readJson } from "../api";
 
 export const authService = {
   forgotPassword: async (email: string) => {
     const response = await fetch(`${API_CONFIG.BASE_URL}/auth/forgotten-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        email, 
-        redirectTo: `${window.location.origin}/reset-password` 
+      body: JSON.stringify({
+        email,
+        redirectTo: `${window.location.origin}/reset-password`
       }),
     });
-    return response.json();
+    return readJson(response);
   },
 
   verifyOtp: async (email: string, token: string) => {
@@ -19,19 +19,19 @@ export const authService = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, token }),
     });
-    return response.json();
+    return readJson(response);
   },
 
   resetPassword: async (password: string, tempToken: string) => {
     const response = await fetch(`${API_CONFIG.BASE_URL}/auth/reset-password`, {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${tempToken}`
       },
       body: JSON.stringify({ password }),
     });
-    return response.json();
+    return readJson(response);
   },
 
   login: async (email: string, password: string) => {
@@ -40,6 +40,6 @@ export const authService = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    return response.json();
+    return readJson(response);
   }
 };

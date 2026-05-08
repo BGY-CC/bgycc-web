@@ -1,4 +1,4 @@
-import { API_CONFIG } from "../api";
+import { API_CONFIG, readJson } from "../api";
 
 export interface SupportTicket {
   id: string;
@@ -24,14 +24,14 @@ const getAuthHeaders = () => {
 
 export const supportService = {
   list: async (status?: string) => {
-    const url = status 
+    const url = status
       ? `${API_CONFIG.BASE_URL}/support?status=${status}`
       : `${API_CONFIG.BASE_URL}/support`;
     const response = await fetch(url, {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   getDetails: async (id: string) => {
@@ -39,7 +39,7 @@ export const supportService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   updateStatus: async (id: string, status: "pending" | "acknowledged" | "resolved") => {
@@ -48,7 +48,7 @@ export const supportService = {
       headers: getAuthHeaders(),
       body: JSON.stringify({ status }),
     });
-    return response.json();
+    return readJson(response);
   },
 };
 

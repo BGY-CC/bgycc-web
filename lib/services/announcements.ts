@@ -1,4 +1,4 @@
-import { API_CONFIG } from "../api";
+import { API_CONFIG, readJson } from "../api";
 
 export interface Announcement {
   id: string;
@@ -41,7 +41,7 @@ export const announcementsService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   create: async (data: Partial<Announcement>) => {
@@ -50,7 +50,7 @@ export const announcementsService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
   update: async (id: string, data: Partial<Announcement>) => {
@@ -59,7 +59,7 @@ export const announcementsService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
   delete: async (id: string) => {
@@ -67,12 +67,11 @@ export const announcementsService = {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
-    
+
     if (response.status === 204 || response.status === 200) return { success: true };
-    
+
     try {
-      const result = await response.json();
-      return result;
+      return await readJson(response);
     } catch {
       return { success: response.ok };
     }
@@ -82,7 +81,7 @@ export const announcementsService = {
   uploadImage: async (file: File) => {
     const formData = new FormData();
     formData.append("image", file);
-    
+
     const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
     const response = await fetch(`${API_CONFIG.BASE_URL}/community/announcements/upload`, {
       method: "POST",
@@ -91,7 +90,7 @@ export const announcementsService = {
       },
       body: formData,
     });
-    return response.json();
+    return readJson(response);
   },
 };
 

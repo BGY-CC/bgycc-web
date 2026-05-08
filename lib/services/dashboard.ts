@@ -1,4 +1,4 @@
-import { API_CONFIG } from "../api";
+import { API_CONFIG, readJson } from "../api";
 
 export interface DashboardStats {
   active_users: StatValue;
@@ -47,7 +47,7 @@ export const dashboardService = {
         ...(token ? { "Authorization": `Bearer ${token}` } : {}),
       },
     });
-    return response.json();
+    return readJson(response);
   },
 
   healthCheck: async () => {
@@ -55,7 +55,7 @@ export const dashboardService = {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
-    return response.json();
+    return readJson(response);
   },
 };
 

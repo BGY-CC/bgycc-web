@@ -22,6 +22,17 @@ export interface ApiResponse<T = unknown> {
   error?: string;
 }
 
+export interface ServiceResult<T = unknown> {
+  success?: boolean;
+  error?: string;
+  message?: string;
+  data?: T;
+  id?: string;
+}
+
+export const readJson = <T = ServiceResult>(response: Response): Promise<T> =>
+  response.json() as Promise<T>;
+
 // Module-level shared promise to deduplicate concurrent refresh attempts.
 const refreshState: { promise: Promise<boolean> | null } = { promise: null };
 
@@ -39,8 +50,8 @@ const refreshAccessToken = (): Promise<boolean> => {
         body: JSON.stringify({ refresh_token: refreshToken }),
       });
 
-      const result = await response.json();
-      if (response.ok && result.success) {
+      const result = await readJson<ServiceResult<{ token: string; refresh_token: string }>>(response);
+      if (response.ok && result.success && result.data) {
         localStorage.setItem("bgycc-token", result.data.token);
         localStorage.setItem("bgycc-refresh-token", result.data.refresh_token);
         return true;
@@ -101,7 +112,7 @@ export function useApi() {
         throw new Error("Unauthorized");
       }
 
-      const result = await response.json().catch(() => ({}));
+      const result = await response.json().catch(() => ({})) as ServiceResult & T;
 
       if (!response.ok) {
         throw new Error(result.error || result.message || "Something went wrong");

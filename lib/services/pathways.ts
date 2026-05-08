@@ -1,4 +1,4 @@
-import { API_CONFIG } from "../api";
+import { API_CONFIG, readJson, ServiceResult } from "../api";
 
 export interface Pathway {
   id: string;
@@ -20,13 +20,18 @@ const getAuthHeaders = () => {
   };
 };
 
+interface UploadUrlData {
+  uploadUrl: string;
+  fileKey: string;
+}
+
 export const pathwaysService = {
   list: async () => {
     const response = await fetch(`${API_CONFIG.BASE_URL}/pathways`, {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   create: async (data: Partial<Pathway>) => {
@@ -35,7 +40,7 @@ export const pathwaysService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
   getDetails: async (slug: string) => {
@@ -43,7 +48,7 @@ export const pathwaysService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return response.json();
+    return readJson(response);
   },
 
   update: async (slug: string, data: Partial<Pathway>) => {
@@ -52,7 +57,7 @@ export const pathwaysService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    return response.json();
+    return readJson(response);
   },
 
   delete: async (slug: string) => {
@@ -60,12 +65,11 @@ export const pathwaysService = {
       method: "DELETE",
       headers: getAuthHeaders(),
     });
-    
+
     if (response.status === 204 || response.status === 200) return { success: true };
-    
+
     try {
-      const result = await response.json();
-      return result;
+      return await readJson(response);
     } catch {
       return { success: response.ok };
     }
@@ -77,7 +81,7 @@ export const pathwaysService = {
       headers: getAuthHeaders(),
       body: JSON.stringify({ file_key: fileKey }),
     });
-    return response.json();
+    return readJson(response);
   },
 
   uploadVideo: async (slug: string, file: File) => {
@@ -94,8 +98,8 @@ export const pathwaysService = {
       }
     );
 
-    const urlData = await getUrlResponse.json();
-    if (!urlData.success) {
+    const urlData = await readJson<ServiceResult<UploadUrlData>>(getUrlResponse);
+    if (!urlData.success || !urlData.data) {
       return urlData;
     }
 

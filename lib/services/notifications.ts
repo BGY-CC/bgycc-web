@@ -1,4 +1,4 @@
-import { API_CONFIG } from "../api";
+import { API_CONFIG, readJson } from "../api";
 
 export interface NotificationUser {
   id: string;
@@ -79,7 +79,7 @@ export const notificationsService = {
       },
     );
 
-    return response.json();
+    return readJson<NotificationsApiResponse>(response);
   },
 
   listMe: async ({
@@ -109,7 +109,7 @@ export const notificationsService = {
       },
     );
 
-    return response.json();
+    return readJson<NotificationsApiResponse>(response);
   },
 
   markAsRead: async (id: string): Promise<NotificationsApiResponse> => {
@@ -121,7 +121,7 @@ export const notificationsService = {
       },
     );
 
-    return response.json();
+    return readJson<NotificationsApiResponse>(response);
   },
 
   markAllAsRead: async (): Promise<NotificationsApiResponse> => {
@@ -133,6 +133,6 @@ export const notificationsService = {
       },
     );
 
-    return response.json();
+    return readJson<NotificationsApiResponse>(response);
   },
 };
