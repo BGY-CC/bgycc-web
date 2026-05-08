@@ -43,13 +43,13 @@ export function LeadersTable({
             : user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) : null;
           
           return (
-            <div 
-              key={user.id} 
-              className="bg-white p-5 rounded-2xl border border-border shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 group hover:shadow-md transition-all"
+            <div
+              key={user.id}
+              className="bg-white p-4 sm:p-5 rounded-2xl border border-border shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 group hover:shadow-md transition-all"
             >
-              <div className="flex items-center gap-5 w-full sm:w-auto">
+              <div className="flex items-center gap-3 sm:gap-5 w-full sm:w-auto min-w-0">
                 {/* Avatar */}
-                <div className="h-16 w-16 rounded-full bg-background border-2 border-white shadow-sm flex items-center justify-center text-xl font-bold text-primary shrink-0 overflow-hidden">
+                <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-background border-2 border-white shadow-sm flex items-center justify-center text-lg sm:text-xl font-bold text-primary shrink-0 overflow-hidden">
                   {user.profile_picture_url ? (
                     <Image
                       src={user.profile_picture_url}
@@ -64,22 +64,22 @@ export function LeadersTable({
                 </div>
 
                 {/* User Info */}
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-lg font-bold text-primary">
+                    <span className="text-base sm:text-lg font-bold text-primary break-words">
                       {user.full_name || "Unknown User"}
                     </span>
                     {isLeader && (
-                      <Badge className="bg-red-50 text-red-600 border-red-100 font-normal px-2 py-0.5 rounded-full">
+                      <Badge className="bg-red-50 text-red-600 border-red-100 font-normal px-2 py-0.5 rounded-full text-[11px] sm:text-xs">
                         Leader
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-subtle font-medium">
+                  <p className="text-xs sm:text-sm text-subtle font-medium break-all">
                     {user.email}
                   </p>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted font-normal mt-1">
-                    <span>{clubLocation}</span>
+                  <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1 text-[11px] sm:text-[13px] text-muted font-normal mt-1">
+                    <span className="break-words">{clubLocation}</span>
                     <span>•</span>
                     <span>Joined {platformJoinedDate}</span>
                     {isLeader && leaderSinceDate && (
