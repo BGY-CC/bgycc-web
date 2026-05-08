@@ -131,6 +131,26 @@ describe("announcementsService.delete", () => {
     expect(calledUrl).toContain("ann-xyz");
     expect(calledUrl).not.toContain("  ");
   });
+
+  it("parses JSON body for non-204/200 responses (lines 73-75)", async () => {
+    const body = { success: false, error: "Not found" };
+    vi.stubGlobal("fetch", mockFetch(body, 404));
+
+    const result = await announcementsService.delete("ann-404");
+    expect(result).toEqual(body);
+  });
+
+  it("falls back to { success: false } when json() throws (line 77)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: vi.fn().mockRejectedValue(new Error("Not JSON")),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await announcementsService.delete("ann-err");
+    expect(result).toEqual({ success: false });
+  });
 });
 
 describe("announcementsService.uploadImage", () => {

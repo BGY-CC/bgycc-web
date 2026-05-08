@@ -87,6 +87,26 @@ describe("resourcesService.delete", () => {
     expect(calledUrl).toContain("res-xyz");
     expect(calledUrl).not.toMatch(/\s/);
   });
+
+  it("parses JSON body for non-204/200 responses (lines 66-68)", async () => {
+    const body = { success: false, error: "Not found" };
+    vi.stubGlobal("fetch", mockFetch(body, 404));
+
+    const result = await resourcesService.delete("res-missing");
+    expect(result).toEqual(body);
+  });
+
+  it("falls back gracefully when json() throws (lines 69-70)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: vi.fn().mockRejectedValue(new Error("Not JSON")),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await resourcesService.delete("res-bad");
+    expect(result).toEqual({ success: false });
+  });
 });
 
 describe("resourcesService.uploadImage", () => {

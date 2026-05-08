@@ -27,6 +27,17 @@ describe("quotesService.list", () => {
       expect.objectContaining({ method: "GET" })
     );
   });
+
+  it("omits Authorization header when token is absent (lines 18-21)", async () => {
+    localStorage.clear();
+    const fetchMock = mockFetch({ quotes: [] });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await quotesService.list();
+
+    const headers = fetchMock.mock.calls[0][1].headers;
+    expect(headers).not.toHaveProperty("Authorization");
+  });
 });
 
 describe("quotesService.create", () => {

@@ -160,6 +160,19 @@ describe("clubsService.delete", () => {
     expect(calledUrl).toContain("club-trim");
     expect(calledUrl).not.toMatch(/\s/);
   });
+
+  it("returns { success: false } when response text is invalid JSON (line 140)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: vi.fn().mockResolvedValue("<html>Server Error</html>"),
+      json: vi.fn(),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await clubsService.delete("club-bad");
+    expect(result).toEqual({ success: false });
+  });
 });
 
 describe("clubsService.getMemberHealth", () => {

@@ -58,6 +58,17 @@ describe("notificationsService.list", () => {
     expect(url).toContain("is_read=true");
   });
 
+  it("omits Authorization header when token is absent (lines 43-47)", async () => {
+    localStorage.clear();
+    const fetchMock = mockFetch({ success: true });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await notificationsService.list({ page: 1 });
+
+    const headers = fetchMock.mock.calls[0][1].headers;
+    expect(headers).not.toHaveProperty("Authorization");
+  });
+
   it("omits optional filters when not provided", async () => {
     const fetchMock = mockFetch({ success: true });
     vi.stubGlobal("fetch", fetchMock);
@@ -91,6 +102,16 @@ describe("notificationsService.listMe", () => {
 
     const url: string = fetchMock.mock.calls[0][0];
     expect(url).toContain("is_read=false");
+  });
+
+  it("appends type filter for listMe (line 101)", async () => {
+    const fetchMock = mockFetch({ success: true });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await notificationsService.listMe({ page: 1, type: "system" });
+
+    const url: string = fetchMock.mock.calls[0][0];
+    expect(url).toContain("type=system");
   });
 });
 

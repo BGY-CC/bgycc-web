@@ -28,6 +28,17 @@ describe("profilesService.list", () => {
     );
   });
 
+  it("omits Authorization header when token is absent (lines 35-38)", async () => {
+    localStorage.clear();
+    const fetchMock = mockFetch({ users: [] });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await profilesService.list();
+
+    const headers = fetchMock.mock.calls[0][1].headers;
+    expect(headers).not.toHaveProperty("Authorization");
+  });
+
   it("passes custom page and page_size", async () => {
     const fetchMock = mockFetch({ users: [] });
     vi.stubGlobal("fetch", fetchMock);

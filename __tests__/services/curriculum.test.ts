@@ -83,6 +83,14 @@ describe("curriculumService.delete", () => {
     expect(result).toEqual({ success: true });
   });
 
+  it("parses JSON body for non-204/200 responses (line 49)", async () => {
+    const body = { success: false, error: "Not found" };
+    vi.stubGlobal("fetch", mockFetch(body, 404));
+
+    const result = await curriculumService.delete("curr-missing");
+    expect(result).toEqual(body);
+  });
+
   it("falls back gracefully on non-JSON error response", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
