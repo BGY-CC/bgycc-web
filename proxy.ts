@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export function middleware() {
+export function proxy() {
   // Since we are using localStorage for auth in Phase 1 (client-side only),
   // we can't easily check auth status in middleware (server-side) without a cookie.
   // For now, we'll let the client-side AuthProvider handle redirects.
