@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { Plus, ChevronDown } from "lucide-react";
 import { Button, Skeleton, useToast } from "@/components/ui";
 import { SearchInput } from "@/components/shared";
@@ -52,6 +53,25 @@ export function ClubsListClient() {
   const [filterCity, setFilterCity] = useState("");
   const [showStateDropdown, setShowStateDropdown] = useState(false);
   const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const stateRef = useRef<HTMLDivElement>(null);
+  const cityRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  // Handle outside clicks
+  useEffect(() => {
+    if (!showStateDropdown && !showCityDropdown) return;
+    const handleOutside = (e: MouseEvent) => {
+      if (stateRef.current && !stateRef.current.contains(e.target as Node) && 
+          cityRef.current && !cityRef.current.contains(e.target as Node)) {
+        setShowStateDropdown(false);
+        setShowCityDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [showStateDropdown, showCityDropdown]);
 
   const allStates: string[] = getStates();
   const cities: string[] = filterState ? getLgas(filterState) : [];
@@ -169,32 +189,37 @@ export function ClubsListClient() {
   return (
     <>
       {/* Toolbar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-wrap items-center gap-3 bg-white p-4 lg:p-5 rounded-xl shadow-sm border border-gray-100">
-          <SearchInput
-            placeholder="Search clubs by name..."
-            containerClassName="w-full sm:max-w-xs"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-          />
+      <div className="bg-white p-4 lg:p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+        <div className="flex flex-col gap-4">
+          {/* Top row: Search */}
+          <div className="w-full">
+            <SearchInput
+              placeholder="Search clubs by name..."
+              containerClassName="w-full"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
 
-          <div className="flex flex-1 items-center justify-between gap-2 w-full sm:w-auto">
-            <div className="flex items-center gap-2">
+          {/* Bottom row: Filters + Create Button */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-1 sm:flex-none">
               {/* State / Region filter */}
-              <div className="relative">
+              <div className="relative flex-1 sm:flex-none" ref={stateRef}>
                 <Button
                   variant="secondary"
                   size="sm"
+                  className="w-full sm:w-auto justify-between min-w-[120px]"
                   rightIcon={<ChevronDown className="h-4 w-4" />}
                   onClick={() => {
                     setShowStateDropdown((p) => !p);
                     setShowCityDropdown(false);
                   }}
                 >
-                  {filterState || "All States"}
+                  <span className="truncate">{filterState || "All States"}</span>
                 </Button>
                 {showStateDropdown && (
                   <div className="absolute top-full left-0 mt-2 z-[100] bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
@@ -231,17 +256,18 @@ export function ClubsListClient() {
 
               {/* City filter — only visible after state is selected */}
               {filterState && cities.length > 0 && (
-                <div className="relative">
+                <div className="relative flex-1 sm:flex-none" ref={cityRef}>
                   <Button
                     variant="secondary"
                     size="sm"
+                    className="w-full sm:w-auto justify-between min-w-[120px]"
                     rightIcon={<ChevronDown className="h-4 w-4" />}
                     onClick={() => {
                       setShowCityDropdown((p) => !p);
                       setShowStateDropdown(false);
                     }}
                   >
-                    {filterCity || "All LGAs"}
+                    <span className="truncate">{filterCity || "All LGAs"}</span>
                   </Button>
                   {showCityDropdown && (
                     <div className="absolute top-full left-0 mt-2 z-[100] bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
@@ -277,7 +303,7 @@ export function ClubsListClient() {
             </div>
 
             <Button
-              className="sm:ml-auto"
+              className="w-full sm:w-auto mt-2 sm:mt-0"
               size="sm"
               leftIcon={<Plus className="h-4 w-4" />}
               onClick={() => setShowCreate(true)}

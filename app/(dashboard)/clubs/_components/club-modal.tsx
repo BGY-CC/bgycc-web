@@ -60,9 +60,12 @@ function useDragToClose(onClose: () => void) {
   const isDragging = useRef(false);
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
-    // Only trigger from the handle / header area — ignore form inputs
-    const tag = (e.target as HTMLElement).tagName.toLowerCase();
-    if (["input", "select", "textarea", "button", "a", "label"].includes(tag)) return;
+    // Only trigger from the background / header area — ignore all interactive elements
+    const target = e.target as HTMLElement;
+    const isInteractive = target.closest('input, select, textarea, button, a, label, [role="button"], .no-drag');
+    
+    if (isInteractive) return;
+    
     isDragging.current = true;
     startY.current = e.clientY;
     sheetRef.current?.setPointerCapture(e.pointerId);

@@ -121,22 +121,33 @@ export default function ClubDetailPage() {
   const [engagementPeriodOpen, setEngagementPeriodOpen] = useState(false);
   const engagementPeriodRef = useRef<HTMLDivElement>(null);
 
+  const [statusPeriod, setStatusPeriod] = useState("7d");
+  const [statusPeriodOpen, setStatusPeriodOpen] = useState(false);
+  const statusPeriodRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if (!engagementPeriodOpen) return;
+    if (!engagementPeriodOpen && !statusPeriodOpen) return;
     function onPointerDown(e: PointerEvent) {
       if (
         engagementPeriodRef.current &&
-        !engagementPeriodRef.current.contains(e.target as Node)
+        !engagementPeriodRef.current.contains(e.target as Node) &&
+        statusPeriodRef.current &&
+        !statusPeriodRef.current.contains(e.target as Node)
       ) {
         setEngagementPeriodOpen(false);
+        setStatusPeriodOpen(false);
       }
     }
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [engagementPeriodOpen]);
+  }, [engagementPeriodOpen, statusPeriodOpen]);
 
   const engagementPeriodLabel =
     ENGAGEMENT_PERIOD_OPTIONS.find((o) => o.value === engagementPeriod)?.label ??
+    "Last 7 Days";
+
+  const statusPeriodLabel =
+    ENGAGEMENT_PERIOD_OPTIONS.find((o) => o.value === statusPeriod)?.label ??
     "Last 7 Days";
 
   const { data: engagementData } = useQuery<{ data: { date: string; reports: number; logins: number }[] }>(
@@ -145,7 +156,7 @@ export default function ClubDetailPage() {
   );
 
   const { data: statusData } = useQuery<{ data: { active: number; at_risk: number; inactive: number } }>(
-    `/clubs/${clubId}/member-status`,
+    `/clubs/${clubId}/member-status?period=${statusPeriod}`,
     { enabled: hasValidClubId },
   );
 
@@ -378,8 +389,34 @@ export default function ClubDetailPage() {
               <h3 className="text-sm font-semibold text-gray-900">Member Status</h3>
               <p className="text-[11px] font-medium text-gray-400">Risk distribution</p>
             </div>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 cursor-pointer">
-              This Week <ChevronDown className="h-3.5 w-3.5" />
+            <div ref={statusPeriodRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setStatusPeriodOpen((p) => !p)}
+                className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {statusPeriodLabel} <ChevronDown className="h-3.5 w-3.5" />
+              </button>
+              {statusPeriodOpen && (
+                <ul className="absolute right-0 top-full mt-1 z-[100] min-w-[140px] bg-white border border-gray-200 rounded-md shadow-lg py-1 animate-in fade-in zoom-in-95 duration-150">
+                  {ENGAGEMENT_PERIOD_OPTIONS.map((opt) => (
+                    <li key={opt.value}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStatusPeriod(opt.value);
+                          setStatusPeriodOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 ${
+                          statusPeriod === opt.value ? "text-primary font-medium" : "text-gray-700"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
           <MemberStatusChart 

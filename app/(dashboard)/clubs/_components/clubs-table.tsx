@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Eye, Pencil, PowerOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   Badge,
   ActionMenu,
@@ -12,7 +13,6 @@ import {
 import { ConfirmDialog } from "@/components/ui";
 import { useToast } from "@/components/ui";
 import { Club } from "@/lib/services/clubs";
-import { useRouter } from "next/navigation";
 
 interface ClubsTableProps {
   clubs: Club[];
@@ -47,8 +47,61 @@ export function ClubsTable({
 
   return (
     <>
-      {/* Table wrapper — horizontal scroll on mobile */}
-      <div className="rounded-2xl border border-border bg-white overflow-hidden shadow-sm">
+      {/* ── Mobile card list (< md) ───────────────────────────────────── */}
+      <div className="md:hidden rounded-2xl border border-border bg-white overflow-hidden shadow-sm divide-y divide-border">
+        {clubs.length === 0 ? (
+          <div className="py-10 text-center text-sm text-gray-500">
+            No clubs found matching your criteria.
+          </div>
+        ) : (
+          clubs.map((club) => {
+            if (!club.id) return null;
+            const menuItems: DropdownItem[] = [
+              {
+                label: "View Details",
+                icon: <Eye className="h-4 w-4" />,
+                onClick: () => router.push(`/clubs/${club.id}`),
+              },
+              {
+                label: "Edit Club",
+                icon: <Pencil className="h-4 w-4" />,
+                onClick: () => onEdit && onEdit(club),
+              },
+              {
+                label: "Deactivate",
+                icon: <PowerOff className="h-4 w-4" />,
+                onClick: () => setDeleteTarget(club),
+                variant: "destructive",
+              },
+            ];
+            return (
+              <div
+                key={club.id}
+                className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+              >
+                <Link
+                  href={`/clubs/${club.id}`}
+                  className="flex-1 min-w-0 mr-2"
+                >
+                  <p className="text-sm font-semibold text-gray-900 truncate">
+                    {club.name}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {[club.city, club.state].filter(Boolean).join(", ") || "No region"}
+                  </p>
+                </Link>
+                {/* Stop link navigation when tapping the menu */}
+                <div onClick={(e) => e.preventDefault()}>
+                  <ActionMenu items={menuItems} align="right" />
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* ── Desktop table (≥ md) ──────────────────────────────────────── */}
+      <div className="hidden md:block rounded-2xl border border-border bg-white overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm font-sans">
             <thead>
