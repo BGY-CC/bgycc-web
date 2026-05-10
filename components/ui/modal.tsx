@@ -46,11 +46,12 @@ export function Modal({ open, onClose, children }: ModalProps) {
         onClick={onClose}
         aria-hidden="true"
       />
-      {/* Panel */}
+      {/* Panel — clicking the empty area closes the modal */}
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
         role="dialog"
         aria-modal="true"
+        onClick={onClose}
       >
         {children}
       </div>
@@ -69,7 +70,7 @@ export function ModalContent({ className, children }: ModalContentProps) {
   return (
     <div
       className={cn(
-        "relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto",
+        "relative w-full rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto",
         className,
       )}
       onClick={(e) => e.stopPropagation()}

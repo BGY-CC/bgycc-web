@@ -34,7 +34,7 @@ export function MemberStatusChart({ data }: MemberStatusProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative w-full h-[220px]">
+      <div className="relative w-full h-[220px] min-h-[220px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
