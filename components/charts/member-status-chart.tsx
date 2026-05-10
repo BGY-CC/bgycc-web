@@ -13,6 +13,7 @@ interface MemberStatusProps {
 
 export function MemberStatusChart({ data }: MemberStatusProps) {
   const [isMounted, setIsMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setIsMounted(true); }, []);
 
   const activeCount = data?.active || 0;

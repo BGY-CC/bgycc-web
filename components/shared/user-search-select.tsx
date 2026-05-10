@@ -36,6 +36,7 @@ export function UserSearchSelect({
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties>({});
 
   // Portal only works client-side
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true); }, []);
 
   // Fetch initial user if value is provided
