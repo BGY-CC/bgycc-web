@@ -15,10 +15,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-if (process.env.NODE_ENV === "development" && !process.env.VERCEL) {
-  import("@opennextjs/cloudflare").then(({ initOpenNextCloudflareForDev }) => {
-    initOpenNextCloudflareForDev();
-  });
-}
+// Cloudflare dev runtime removed — using Vercel for deployment
 
 export default nextConfig;

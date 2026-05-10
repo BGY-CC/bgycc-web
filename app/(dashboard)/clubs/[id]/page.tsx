@@ -261,42 +261,42 @@ export default function ClubDetailPage() {
       </div>
 
       {/* Info Card */}
-      <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-100 border border-gray-100 shrink-0">
+      <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="h-9 w-9 rounded-full overflow-hidden bg-gray-100 border border-gray-100 shrink-0">
             {club.leader?.profile_picture_url ? (
               <Image 
                 src={club.leader.profile_picture_url} 
                 alt={club.leader.full_name || "Leader"} 
-                width={48} 
-                height={48} 
+                width={36} 
+                height={36} 
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="h-full w-full flex items-center justify-center bg-gray-50 text-gray-400 font-medium text-lg">
+              <div className="h-full w-full flex items-center justify-center bg-gray-50 text-gray-400 font-medium text-base">
                 {(club.leader?.full_name || "L").charAt(0)}
               </div>
             )}
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Leader</span>
-            <span className="text-base font-medium text-gray-900">{club.leader?.full_name || "No Leader Assigned"}</span>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Leader</span>
+            <span className="text-xs font-medium text-gray-900 truncate">{club.leader?.full_name || "No Leader Assigned"}</span>
           </div>
         </div>
 
         <div className="flex flex-col">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Region</span>
-          <span className="text-base font-medium text-gray-900">
+          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Region</span>
+          <span className="text-xs font-medium text-gray-900">
             {[club.city, club.state].filter(Boolean).join(", ") || "No Region Set"}
           </span>
         </div>
 
         <div className="flex flex-col">
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Created</span>
-          <span className="text-base font-medium text-gray-600">
-            {club.created_at ? new Date(club.created_at).toLocaleDateString("en-US", {
-              month: "numeric",
+          <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Created</span>
+          <span className="text-xs font-medium text-gray-600">
+            {club.created_at ? new Date(club.created_at).toLocaleDateString("en-GB", {
               day: "numeric",
+              month: "short",
               year: "numeric"
             }) : "N/A"}
           </span>

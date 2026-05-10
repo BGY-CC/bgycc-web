@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, type CSSProperties } from "react";
 import { Search, User, X } from "lucide-react";
 import Image from "next/image";
 import { Input, Skeleton } from "@/components/ui";
@@ -30,6 +30,8 @@ export function UserSearchSelect({
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLDivElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<CSSProperties>({});
 
   // Fetch initial user if value is provided
   useEffect(() => {
@@ -44,6 +46,20 @@ export function UserSearchSelect({
     }
   }, [value, selectedUser]);
 
+  // Compute fixed position from the input's bounding rect so the
+  // dropdown escapes any overflow:hidden / overflow:scroll ancestor.
+  const updateDropdownPosition = useCallback(() => {
+    if (!inputRef.current) return;
+    const rect = inputRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: "fixed",
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999,
+    });
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -53,6 +69,21 @@ export function UserSearchSelect({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (isOpen) updateDropdownPosition();
+  }, [isOpen, updateDropdownPosition]);
+
+  // Reposition on scroll / resize while open
+  useEffect(() => {
+    if (!isOpen) return;
+    window.addEventListener("scroll", updateDropdownPosition, true);
+    window.addEventListener("resize", updateDropdownPosition);
+    return () => {
+      window.removeEventListener("scroll", updateDropdownPosition, true);
+      window.removeEventListener("resize", updateDropdownPosition);
+    };
+  }, [isOpen, updateDropdownPosition]);
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -99,7 +130,7 @@ export function UserSearchSelect({
         </label>
       )}
       
-      <div className="relative">
+      <div className="relative" ref={inputRef}>
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className="h-4 w-4 text-gray-400" />
         </div>
@@ -136,7 +167,10 @@ export function UserSearchSelect({
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
 
       {isOpen && (query.length >= 2 || isLoading) && !selectedUser && (
-        <div className="absolute z-50 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+        <div
+          className="bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
+          style={dropdownStyle}
+        >
           {isLoading ? (
             <div className="px-4 py-2 space-y-2">
               <Skeleton className="h-4 w-full" />
@@ -152,7 +186,7 @@ export function UserSearchSelect({
                 )}
                 onClick={() => handleSelect(user)}
               >
-                <div className="flex items-center">
+                <div className="flex items-center gap-2 min-w-0">
                   <div className="flex-shrink-0 h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center">
                     {user.profile_picture_url ? (
                       <Image src={user.profile_picture_url} alt="" width={24} height={24} className="h-6 w-6 rounded-full" />
@@ -160,19 +194,19 @@ export function UserSearchSelect({
                       <User className="h-3 w-3 text-gray-500" />
                     )}
                   </div>
-                  <span className="ml-3 block truncate font-medium">
+                  <span className="block truncate font-normal text-sm flex-1 min-w-0">
                     {user.full_name || "Unknown User"}
                   </span>
-                  <span className="ml-2 text-xs text-gray-500">
+                  <span className="text-xs text-gray-400 shrink-0 truncate max-w-[80px] hidden sm:block">
                     {user.email}
                   </span>
                   {user.club_id && (
-                    <span className="ml-2 px-1.5 py-0.5 text-[10px] font-medium bg-red-100 text-red-700 rounded-full">
+                    <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 text-[10px] font-medium bg-red-100 text-red-700 rounded-full">
                       Has Club
                     </span>
                   )}
                   {user.role === 'leader' && (
-                    <span className="ml-2 px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-700 rounded-full">
+                    <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-700 rounded-full">
                       Leader
                     </span>
                   )}
