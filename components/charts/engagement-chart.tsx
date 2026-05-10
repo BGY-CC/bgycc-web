@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   AreaChart,
   Area,
@@ -37,6 +38,13 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 }
 
 export function EngagementChart({ data }: { data?: ChartDataPoint[] }) {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => { setIsMounted(true); }, []);
+
+  if (!isMounted) {
+    return <div className="w-full h-[220px] bg-gray-50/50 rounded-lg animate-pulse" />;
+  }
+
   if (!data || data.length === 0) {
     return (
       <div className="flex h-[220px] items-center justify-center text-sm text-gray-400">
@@ -46,52 +54,54 @@ export function EngagementChart({ data }: { data?: ChartDataPoint[] }) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <AreaChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-        <defs>
-          <linearGradient id="reportsGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#1e293b" stopOpacity={0.1} />
-            <stop offset="95%" stopColor="#1e293b" stopOpacity={0} />
-          </linearGradient>
-          <linearGradient id="activeUsersGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#e11d48" stopOpacity={0.1} />
-            <stop offset="95%" stopColor="#e11d48" stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="5 5" stroke="#e9edf7" vertical={false} />
-        <XAxis
-          dataKey="label"
-          tick={{ fontSize: 12, fill: "#a3aed0", fontWeight: 500 }}
-          axisLine={false}
-          tickLine={false}
-          dy={10}
-        />
-        <YAxis
-          tick={{ fontSize: 12, fill: "#a3aed0", fontWeight: 500 }}
-          axisLine={false}
-          tickLine={false}
-          dx={-10}
-        />
-        <Tooltip content={<CustomTooltip />} />
-        <Area
-          type="monotone"
-          dataKey="reports"
-          stroke="#1e293b"
-          strokeWidth={3}
-          fill="url(#reportsGradient)"
-          dot={false}
-          activeDot={{ r: 4, fill: "#1e293b", strokeWidth: 2, stroke: "#fff" }}
-        />
-        <Area
-          type="monotone"
-          dataKey="active_users"
-          stroke="#e11d48"
-          strokeWidth={3}
-          fill="url(#activeUsersGradient)"
-          dot={false}
-          activeDot={{ r: 4, fill: "#e11d48", strokeWidth: 2, stroke: "#fff" }}
-        />
-      </AreaChart>
-    </ResponsiveContainer>
+    <div className="w-full min-h-[220px]">
+      <ResponsiveContainer width="100%" height={220}>
+        <AreaChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+          <defs>
+            <linearGradient id="reportsGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#1e293b" stopOpacity={0.1} />
+              <stop offset="95%" stopColor="#1e293b" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="activeUsersGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#e11d48" stopOpacity={0.1} />
+              <stop offset="95%" stopColor="#e11d48" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="5 5" stroke="#e9edf7" vertical={false} />
+          <XAxis
+            dataKey="label"
+            tick={{ fontSize: 12, fill: "#a3aed0", fontWeight: 500 }}
+            axisLine={false}
+            tickLine={false}
+            dy={10}
+          />
+          <YAxis
+            tick={{ fontSize: 12, fill: "#a3aed0", fontWeight: 500 }}
+            axisLine={false}
+            tickLine={false}
+            dx={-10}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Area
+            type="monotone"
+            dataKey="reports"
+            stroke="#1e293b"
+            strokeWidth={3}
+            fill="url(#reportsGradient)"
+            dot={false}
+            activeDot={{ r: 4, fill: "#1e293b", strokeWidth: 2, stroke: "#fff" }}
+          />
+          <Area
+            type="monotone"
+            dataKey="active_users"
+            stroke="#e11d48"
+            strokeWidth={3}
+            fill="url(#activeUsersGradient)"
+            dot={false}
+            activeDot={{ r: 4, fill: "#e11d48", strokeWidth: 2, stroke: "#fff" }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { Search, User, X } from "lucide-react";
 import Image from "next/image";
 import { Input, Skeleton } from "@/components/ui";
@@ -22,16 +23,20 @@ export function UserSearchSelect({
   placeholder = "Search users...",
   label,
   error,
-  disabled
+  disabled,
 }: UserSearchSelectProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties>({});
+
+  // Portal only works client-side
+  useEffect(() => { setMounted(true); }, []);
 
   // Fetch initial user if value is provided
   useEffect(() => {
@@ -46,8 +51,9 @@ export function UserSearchSelect({
     }
   }, [value, selectedUser]);
 
-  // Compute fixed position from the input's bounding rect so the
-  // dropdown escapes any overflow:hidden / overflow:scroll ancestor.
+  // Compute position from inputRef's bounding rect.
+  // We use createPortal so this renders directly on document.body,
+  // escaping any transform/overflow ancestor (including the drag sheet).
   const updateDropdownPosition = useCallback(() => {
     if (!inputRef.current) return;
     const rect = inputRef.current.getBoundingClientRect();
@@ -56,13 +62,16 @@ export function UserSearchSelect({
       top: rect.bottom + 4,
       left: rect.left,
       width: rect.width,
-      zIndex: 9999,
+      zIndex: 99999,
     });
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -95,8 +104,8 @@ export function UserSearchSelect({
           if (res.success && data) {
             setResults(data.users || []);
           }
-        } catch (error) {
-          console.error("Failed to search users", error);
+        } catch (err) {
+          console.error("Failed to search users", err);
         } finally {
           setIsLoading(false);
         }
@@ -122,6 +131,72 @@ export function UserSearchSelect({
     onChange("", null);
   };
 
+  const dropdown =
+    mounted && isOpen && (query.length >= 2 || isLoading) && !selectedUser
+      ? createPortal(
+          <div
+            className="bg-white shadow-xl rounded-xl py-1 text-sm ring-1 ring-black/5 overflow-auto max-h-60"
+            style={dropdownStyle}
+          >
+            {isLoading ? (
+              <div className="px-4 py-2 space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            ) : results.length > 0 ? (
+              results.map((user) => (
+                <div
+                  key={user.id}
+                  className={cn(
+                    "cursor-pointer select-none py-2 px-3 hover:bg-primary/10 text-gray-900"
+                  )}
+                  onMouseDown={(e) => {
+                    // Use mousedown so it fires before the input blur that closes the dropdown
+                    e.preventDefault();
+                    handleSelect(user);
+                  }}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-nowrap">
+                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center">
+                      {user.profile_picture_url ? (
+                        <Image
+                          src={user.profile_picture_url}
+                          alt=""
+                          width={24}
+                          height={24}
+                          className="h-6 w-6 rounded-full"
+                        />
+                      ) : (
+                        <User className="h-3 w-3 text-gray-500" />
+                      )}
+                    </div>
+                    <span className="block truncate font-normal text-sm flex-1 min-w-0">
+                      {user.full_name || "Unknown User"}
+                    </span>
+                    <span className="text-xs text-gray-400 shrink-0 truncate max-w-[80px] hidden sm:block">
+                      {user.email}
+                    </span>
+                    {user.club_id && (
+                      <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 text-[10px] font-medium bg-red-100 text-red-700 rounded-full">
+                        Has Club
+                      </span>
+                    )}
+                    {user.role === "leader" && (
+                      <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-700 rounded-full">
+                        Leader
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-2 text-sm text-gray-500">No users found</div>
+            )}
+          </div>,
+          document.body
+        )
+      : null;
+
   return (
     <div className="relative" ref={containerRef}>
       {label && (
@@ -129,19 +204,17 @@ export function UserSearchSelect({
           {label}
         </label>
       )}
-      
+
       <div className="relative" ref={inputRef}>
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className="h-4 w-4 text-gray-400" />
         </div>
-        
+
         <Input
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
-            if (selectedUser) {
-              handleClear();
-            }
+            if (selectedUser) handleClear();
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
@@ -166,60 +239,7 @@ export function UserSearchSelect({
 
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
 
-      {isOpen && (query.length >= 2 || isLoading) && !selectedUser && (
-        <div
-          className="bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
-          style={dropdownStyle}
-        >
-          {isLoading ? (
-            <div className="px-4 py-2 space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-          ) : results.length > 0 ? (
-            results.map((user) => (
-              <div
-                key={user.id}
-                className={cn(
-                  "cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-primary/10",
-                  "text-gray-900"
-                )}
-                onClick={() => handleSelect(user)}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center">
-                    {user.profile_picture_url ? (
-                      <Image src={user.profile_picture_url} alt="" width={24} height={24} className="h-6 w-6 rounded-full" />
-                    ) : (
-                      <User className="h-3 w-3 text-gray-500" />
-                    )}
-                  </div>
-                  <span className="block truncate font-normal text-sm flex-1 min-w-0">
-                    {user.full_name || "Unknown User"}
-                  </span>
-                  <span className="text-xs text-gray-400 shrink-0 truncate max-w-[80px] hidden sm:block">
-                    {user.email}
-                  </span>
-                  {user.club_id && (
-                    <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 text-[10px] font-medium bg-red-100 text-red-700 rounded-full">
-                      Has Club
-                    </span>
-                  )}
-                  {user.role === 'leader' && (
-                    <span className="shrink-0 whitespace-nowrap px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-700 rounded-full">
-                      Leader
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="px-4 py-2 text-sm text-gray-500">
-              No users found
-            </div>
-          )}
-        </div>
-      )}
+      {dropdown}
     </div>
   );
 }

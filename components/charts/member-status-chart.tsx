@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 interface MemberStatusProps {
@@ -11,6 +12,9 @@ interface MemberStatusProps {
 }
 
 export function MemberStatusChart({ data }: MemberStatusProps) {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => { setIsMounted(true); }, []);
+
   const activeCount = data?.active || 0;
   const atRiskCount = data?.at_risk || 0;
   const resetCount = data?.reset || data?.inactive || 0;
@@ -23,6 +27,10 @@ export function MemberStatusChart({ data }: MemberStatusProps) {
   ];
 
   const getPercent = (val: number) => Math.round((val / total) * 100);
+
+  if (!isMounted) {
+    return <div className="w-full h-[220px] bg-gray-50/50 rounded-lg animate-pulse" />;
+  }
 
   if (!data || total === 0) {
     return (
