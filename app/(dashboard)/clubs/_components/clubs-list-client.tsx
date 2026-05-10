@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, type CSSProperties } from "react";
-import { createPortal } from "react-dom";
+import { useState, useRef, useEffect } from "react";
 import { Plus, ChevronDown } from "lucide-react";
 import { Button, Skeleton, useToast } from "@/components/ui";
 import { SearchInput } from "@/components/shared";
@@ -53,11 +52,8 @@ export function ClubsListClient() {
   const [filterCity, setFilterCity] = useState("");
   const [showStateDropdown, setShowStateDropdown] = useState(false);
   const [showCityDropdown, setShowCityDropdown] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const stateRef = useRef<HTMLDivElement>(null);
   const cityRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => { setMounted(true); }, []);
 
   // Handle outside clicks
   useEffect(() => {
