@@ -16,7 +16,11 @@ import {
   Textarea,
   Checkbox,
   Radio,
+  Skeleton,
 } from "@/components/ui";
+import { useQuery } from "@/hooks/use-query";
+import { clubsService, PaginatedClubs } from "@/lib/services/clubs";
+import { filterAndNormalizeClubs } from "@/lib/services/club-utils";
 
 const schema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -78,6 +82,15 @@ export function AnnouncementModal({
   const targetAudience = watch("targetAudience");
   const deliveryOptions = watch("deliveryOptions") || [];
   const selectedClubs = watch("selectedClubs") || [];
+
+  const { data: clubsData, isLoading: isLoadingClubs } = useQuery<PaginatedClubs>(
+    "/clubs?page_size=100",
+    { enabled: open && targetAudience === "specific" }
+  );
+
+  const availableClubs = filterAndNormalizeClubs(
+    (clubsData?.clubs as unknown as Record<string, unknown>[]) || []
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   useEffect(() => {
     if (!open) reset();
@@ -162,22 +175,36 @@ export function AnnouncementModal({
           {targetAudience === "specific" && (
             <div className="space-y-3 p-4 rounded-2xl bg-background border border-border">
                 <p className="text-xs font-semibold text-muted uppercase tracking-wider">Select Clubs*</p>
-                <div className="grid grid-cols-2 gap-3">
-                    {["Lagos Club", "Kano Club", "Owerri Club", "Uyo Club"].map(club => (
-                        <Checkbox 
-                            key={club}
-                            id={club}
-                            label={club}
-                            checked={selectedClubs.includes(club)}
-                            onChange={(e) => {
-                                const next = e.target.checked
-                                    ? [...selectedClubs, club]
-                                    : selectedClubs.filter(c => c !== club);
-                                setValue("selectedClubs", next);
-                            }}
-                        />
+                
+                {isLoadingClubs ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <Skeleton className="h-4 w-4 rounded" />
+                        <Skeleton className="h-4 w-24" />
+                      </div>
                     ))}
-                </div>
+                  </div>
+                ) : availableClubs.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3">
+                      {availableClubs.map(club => (
+                          <Checkbox 
+                              key={club.id}
+                              id={club.id}
+                              label={club.name}
+                              checked={selectedClubs.includes(club.id) || selectedClubs.includes(club.name)}
+                              onChange={(e) => {
+                                  const next = e.target.checked
+                                      ? [...selectedClubs, club.id]
+                                      : selectedClubs.filter(val => val !== club.id && val !== club.name);
+                                  setValue("selectedClubs", next, { shouldValidate: true });
+                              }}
+                          />
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 italic">No clubs available.</p>
+                )}
             </div>
           )}
 
