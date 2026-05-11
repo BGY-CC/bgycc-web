@@ -11,6 +11,8 @@ import {
   Announcement,
   announcementsService,
 } from "@/lib/services/announcements";
+import { clubsService, PaginatedClubs } from "@/lib/services/clubs";
+import { filterAndNormalizeClubs } from "@/lib/services/club-utils";
 
 function AnnouncementsSkeleton() {
   return (
@@ -80,6 +82,13 @@ export function AnnouncementsClient() {
 
   const { data: rawData, isLoading, refetch } =
     useQuery<unknown>(`/community/announcements`);
+
+  const { data: clubsData } = useQuery<PaginatedClubs>("/clubs?page_size=100");
+  
+  const clubsMap = useMemo(() => {
+    const clubs = filterAndNormalizeClubs((clubsData?.clubs as unknown as Record<string, unknown>[]) || []);
+    return new Map(clubs.map(c => [c.id, c.name]));
+  }, [clubsData]);
 
   const announcements: Announcement[] = useMemo(() => {
     const source = rawData as
@@ -223,9 +232,9 @@ export function AnnouncementsClient() {
             const isExpanded = !!expanded[a.id];
             const delivery = (Array.isArray(a.metadata?.delivery) ? a.metadata.delivery : []) as string[];
             const targets = Array.isArray(a.metadata?.target) 
-              ? a.metadata.target 
+              ? a.metadata.target.map((t: string) => clubsMap.get(t) || t)
               : a.metadata?.target 
-                ? [a.metadata.target] 
+                ? [clubsMap.get(a.metadata.target as string) || a.metadata.target] 
                 : ["All Members"];
 
             return (
