@@ -231,10 +231,10 @@ export function AnnouncementsClient() {
             const content = a.content ?? "";
             const isExpanded = !!expanded[a.id];
             const delivery = (Array.isArray(a.metadata?.delivery) ? a.metadata.delivery : []) as string[];
-            const targets = Array.isArray(a.metadata?.target) 
-              ? a.metadata.target.map((t: string) => clubsMap.get(t) || t)
+            const targets: string[] = Array.isArray(a.metadata?.target) 
+              ? (a.metadata.target as string[]).map((t: string) => clubsMap.get(t) || t)
               : a.metadata?.target 
-                ? [clubsMap.get(a.metadata.target as string) || a.metadata.target] 
+                ? [clubsMap.get(a.metadata.target as string) || (a.metadata.target as string)] 
                 : ["All Members"];
 
             return (
