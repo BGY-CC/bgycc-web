@@ -11,7 +11,7 @@ import {
   Announcement,
   announcementsService,
 } from "@/lib/services/announcements";
-import { clubsService, PaginatedClubs } from "@/lib/services/clubs";
+import { PaginatedClubs } from "@/lib/services/clubs";
 import { filterAndNormalizeClubs } from "@/lib/services/club-utils";
 
 function AnnouncementsSkeleton() {

@@ -19,7 +19,7 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
-import { clubsService, PaginatedClubs } from "@/lib/services/clubs";
+import { PaginatedClubs } from "@/lib/services/clubs";
 import { filterAndNormalizeClubs } from "@/lib/services/club-utils";
 
 const schema = z.object({
