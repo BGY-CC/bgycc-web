@@ -12,6 +12,7 @@ import {
   LogOut,
   X,
   UserRoundCheck,
+  Share2,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,7 @@ const navItems = [
   { label: "Resources", href: "/resources", icon: FolderOpen },
   { label: "Announcement", href: "/announcement", icon: Megaphone },
   { label: "Leader Management", href: "/leaders", icon: UserRoundCheck },
+  // { label: "Referrals", href: "/referrals", icon: Share2 },
 ];
 
 interface SidebarProps {

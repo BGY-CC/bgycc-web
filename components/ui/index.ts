@@ -48,3 +48,7 @@ export type { ConfirmDialogProps } from "./confirm-dialog";
 
 export { Skeleton } from "./skeleton";
 export type { SkeletonProps } from "./skeleton";
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
+
+export { Avatar, AvatarImage, AvatarFallback } from "./avatar";
