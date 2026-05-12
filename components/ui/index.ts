@@ -31,6 +31,9 @@ export type { ToastItem } from "./toast";
 export { Select } from "./select";
 export type { SelectProps } from "./select";
 
+export { CustomSelect } from "./custom-select";
+export type { CustomSelectProps } from "./custom-select";
+
 export { Textarea } from "./textarea";
 export type { TextareaProps } from "./textarea";
 
@@ -48,7 +51,3 @@ export type { ConfirmDialogProps } from "./confirm-dialog";
 
 export { Skeleton } from "./skeleton";
 export type { SkeletonProps } from "./skeleton";
-
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
-
-export { Avatar, AvatarImage, AvatarFallback } from "./avatar";

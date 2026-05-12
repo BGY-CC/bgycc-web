@@ -11,7 +11,7 @@ import {
   Button,
   FormField,
   Input,
-  Select,
+  CustomSelect,
   Textarea,
 } from "@/components/ui";
 import { UserSearchSelect } from "@/components/shared";
@@ -128,6 +128,7 @@ export function ClubModal({
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const selectedState = watch("state");
+  const selectedCity = watch("city");
   const allStates: string[] = getStates();
   const cities: string[] = useMemo(
     () => (selectedState ? getLgas(selectedState) : []),
@@ -292,25 +293,25 @@ export function ClubModal({
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
-                <FormField label="State" required error={errors.state?.message}>
-                  <Select {...register("state")}>
-                    <option value="">Select State</option>
-                    {allStates.map((s: string) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </Select>
-                </FormField>
+          <div className="grid grid-cols-2 gap-3">
+            <FormField label="State" required error={errors.state?.message}>
+              <CustomSelect {...register("state")} value={selectedState} placeholder="Select State">
+                <option value="">Select State</option>
+                {allStates.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </CustomSelect>
+            </FormField>
 
-                <FormField label="City / LGA" required error={errors.city?.message}>
-                  <Select {...register("city")} disabled={!selectedState}>
-                    <option value="">{selectedState ? "Select City" : "Pick state first"}</option>
-                    {cities.map((c: string) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </Select>
-                </FormField>
-              </div>
+            <FormField label="City / LGA" required error={errors.city?.message}>
+              <CustomSelect {...register("city")} value={selectedCity} disabled={!selectedState} placeholder={selectedState ? "Select City" : "Select state first"}>
+                <option value="">{selectedState ? "Select City" : "Select state first"}</option>
+                {cities.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </CustomSelect>
+            </FormField>
+          </div>
 
               <FormField label="WhatsApp Link" error={errors.whatsappLink?.message}>
                 <Input placeholder="https://chat.whatsapp.com/..." {...register("whatsappLink")} />

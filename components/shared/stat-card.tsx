@@ -10,6 +10,7 @@ export interface StatCardProps {
   color?: string; // Hex color for icon and subtle background
   change?: number; // e.g. 0, +5.2, -3.1
   changeSuffix?: string; // e.g. "%", " XP"
+  description?: string; // Additional context below the label
   className?: string;
 }
 
@@ -24,6 +25,7 @@ export function StatCard({
   color,
   change, 
   changeSuffix = "%",
+  description,
   className 
 }: StatCardProps) {
   const isPositive = change !== undefined ? change >= 0 : true;
@@ -58,6 +60,11 @@ export function StatCard({
           <div className="min-w-0">
             <p className="text-xl font-semibold text-primary tracking-tight">{value}</p>
             <p className="mt-1 text-sm font-normal text-muted">{label}</p>
+            {description && (
+              <p className="mt-1 text-[11px] text-subtle font-normal italic truncate">
+                {description}
+              </p>
+            )}
           </div>
         </div>
 

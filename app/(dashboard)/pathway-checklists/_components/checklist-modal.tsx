@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ClipboardList } from "lucide-react";
@@ -12,7 +12,7 @@ import {
   Button,
   FormField,
   Input,
-  Select,
+  CustomSelect,
   Textarea,
 } from "@/components/ui";
 import { ChecklistItem } from "@/lib/services/checklist";
@@ -48,7 +48,7 @@ export function ChecklistModal({
     register,
     handleSubmit,
     reset,
-    control,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -63,7 +63,9 @@ export function ChecklistModal({
     },
   });
 
-  const schedule = useWatch({ control, name: "schedule" });
+  const type = watch("type");
+  const schedule = watch("schedule");
+  const day_of_week = watch("day_of_week");
 
   useEffect(() => {
     if (open) {
@@ -98,7 +100,7 @@ export function ChecklistModal({
         <form onSubmit={handleSubmit(onSuccess)} noValidate className="space-y-5 px-6 pb-8">
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Task Type*" error={errors.type?.message}>
-              <Select {...register("type")}>
+              <CustomSelect {...register("type")} value={type} placeholder="Select Type">
                 <option value="Prayer">Prayer</option>
                 <option value="Bible Study">Bible Study</option>
                 <option value="Meditation">Meditation</option>
@@ -109,15 +111,15 @@ export function ChecklistModal({
                 <option value="Affirmations">Affirmations</option>
                 <option value="Practice Speech">Practice Speech</option>
                 <option value="Watch Video">Watch Video</option>
-              </Select>
+              </CustomSelect>
             </FormField>
 
             <FormField label="Schedule*" error={errors.schedule?.message}>
-              <Select {...register("schedule")}>
+              <CustomSelect {...register("schedule")} value={schedule} placeholder="Select Schedule">
                 <option value="Everyday">Everyday</option>
                 <option value="Weekly">Weekly</option>
                 <option value="Specific Day">Specific Day</option>
-              </Select>
+              </CustomSelect>
             </FormField>
           </div>
 
@@ -135,7 +137,7 @@ export function ChecklistModal({
 
           {schedule === "Weekly" && (
             <FormField label="Day of Week" error={errors.day_of_week?.message}>
-              <Select {...register("day_of_week")}>
+              <CustomSelect {...register("day_of_week")} value={day_of_week} placeholder="Select Day">
                 <option value="0">Sunday</option>
                 <option value="1">Monday</option>
                 <option value="2">Tuesday</option>
@@ -143,7 +145,7 @@ export function ChecklistModal({
                 <option value="4">Thursday</option>
                 <option value="5">Friday</option>
                 <option value="6">Saturday</option>
-              </Select>
+              </CustomSelect>
             </FormField>
           )}
 
