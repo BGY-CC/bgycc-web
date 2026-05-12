@@ -6,10 +6,15 @@ import { ReferralLeaderboard } from "./_components/referral-leaderboard";
 import { ReferralAnalytics } from "./_components/referral-analytics";
 import { useQuery } from "@/hooks/use-query";
 
+interface ReferralStats {
+  total_referrals: number;
+  monthly_referrals: number;
+}
+
 export default function ReferralsPage() {
   // In a real app, we'd have a specific stats endpoint for admin referrals
   // For now, let's assume /referrals/stats or similar
-  const { data: stats, isLoading } = useQuery<any>("/referrals/stats");
+  const { data: stats, isLoading } = useQuery<ReferralStats>("/referrals/stats");
 
   return (
     <div className="flex flex-col min-h-full">

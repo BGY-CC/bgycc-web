@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ClipboardList } from "lucide-react";
@@ -48,7 +48,7 @@ export function ChecklistModal({
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -63,9 +63,9 @@ export function ChecklistModal({
     },
   });
 
-  const type = watch("type");
-  const schedule = watch("schedule");
-  const day_of_week = watch("day_of_week");
+  const type = useWatch({ control, name: "type" });
+  const schedule = useWatch({ control, name: "schedule" });
+  const day_of_week = useWatch({ control, name: "day_of_week" });
 
   useEffect(() => {
     if (open) {
