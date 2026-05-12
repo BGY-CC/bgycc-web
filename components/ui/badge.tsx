@@ -9,6 +9,7 @@ const variantClasses = {
   "no-video": "bg-gray-100 text-gray-500",
   default: "bg-gray-100 text-gray-600",
   primary: "bg-primary text-white",
+  secondary: "bg-gray-200 text-gray-800",
   outline: "border border-gray-300 text-gray-600 bg-white",
 } as const;
 
