@@ -9,6 +9,7 @@ import { useQuery } from "@/hooks/use-query";
 interface ReferralStats {
   total_referrals: number;
   monthly_referrals: number;
+  weekly_referrals: number;
 }
 
 export default function ReferralsPage() {
@@ -25,9 +26,9 @@ export default function ReferralsPage() {
       
       <div className="flex-1 space-y-8 px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
         {/* Stat cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {isLoading ? (
-            Array.from({ length: 4 }).map((_, index) => (
+            Array.from({ length: 5 }).map((_, index) => (
               <StatCardSkeleton key={index} />
             ))
           ) : (
@@ -41,8 +42,14 @@ export default function ReferralsPage() {
               <StatCard
                 label="Monthly Growth"
                 value={stats?.monthly_referrals?.toString() || "0"}
-                icon={<TrendingUp className="h-4 w-4" />}
+                icon={<TrendingUp className="h-4 w-4 text-emerald-500" />}
                 description="New members this month"
+              />
+              <StatCard
+                label="Weekly Growth"
+                value={stats?.weekly_referrals?.toString() || "0"}
+                icon={<TrendingUp className="h-4 w-4" />}
+                description="New members this week"
               />
               <StatCard
                 label="Conversion Rate"
@@ -66,7 +73,7 @@ export default function ReferralsPage() {
             <ReferralAnalytics />
           </div>
 
-          {/* Monthly Leaderboard */}
+          {/* Weekly Leaderboard */}
           <div className="lg:col-span-1">
             <ReferralLeaderboard />
           </div>

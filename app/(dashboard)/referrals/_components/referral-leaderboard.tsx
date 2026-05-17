@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "@/hooks/use-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -14,10 +15,20 @@ interface LeaderboardItem {
   profile_picture_url: string | null;
   referral_count: number;
   rank: number;
+  xp: number;
 }
 
 export function ReferralLeaderboard() {
-  const { data: leaderboard, isLoading } = useQuery<LeaderboardItem[]>("/referrals/leaderboard");
+  const [timeframe, setTimeframe] = useState<"weekly" | "monthly">("weekly");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const handleTimeframeChange = (newTimeframe: "weekly" | "monthly") => {
+    setTimeframe(newTimeframe);
+    setPage(1);
+  };
+
+  const { data: leaderboard, isLoading } = useQuery<LeaderboardItem[]>(`/referrals/leaderboard?timeframe=${timeframe}&page=${page}&page_size=${pageSize}`);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -38,9 +49,26 @@ export function ReferralLeaderboard() {
         <CardTitle className="text-lg font-bold flex items-center gap-2">
           <Trophy className="h-5 w-5 text-primary" />
           Top Referrers
-          <Badge variant="secondary" className="ml-auto font-normal text-[10px]">
-            THIS MONTH
-          </Badge>
+          <div className="ml-auto flex items-center gap-1 bg-secondary rounded-md p-0.5">
+            <button
+              onClick={() => handleTimeframeChange("weekly")}
+              className={cn(
+                "px-2 py-1 text-[10px] font-medium rounded-sm transition-colors",
+                timeframe === "weekly" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              WEEKLY
+            </button>
+            <button
+              onClick={() => handleTimeframeChange("monthly")}
+              className={cn(
+                "px-2 py-1 text-[10px] font-medium rounded-sm transition-colors",
+                timeframe === "monthly" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              MONTHLY
+            </button>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -85,29 +113,51 @@ export function ReferralLeaderboard() {
                   </p>
                 </div>
 
-                <div className="text-right">
-                  <p className="text-sm font-bold text-primary">
-                    {item.referral_count}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                    Invites
-                  </p>
+                <div className="flex gap-4 items-center text-right">
+                  <div>
+                    <p className="text-sm font-bold text-emerald-600">
+                      {item.xp}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                      XP
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-primary">
+                      {item.referral_count}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                      Invites
+                    </p>
+                  </div>
                 </div>
               </div>
             ))
           ) : (
             <div className="p-8 text-center">
               <p className="text-sm text-muted-foreground italic">
-                No referrals logged yet this month.
+                No referrals logged yet this {timeframe === "weekly" ? "week" : "month"}.
               </p>
             </div>
           )}
         </div>
 
         {leaderboard && leaderboard.length > 0 && (
-          <div className="p-4 bg-gray-50/50 border-t border-gray-50">
-            <button className="text-xs font-semibold text-primary hover:underline w-full text-center">
-              View Full Leaderboard
+          <div className="p-4 bg-gray-50/50 border-t border-gray-50 flex justify-between items-center">
+            <button 
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="text-xs font-semibold text-primary disabled:opacity-50 disabled:hover:no-underline hover:underline px-2"
+            >
+              Previous
+            </button>
+            <span className="text-xs text-muted-foreground">Page {page}</span>
+            <button 
+              onClick={() => setPage(p => p + 1)}
+              disabled={leaderboard.length < pageSize}
+              className="text-xs font-semibold text-primary disabled:opacity-50 disabled:hover:no-underline hover:underline px-2"
+            >
+              Next
             </button>
           </div>
         )}
