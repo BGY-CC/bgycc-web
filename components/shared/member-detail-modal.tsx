@@ -122,7 +122,7 @@ export function MemberDetailModal({
           // Mobile: stretch to full width, push to bottom of the flex container
           "self-end w-full rounded-t-3xl rounded-b-none max-h-[92dvh]",
           // md+: centre as normal panel
-          "md:self-center md:rounded-2xl md:max-w-2xl md:max-h-[88vh]"
+          "md:self-center md:max-h-[88dvh] md:max-w-2xl md:rounded-2xl"
         )}
       >
         {/* Drag handle (visual only, mobile UX cue) */}
@@ -133,7 +133,7 @@ export function MemberDetailModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 z-10 p-1.5 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-gray-600 shadow-sm transition-colors"
+          className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-gray-100 bg-white text-gray-400 shadow-sm transition-colors hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:right-4 sm:top-4"
           aria-label="Close"
         >
           <X className="h-4 w-4" />
@@ -170,7 +170,7 @@ export function MemberDetailModal({
         ) : (
           <div className="flex flex-col overflow-hidden max-h-[inherit]">
             {/* ── Header ──────────────────────────────────────────────────── */}
-            <div className="bg-white px-5 pt-4 pb-5 border-b border-gray-100">
+            <div className="border-b border-gray-100 bg-white px-4 pb-5 pr-14 pt-4 sm:px-5 sm:pr-16">
               <div className="flex items-start gap-4">
                 {/* Avatar */}
                 <div className="h-14 w-14 md:h-16 md:w-16 rounded-full overflow-hidden bg-gray-100 border-2 border-white shadow-sm shrink-0">
@@ -245,7 +245,7 @@ export function MemberDetailModal({
             {/* ── Scrollable body ─────────────────────────────────────────── */}
             <div className="overflow-y-auto flex-1 px-5 py-5 space-y-5">
               {/* Stat grid — 4 equal columns */}
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 gap-2 min-[380px]:grid-cols-4">
                 <MiniStat
                   icon={<Flame className="h-4 w-4" />}
                   label="Streak"
@@ -363,21 +363,21 @@ export function MemberDetailModal({
                   <div className="space-y-2">
                     <Button
                       variant="secondary"
-                      className="w-full justify-start text-xs font-bold"
+                      className="h-11 w-full justify-start text-xs font-bold"
                       size="sm"
                     >
                       Send Message
                     </Button>
                     <Button
                       variant="secondary"
-                      className="w-full justify-start text-xs font-bold"
+                      className="h-11 w-full justify-start text-xs font-bold"
                       size="sm"
                     >
                       Reset Password
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-xs font-bold text-red-500 border-red-100 hover:bg-red-50"
+                      className="h-11 w-full justify-start border-red-100 text-xs font-bold text-red-500 hover:bg-red-50"
                       size="sm"
                     >
                       Deactivate Account

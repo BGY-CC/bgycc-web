@@ -66,8 +66,9 @@ export function ResourceModal({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <ModalContent className="max-w-xl">
+      <ModalContent className="mx-2 w-[calc(100%-1rem)] max-w-xl p-4 sm:mx-0 sm:p-6">
         <ModalHeader
+          className="pr-8"
           icon={<FolderOpen className="h-5 w-5 text-primary" />}
           title={mode === "add" ? "Add Resource" : "Edit Resource"}
           description={
@@ -76,7 +77,7 @@ export function ResourceModal({
               : "Update the resource link details below."
           }
         />
-        <form onSubmit={handleSubmit(onSuccess)} noValidate className="space-y-4 px-6 pb-8">
+        <form onSubmit={handleSubmit(onSuccess)} noValidate className="space-y-4 px-0 pb-2">
           <FormField label="Title" required error={errors.title?.message}>
             <Input placeholder="e.g. Daily Audio Report Guide" {...register("title")} />
           </FormField>
@@ -96,11 +97,11 @@ export function ResourceModal({
             />
           </FormField>
 
-          <div className="flex gap-3 pt-2">
-            <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
+          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+            <Button type="button" variant="secondary" onClick={onClose} className="min-h-11 flex-1">
               Cancel
             </Button>
-            <Button type="submit" isLoading={isSubmitting} className="flex-1">
+            <Button type="submit" isLoading={isSubmitting} className="min-h-11 flex-1">
               {mode === "add" ? "Add Resource" : "Save Changes"}
             </Button>
           </div>

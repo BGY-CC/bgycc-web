@@ -11,7 +11,7 @@ export function AuthFooter() {
   }
 
   return (
-    <p className="mt-8 sm:mt-10 text-center text-[13px] font-normal text-black max-w-sm leading-relaxed">
+    <p className="mt-6 w-full max-w-[26rem] px-2 text-center text-[13px] font-normal leading-relaxed text-black sm:mt-8">
       By joining, you agree to our{" "}
       <a href="#" className="text-primary underline underline-offset-4 hover:text-primary-hover">
         Terms of Service

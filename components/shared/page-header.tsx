@@ -34,9 +34,9 @@ export function PageHeader({ title, breadcrumb }: PageHeaderProps) {
   };
 
   return (
-    <header className="w-full bg-white px-4 py-4 border-b border-gray-100 mb-6 sm:px-6 sticky top-0 z-30">
-      <div className="flex items-center justify-between gap-4 mb-2">
-        <div className="flex items-center gap-2">
+    <header className="sticky top-0 z-30 mb-4 w-full border-b border-gray-100 bg-white px-3 py-3 sm:mb-6 sm:px-6 sm:py-4">
+      <div className="flex min-w-0 items-center justify-between gap-2 sm:gap-4">
+        <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
           <Button
             variant="ghost"
             size="icon"
@@ -46,11 +46,11 @@ export function PageHeader({ title, breadcrumb }: PageHeaderProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-bold text-[#1e293b] sm:text-2xl">{title}</h1>
+          <h1 className="min-w-0 truncate text-lg font-bold text-[#1e293b] sm:text-xl xl:text-2xl" title={title}>{title}</h1>
         </div>
         
-        <div className="flex items-center gap-4 flex-1 max-w-2xl justify-end">
-          <div className="hidden sm:block w-full max-w-md">
+        <div className="flex shrink-0 items-center justify-end gap-1 sm:gap-3 lg:min-w-0 lg:flex-1">
+          <div className="hidden w-full max-w-md lg:block">
             <button
               type="button"
               onClick={openPalette}
@@ -66,7 +66,7 @@ export function PageHeader({ title, breadcrumb }: PageHeaderProps) {
           </div>
 
           <div className="flex shrink-0 items-center gap-3">
-            <div className="sm:hidden">
+            <div className="lg:hidden">
               <Button
                 variant="ghost"
                 size="icon"
@@ -97,7 +97,7 @@ export function PageHeader({ title, breadcrumb }: PageHeaderProps) {
       </div>
 
       {breadcrumb && breadcrumb.length > 0 && (
-        <div className="pt-1 border-t border-gray-50">
+        <div className="mt-2 min-w-0 border-t border-gray-50 pt-2">
           <Breadcrumb items={breadcrumb} />
         </div>
       )}

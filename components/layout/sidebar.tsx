@@ -12,6 +12,7 @@ import {
   LogOut,
   X,
   UserRoundCheck,
+  ShieldCheck,
   // Share2,
 } from "lucide-react";
 import { useState } from "react";
@@ -27,6 +28,7 @@ const navItems = [
   { label: "Resources", href: "/resources", icon: FolderOpen },
   { label: "Announcement", href: "/announcement", icon: Megaphone },
   { label: "Leader Management", href: "/leaders", icon: UserRoundCheck },
+  { label: "Audit Logs", href: "/audit-logs", icon: ShieldCheck },
   // { label: "Referrals", href: "/referrals", icon: Share2 },
 ];
 
@@ -55,7 +57,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-30 flex w-72 flex-col",
+          "fixed inset-y-0 left-0 z-30 flex w-[min(18rem,88vw)] flex-col",
           "bg-white border-r border-border",
           "transition-transform duration-300 ease-in-out",
           isOpen ? "translate-x-0" : "-translate-x-full",
@@ -63,11 +65,12 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between px-8 py-8">
+        <div className="flex items-center justify-between px-6 pb-6 pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-8 sm:py-8">
           <Logo size="md" />
           <button
             onClick={onClose}
-            className="md:hidden p-1 rounded hover:bg-gray-100"
+            className="flex h-11 w-11 items-center justify-center rounded-xl hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:hidden"
+            aria-label="Close navigation menu"
           >
             <X className="h-5 w-5 text-gray-500" />
           </button>
@@ -118,7 +121,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         </nav>
 
         {/* Logout button */}
-        <div className="px-4 py-8">
+        <div className="px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6 sm:py-8">
           <button
             onClick={() => setShowLogoutModal(true)}
             className="flex w-full items-center gap-4 rounded-2xl px-4 py-4 text-sm font-semibold text-error hover:bg-error-bg transition-all duration-200"
@@ -131,8 +134,8 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
       {/* ─── LOGOUT MODAL ─────────────────────────────────────────────── */}
       {showLogoutModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/20 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl sm:p-6">
             <h2 className="text-lg font-semibold text-primary">
               Confirm Logout
             </h2>
@@ -142,7 +145,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               to access your dashboard.
             </p>
 
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row">
               <button
                 onClick={() => setShowLogoutModal(false)}
                 className="flex-1 rounded-xl border border-border px-4 py-3 text-sm font-semibold hover:bg-gray-50"

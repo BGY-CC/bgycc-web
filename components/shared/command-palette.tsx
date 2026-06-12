@@ -17,6 +17,7 @@ import {
   CheckSquare,
   CornerDownLeft,
   Loader2,
+  ShieldCheck,
 } from "lucide-react";
 import { useCommandPalette } from "./command-palette-context";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -39,6 +40,7 @@ const PAGES: PageEntry[] = [
   { label: "Resources", href: "/resources", description: "Manage learning resources", icon: FolderOpen, keywords: ["library", "materials"] },
   { label: "Announcement", href: "/announcement", description: "Send announcements", icon: Megaphone, keywords: ["broadcast", "notice"] },
   { label: "Leader Management", href: "/leaders", description: "Promote & revoke leaders", icon: UserRoundCheck, keywords: ["users", "members", "people"] },
+  { label: "Audit Logs", href: "/audit-logs", description: "Review administrative actions", icon: ShieldCheck, keywords: ["history", "accountability", "changes"] },
 ];
 
 const TYPE_META: Record<SearchResultType, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -194,7 +196,7 @@ export function CommandPalette() {
         aria-hidden="true"
       />
       <div
-        className="relative mx-auto mt-[12vh] w-[calc(100%-2rem)] max-w-2xl rounded-2xl bg-white shadow-2xl border border-border overflow-hidden"
+        className="relative mx-auto mt-3 max-h-[calc(100dvh-1.5rem)] w-[calc(100%-1.5rem)] max-w-2xl overflow-hidden rounded-2xl border border-border bg-white shadow-2xl sm:mt-[12dvh] sm:max-h-[76dvh] sm:w-[calc(100%-2rem)]"
         onKeyDown={onKeyDown}
       >
         <div className="flex items-center gap-3 border-b border-border px-4">
@@ -216,7 +218,7 @@ export function CommandPalette() {
           </kbd>
         </div>
 
-        <div ref={listRef} className="max-h-[60vh] overflow-y-auto p-2">
+        <div ref={listRef} className="max-h-[calc(100dvh-8.5rem)] overflow-y-auto overscroll-contain p-2 sm:max-h-[60dvh]">
           {pages.length > 0 && (
             <div className="mb-1">
               <div className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted">

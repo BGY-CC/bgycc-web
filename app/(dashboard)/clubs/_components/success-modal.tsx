@@ -25,11 +25,11 @@ export function SuccessModal({
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-            <p className="mt-1 text-sm text-gray-500">{description}</p>
+            <p className="mt-1 break-words text-sm text-gray-500">{description}</p>
           </div>
         </div>
         <ModalFooter className="justify-center">
-          <Button onClick={onClose} className="w-full">
+          <Button onClick={onClose} className="min-h-11 w-full sm:w-auto sm:min-w-32">
             Continue
           </Button>
         </ModalFooter>

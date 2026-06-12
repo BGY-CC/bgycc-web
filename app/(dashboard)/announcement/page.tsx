@@ -58,11 +58,11 @@ export default function AnnouncementPage() {
       />
 
       <div className="flex-1 px-4 py-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full space-y-6">
-        <div className="flex border-b border-gray-100">
+        <div className="grid grid-cols-2 gap-1 border-b border-gray-100">
           <button
             onClick={() => setActiveTab("announcements")}
             className={cn(
-              "px-6 py-3 text-sm font-medium transition-colors relative",
+              "relative min-h-11 px-3 py-3 text-center text-sm font-medium transition-colors sm:px-6",
               activeTab === "announcements"
                 ? "text-primary"
                 : "text-slate-500 hover:text-slate-700"
@@ -70,13 +70,13 @@ export default function AnnouncementPage() {
           >
             Announcements
             {activeTab === "announcements" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary sm:left-0 sm:right-0" />
             )}
           </button>
           <button
             onClick={() => setActiveTab("notifications")}
             className={cn(
-              "px-6 py-3 text-sm font-medium transition-colors relative",
+              "relative min-h-11 px-3 py-3 text-center text-sm font-medium transition-colors sm:px-6",
               activeTab === "notifications"
                 ? "text-primary"
                 : "text-slate-500 hover:text-slate-700"
@@ -84,7 +84,7 @@ export default function AnnouncementPage() {
           >
             My Notifications
             {activeTab === "notifications" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary sm:left-0 sm:right-0" />
             )}
           </button>
         </div>
@@ -92,16 +92,16 @@ export default function AnnouncementPage() {
         {activeTab === "announcements" ? (
           <>
             {/* Info card */}
-            <div className="rounded-2xl bg-white border border-gray-100 p-6 sm:p-8 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-8">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 
                 {/* Left content */}
-                <div className="flex items-center gap-4">
+                <div className="flex min-w-0 items-start gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-600">
                     <Megaphone className="h-6 w-6" />
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     <h2 className="text-xl font-semibold tracking-tight text-slate-900">
                       Announcements
                     </h2>
@@ -115,7 +115,7 @@ export default function AnnouncementPage() {
                 <Button
                   leftIcon={<Plus className="h-4 w-4" />}
                   onClick={() => setShowAdd(true)}
-                  className="shrink-0 w-full sm:w-auto bg-[#1A1F36] hover:bg-[#1A1F36]/90 text-white rounded-xl py-6 px-6"
+                  className="min-h-11 w-full shrink-0 rounded-xl bg-[#1A1F36] px-6 py-3 text-white hover:bg-[#1A1F36]/90 sm:w-auto"
                 >
                   New Announcement
                 </Button>

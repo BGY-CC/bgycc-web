@@ -58,15 +58,19 @@ export function ClubsListClient() {
   // Handle outside clicks
   useEffect(() => {
     if (!showStateDropdown && !showCityDropdown) return;
-    const handleOutside = (e: MouseEvent) => {
-      if (stateRef.current && !stateRef.current.contains(e.target as Node) && 
-          cityRef.current && !cityRef.current.contains(e.target as Node)) {
+    const handleOutside = (e: PointerEvent) => {
+      const target = e.target as Node;
+      const clickedState = stateRef.current?.contains(target) ?? false;
+      const clickedCity = cityRef.current?.contains(target) ?? false;
+
+      if (!clickedState && !clickedCity) {
         setShowStateDropdown(false);
         setShowCityDropdown(false);
       }
     };
-    document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
+
+    document.addEventListener("pointerdown", handleOutside);
+    return () => document.removeEventListener("pointerdown", handleOutside);
   }, [showStateDropdown, showCityDropdown]);
 
   const allStates: string[] = getStates();
@@ -185,7 +189,7 @@ export function ClubsListClient() {
   return (
     <>
       {/* Toolbar */}
-      <div className="bg-white p-4 lg:p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+      <div className="mb-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4">
           {/* Top row: Search */}
           <div className="w-full">
@@ -201,14 +205,14 @@ export function ClubsListClient() {
           </div>
 
           {/* Bottom row: Filters + Create Button */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2 flex-1 sm:flex-none">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto">
               {/* State / Region filter */}
-              <div className="relative flex-1 sm:flex-none" ref={stateRef}>
+              <div className="relative w-full sm:w-auto sm:max-w-[220px]" ref={stateRef}>
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="w-full sm:w-auto justify-between min-w-[120px]"
+                  className="w-full min-w-0 justify-between sm:min-w-[140px]"
                   rightIcon={<ChevronDown className="h-4 w-4" />}
                   onClick={() => {
                     setShowStateDropdown((p) => !p);
@@ -218,7 +222,7 @@ export function ClubsListClient() {
                   <span className="truncate">{filterState || "All States"}</span>
                 </Button>
                 {showStateDropdown && (
-                  <div className="absolute top-full left-0 mt-2 z-[100] bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
+                  <div className="absolute left-0 right-0 top-full z-[100] mt-2 max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl animate-in fade-in zoom-in-95 duration-200 sm:right-auto sm:min-w-[200px] sm:max-w-[20rem]">
                     <button
                       className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 font-medium text-slate-600 transition-colors"
                       onClick={() => {
@@ -252,11 +256,11 @@ export function ClubsListClient() {
 
               {/* City filter — only visible after state is selected */}
               {filterState && cities.length > 0 && (
-                <div className="relative flex-1 sm:flex-none" ref={cityRef}>
+                <div className="relative w-full sm:w-auto sm:max-w-[220px]" ref={cityRef}>
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="w-full sm:w-auto justify-between min-w-[120px]"
+                    className="w-full min-w-0 justify-between sm:min-w-[140px]"
                     rightIcon={<ChevronDown className="h-4 w-4" />}
                     onClick={() => {
                       setShowCityDropdown((p) => !p);
@@ -266,7 +270,7 @@ export function ClubsListClient() {
                     <span className="truncate">{filterCity || "All LGAs"}</span>
                   </Button>
                   {showCityDropdown && (
-                    <div className="absolute top-full left-0 mt-2 z-[100] bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto min-w-[200px] animate-in fade-in zoom-in-95 duration-200">
+                    <div className="absolute left-0 right-0 top-full z-[100] mt-2 max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl animate-in fade-in zoom-in-95 duration-200 sm:right-auto sm:min-w-[200px] sm:max-w-[20rem]">
                       <button
                         className="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 font-medium text-slate-600 transition-colors"
                         onClick={() => {
@@ -299,7 +303,7 @@ export function ClubsListClient() {
             </div>
 
             <Button
-              className="w-full sm:w-auto mt-2 sm:mt-0"
+              className="w-full lg:mt-0 lg:w-auto"
               size="sm"
               leftIcon={<Plus className="h-4 w-4" />}
               onClick={() => setShowCreate(true)}

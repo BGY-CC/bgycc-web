@@ -48,7 +48,7 @@ export function Modal({ open, onClose, children }: ModalProps) {
       />
       {/* Panel — clicking the empty area closes the modal */}
       <div
-        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
+        className="fixed inset-0 z-50 flex items-end justify-center px-0 pt-[env(safe-area-inset-top)] sm:items-center sm:p-4"
         role="dialog"
         aria-modal="true"
         onClick={onClose}
@@ -70,7 +70,7 @@ export function ModalContent({ className, children }: ModalContentProps) {
   return (
     <div
       className={cn(
-        "relative w-full rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto",
+        "relative max-h-[calc(100dvh-env(safe-area-inset-top))] w-full overflow-y-auto overscroll-contain rounded-t-2xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-xl sm:max-h-[90dvh] sm:rounded-2xl sm:p-6",
         className,
       )}
       onClick={(e) => e.stopPropagation()}
@@ -101,7 +101,7 @@ export function ModalHeader({
       {ctx && (
         <button
           onClick={ctx.onClose}
-          className="absolute right-4 top-4 p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-xl text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:right-3 sm:top-3"
           aria-label="Close dialog"
         >
           <X className="h-4 w-4" />
@@ -130,7 +130,7 @@ export function ModalFooter({
   children: React.ReactNode;
 }) {
   return (
-    <div className={cn("mt-6 flex items-center gap-3", className)}>
+    <div className={cn("mt-6 flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center", className)}>
       {children}
     </div>
   );

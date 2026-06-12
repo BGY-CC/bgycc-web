@@ -66,17 +66,36 @@ export function LeadersListClient() {
   };
 
   const tabs = [
-    { label: `All Users (${statsData?.stats.total_users || 0})`, value: "all" },
-    { label: `Leaders (${statsData?.stats.active_leaders || 0})`, value: "leader" },
-    { label: `Members (${statsData?.stats.regular_members || 0})`, value: "member" },
+    {
+      label: "All Users",
+      mobileLabel: "All",
+      count: statsData?.stats.total_users || 0,
+      value: "all",
+    },
+    {
+      label: "Leaders",
+      mobileLabel: "Leaders",
+      count: statsData?.stats.active_leaders || 0,
+      value: "leader",
+    },
+    {
+      label: "Members",
+      mobileLabel: "Members",
+      count: statsData?.stats.regular_members || 0,
+      value: "member",
+    },
   ];
+
+  const statusLabel =
+    statusFilter === "all"
+      ? "All Statuses"
+      : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1).replace("_", " ");
 
   return (
     <>
       <LeaderStats stats={statsData?.stats} isLoading={isLoadingStats} />
 
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mt-10">
-        {/* Search */}
+      <div className="mt-8 flex flex-col gap-4 xl:mt-10 xl:flex-row xl:items-center xl:justify-between">
         <div className="w-full lg:w-auto">
           <SearchInput
             placeholder="Search by email or username"
@@ -89,9 +108,8 @@ export function LeadersListClient() {
           />
         </div>
 
-        {/* Filters & Tabs */}
-        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-          <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start xl:w-auto xl:justify-end">
+          <div className="grid w-full grid-cols-3 gap-1 rounded-xl bg-gray-100/50 p-1 sm:w-auto sm:min-w-[360px] sm:grid-cols-3">
             {tabs.map((tab) => (
               <button
                 key={tab.value}
@@ -100,21 +118,25 @@ export function LeadersListClient() {
                   setPage(1);
                 }}
                 className={cn(
-                  "px-4 py-2 text-sm font-normal rounded-lg transition-all",
+                  "flex min-h-11 flex-col items-center justify-center rounded-lg px-2 py-2 text-center text-xs font-medium transition-all sm:px-4 sm:text-sm",
                   roleFilter === tab.value
                     ? "bg-primary text-white shadow-sm"
                     : "text-muted hover:text-primary"
                 )}
               >
-                {tab.label}
+                <span className="sm:hidden">{tab.mobileLabel}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="text-[11px] font-medium opacity-80 sm:ml-1 sm:text-xs">
+                  {tab.count.toLocaleString()}
+                </span>
               </button>
             ))}
           </div>
           
-          <div className="relative group">
+          <div className="relative w-full sm:w-auto">
             <Button
               variant="outline"
-              className="rounded-xl border-gray-200 text-subtle flex items-center gap-0 sm:gap-2 px-3 sm:px-4"
+            className="min-h-11 w-full justify-center gap-2 rounded-xl border-gray-200 px-4 text-subtle sm:w-auto sm:justify-start"
               leftIcon={<Filter className="h-4 w-4" />}
             >
               <select 
@@ -131,15 +153,13 @@ export function LeadersListClient() {
                 <option value="reset">Reset</option>
                 <option value="missed">Missed</option>
               </select>
-              <span className="hidden sm:inline">
-                {statusFilter === "all" ? "Leader Status" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1).replace("_", " ")}
-              </span>
+              <span className="truncate">Status: {statusLabel}</span>
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between mt-6 mb-2">
+      <div className="mt-6 mb-2 flex flex-col gap-1 text-sm font-medium text-subtle sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <p className="text-sm text-subtle font-medium">
           Showing {filteredUsers.length} of {data?.total || 0} users
         </p>

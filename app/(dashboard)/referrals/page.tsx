@@ -23,10 +23,10 @@ export default function ReferralsPage() {
         title="Referral & QR System"
         breadcrumb={[{ label: "Referrals" }]}
       />
-      
-      <div className="flex-1 space-y-8 px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
+
+      <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col space-y-6 px-4 py-6 sm:px-6 lg:px-8">
         {/* Stat cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
           {isLoading ? (
             Array.from({ length: 5 }).map((_, index) => (
               <StatCardSkeleton key={index} />
@@ -67,14 +67,14 @@ export default function ReferralsPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           {/* Main Analytics / Charts */}
-          <div className="lg:col-span-2">
+          <div className="min-w-0 xl:col-span-2">
             <ReferralAnalytics />
           </div>
 
           {/* Weekly Leaderboard */}
-          <div className="lg:col-span-1">
+          <div className="min-w-0">
             <ReferralLeaderboard />
           </div>
         </div>

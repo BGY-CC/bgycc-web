@@ -19,21 +19,26 @@ export function Pagination({
 
   return (
     <nav
-      className={cn("flex items-center gap-3", className)}
+      className={cn("flex w-full items-center justify-center gap-2 sm:gap-3", className)}
       aria-label="Pagination"
     >
       {/* Previous */}
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
+        className="flex h-11 min-w-11 items-center justify-center gap-2 rounded-xl px-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-primary disabled:pointer-events-none disabled:opacity-30 sm:px-3"
+        aria-label="Previous page"
       >
         <ArrowLeft className="h-4 w-4" />
-        <span>Previous</span>
+        <span className="hidden sm:inline">Previous</span>
       </button>
 
       {/* Page numbers */}
-      <div className="flex items-center gap-1">
+      <span className="min-w-24 text-center text-sm font-medium text-gray-600 sm:hidden">
+        Page {currentPage} of {totalPages}
+      </span>
+
+      <div className="hidden items-center gap-1 sm:flex">
         {pages.map((page, i) =>
           page === "..." ? (
             <span key={`ellipsis-${i}`} className="px-2 text-sm text-gray-400 select-none">
@@ -44,7 +49,7 @@ export function Pagination({
               key={page}
               onClick={() => onPageChange(page as number)}
               className={cn(
-                "h-9 w-9 flex items-center justify-center rounded-lg text-sm font-medium transition-all",
+                "flex h-11 w-11 items-center justify-center rounded-lg text-sm font-medium transition-all",
                 page === currentPage
                   ? "bg-[#1e293b] text-white shadow-md"
                   : "text-gray-500 hover:bg-gray-100"
@@ -62,9 +67,10 @@ export function Pagination({
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
+        className="flex h-11 min-w-11 items-center justify-center gap-2 rounded-xl px-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-primary disabled:pointer-events-none disabled:opacity-30 sm:px-3"
+        aria-label="Next page"
       >
-        <span>Next</span>
+        <span className="hidden sm:inline">Next</span>
         <ArrowRight className="h-4 w-4" />
       </button>
     </nav>

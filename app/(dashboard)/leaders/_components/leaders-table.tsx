@@ -30,7 +30,7 @@ export function LeadersTable({
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {users.map((user) => {
           const isLeader = user.role === "leader";
           const clubLocation = user.club ? `${user.club.city} ${user.club.state}` : "No club location";
@@ -45,11 +45,10 @@ export function LeadersTable({
           return (
             <div
               key={user.id}
-              className="bg-white p-4 sm:p-5 rounded-2xl border border-border shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 group hover:shadow-md transition-all"
+              className="group flex flex-col gap-4 rounded-2xl border border-border bg-white p-4 shadow-sm transition-all hover:shadow-md sm:p-5 lg:flex-row lg:items-center lg:justify-between"
             >
-              <div className="flex items-center gap-3 sm:gap-5 w-full sm:w-auto min-w-0">
-                {/* Avatar */}
-                <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-background border-2 border-white shadow-sm flex items-center justify-center text-lg sm:text-xl font-bold text-primary shrink-0 overflow-hidden">
+              <div className="flex min-w-0 w-full items-start gap-3 sm:gap-5 lg:w-auto">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-background text-lg font-bold text-primary shadow-sm sm:h-16 sm:w-16 sm:text-xl">
                   {user.profile_picture_url ? (
                     <Image
                       src={user.profile_picture_url}
@@ -63,7 +62,6 @@ export function LeadersTable({
                   )}
                 </div>
 
-                {/* User Info */}
                 <div className="flex flex-col gap-1 min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-base sm:text-lg font-bold text-primary break-words">
@@ -78,13 +76,13 @@ export function LeadersTable({
                   <p className="text-xs sm:text-sm text-subtle font-medium break-all">
                     {user.email}
                   </p>
-                  <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1 text-[11px] sm:text-[13px] text-muted font-normal mt-1">
+                  <div className="mt-1 flex flex-col gap-1 text-[11px] font-normal text-muted sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-1 sm:text-[13px]">
                     <span className="break-words">{clubLocation}</span>
-                    <span>•</span>
+                    <span className="hidden sm:inline">•</span>
                     <span>Joined {platformJoinedDate}</span>
                     {isLeader && leaderSinceDate && (
                       <>
-                        <span>•</span>
+                        <span className="hidden sm:inline">•</span>
                         <span>Leader since {leaderSinceDate}</span>
                       </>
                     )}
@@ -92,14 +90,13 @@ export function LeadersTable({
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-3 w-full sm:w-auto sm:justify-end">
+              <div className="flex w-full items-center gap-3 lg:w-auto lg:justify-end">
                 {isLeader ? (
                   <Button
                     variant="outline"
                     size="sm"
                     leftIcon={<XCircle className="h-4 w-4" />}
-                    className="rounded-xl font-normal border-red-200 text-red-600 hover:bg-red-50 h-10 px-4"
+                    className="min-h-11 w-full justify-center rounded-xl border-red-200 px-4 font-normal text-red-600 hover:bg-red-50 lg:w-auto"
                     onClick={() => setRoleChangeTarget({ user, newRole: "member" })}
                   >
                     Revoke leader
@@ -109,7 +106,7 @@ export function LeadersTable({
                     variant="primary"
                     size="sm"
                     leftIcon={<CheckCircle2 className="h-4 w-4" />}
-                    className="rounded-xl font-normal bg-[#1E293B] hover:bg-[#0F172A] text-white h-10 px-4"
+                    className="min-h-11 w-full justify-center rounded-xl bg-[#1E293B] px-4 font-normal text-white hover:bg-[#0F172A] lg:w-auto"
                     onClick={() => setRoleChangeTarget({ user, newRole: "leader" })}
                   >
                     Assign leader

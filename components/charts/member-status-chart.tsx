@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 interface MemberStatusProps {
@@ -19,7 +19,7 @@ export function MemberStatusChart({ data }: MemberStatusProps) {
   const activeCount = data?.active || 0;
   const atRiskCount = data?.at_risk || 0;
   const resetCount = data?.reset || data?.inactive || 0;
-  const total = activeCount + atRiskCount + resetCount || 1;
+  const total = activeCount + atRiskCount + resetCount;
 
   const chartData = [
     { name: "Active", value: activeCount, color: "#1b2559" },
@@ -30,12 +30,12 @@ export function MemberStatusChart({ data }: MemberStatusProps) {
   const getPercent = (val: number) => Math.round((val / total) * 100);
 
   if (!isMounted) {
-    return <div className="w-full h-[220px] bg-gray-50/50 rounded-lg animate-pulse" />;
+    return <div className="h-[240px] w-full rounded-lg bg-gray-50/50 animate-pulse sm:h-[280px]" />;
   }
 
   if (!data || total === 0) {
     return (
-      <div className="flex h-[220px] items-center justify-center text-sm text-gray-400">
+      <div className="flex h-[240px] items-center justify-center rounded-lg text-center text-sm text-gray-400 sm:h-[280px]">
         No status data available.
       </div>
     );
@@ -43,15 +43,15 @@ export function MemberStatusChart({ data }: MemberStatusProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative w-full h-[220px] min-h-[220px]">
+      <div className="relative h-[240px] w-full min-w-0 sm:h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={chartData}
               cx="50%"
               cy="50%"
-              innerRadius={65}
-              outerRadius={85}
+              innerRadius="55%"
+              outerRadius="78%"
               paddingAngle={2}
               dataKey="value"
               startAngle={90}
@@ -81,7 +81,7 @@ export function MemberStatusChart({ data }: MemberStatusProps) {
       </div>
 
       {/* Legend */}
-      <div className="mt-4 flex items-center gap-6 flex-wrap justify-center">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-center">
         {chartData.map((d) => (
           <span key={d.name} className="flex items-center gap-2 text-[11px] font-medium text-gray-500">
             <span
