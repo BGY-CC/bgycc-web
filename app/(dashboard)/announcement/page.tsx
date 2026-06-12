@@ -10,12 +10,17 @@ import { AnnouncementModal } from "./_components/announcement-modal";
 import { useToast } from "@/components/ui";
 import { announcementsService } from "@/lib/services/announcements";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 
 export default function AnnouncementPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const notificationsOnly = user?.role === "technical_admin";
   const [showAdd, setShowAdd] = useState(false);
-  const [activeTab, setActiveTab] = useState<"announcements" | "notifications">("announcements");
+  const [activeTab, setActiveTab] = useState<"announcements" | "notifications">(
+    notificationsOnly ? "notifications" : "announcements",
+  );
 
   const handleAdd = async (formData: {
     title: string;
@@ -58,7 +63,8 @@ export default function AnnouncementPage() {
       />
 
       <div className="flex-1 px-4 py-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full space-y-6">
-        <div className="grid grid-cols-2 gap-1 border-b border-gray-100">
+        <div className={cn("grid gap-1 border-b border-gray-100", notificationsOnly ? "grid-cols-1" : "grid-cols-2")}>
+          {!notificationsOnly && (
           <button
             onClick={() => setActiveTab("announcements")}
             className={cn(
@@ -73,6 +79,7 @@ export default function AnnouncementPage() {
               <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary sm:left-0 sm:right-0" />
             )}
           </button>
+          )}
           <button
             onClick={() => setActiveTab("notifications")}
             className={cn(

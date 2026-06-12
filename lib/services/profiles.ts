@@ -14,7 +14,8 @@ export interface UserProfile {
   profile_picture_url: string | null;
   pathway_id: string | null;
   referral_code: string | null;
-  role: "member" | "leader" | "admin" | "super_admin" | "parent" | null;
+  role: "member" | "leader" | "admin" | "super_admin" | "technical_admin" | "parent" | null;
+  permissions?: string[];
   partner_id: string | null;
   club_id: string | null;
   created_at: string;
@@ -69,6 +70,20 @@ export const profilesService = {
       method: "PUT",
       headers: getAuthHeaders(),
       body: JSON.stringify({ role }),
+    });
+    return readJson(response);
+  },
+
+  getMe: async () => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/profiles/me`, { headers: getAuthHeaders() });
+    return readJson(response);
+  },
+
+  updateMe: async (data: Partial<UserProfile>) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/profiles/me`, {
+      method: "PUT",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
     });
     return readJson(response);
   },

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Activity, CalendarDays, Filter, ShieldCheck } from "lucide-react";
 import { Alert, Badge, Input, Pagination, Select, Skeleton } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
+import { ADMIN_MUTATION_EVENT } from "@/lib/audit-events";
+import { formatAuditResource, formatAuditStatement } from "@/lib/audit-format";
 
 interface AuditActor {
   id: string;
@@ -60,9 +62,20 @@ export function AuditLogsClient() {
   if (from) params.set("from", from);
   if (to) params.set("to", to);
 
-  const { data, isLoading, error } = useQuery<AuditLogsResponse>(
+  const { data, isLoading, error, refetch } = useQuery<AuditLogsResponse>(
     `/audit-logs?${params.toString()}`,
+    { cacheTtlMs: 0 },
   );
+
+  useEffect(() => {
+    const refresh = () => refetch();
+    window.addEventListener(ADMIN_MUTATION_EVENT, refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener(ADMIN_MUTATION_EVENT, refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [refetch]);
 
   const logs = data?.audit_logs ?? [];
   const totalPages = data?.meta.total_pages ?? 1;
@@ -113,7 +126,7 @@ export function AuditLogsClient() {
           <Select value={resourceType} onChange={(event) => updateFilter(setResourceType, event.target.value)} className="h-11 rounded-xl">
             <option value="">All resources</option>
             {RESOURCE_OPTIONS.map((resource) => (
-              <option key={resource} value={resource}>{formatResource(resource)}</option>
+              <option key={resource} value={resource}>{formatAuditResource(resource)}</option>
             ))}
           </Select>
           <Input type="date" aria-label="From date" value={from} max={to || undefined} onChange={(event) => updateFilter(setFrom, event.target.value)} leftAddon={<CalendarDays className="h-4 w-4" />} />
@@ -148,28 +161,28 @@ export function AuditLogsClient() {
 
 function AuditLogRow({ log }: { log: AuditLog }) {
   const actor = Array.isArray(log.actor) ? log.actor[0] : log.actor;
-  const method = typeof log.metadata?.method === "string" ? log.metadata.method : null;
   const status = typeof log.metadata?.status === "number" ? log.metadata.status : null;
+  const actorName = actor?.full_name || actor?.email || "System administrator";
 
   return (
-    <article className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] sm:items-center sm:p-5">
+    <article className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
       <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={actionVariant(log.action)} className="capitalize">{log.action}</Badge>
-          <span className="text-sm font-semibold text-primary">{formatResource(log.resource_type || "unknown")}</span>
-          {method && <span className="text-xs font-medium text-muted">{method}</span>}
+        <div className="flex items-start gap-3">
+          <Badge variant={actionVariant(log.action)} className="mt-0.5 shrink-0 capitalize">{log.action}</Badge>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-primary">
+              {formatAuditStatement(actorName, log.action, log.resource_type)}
+            </p>
+            <p className="mt-1 truncate text-xs text-muted">
+              {actor?.email || "No actor email"}
+              {status && status >= 200 && status < 300 ? " · Successful" : ""}
+            </p>
+          </div>
         </div>
-        <p className="mt-1 truncate text-sm text-muted" title={log.resource_id || undefined}>
-          {log.resource_id ? `Entity ${log.resource_id}` : "Collection-level action"}
-        </p>
-      </div>
-      <div className="min-w-0 text-sm">
-        <p className="truncate font-medium text-gray-800">{actor?.full_name || actor?.email || "System administrator"}</p>
-        <p className="truncate text-xs text-muted">{actor?.email || log.ip_address || "No actor details"}</p>
       </div>
       <div className="text-left sm:text-right">
         <p className="text-sm font-medium text-gray-700">{formatDate(log.created_at)}</p>
-        <p className="text-xs text-muted">{status ? `HTTP ${status}` : log.ip_address || "Recorded"}</p>
+        <p className="text-xs text-muted">Recorded</p>
       </div>
     </article>
   );
@@ -180,10 +193,6 @@ function actionVariant(action: string): "active" | "warning" | "dormant" | "defa
   if (action === "update") return "warning";
   if (action === "delete") return "dormant";
   return "default";
-}
-
-function formatResource(value: string) {
-  return value.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function formatDate(value: string) {

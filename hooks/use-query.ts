@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 interface UseQueryOptions<T> {
   enabled?: boolean;
+  cacheTtlMs?: number;
   onSuccess?: (data: T) => void;
   onError?: (error: unknown) => void;
 }
@@ -32,7 +33,8 @@ export function useQuery<T = unknown>(endpoint: string, options: UseQueryOptions
     if (!isAuthenticated) return;
 
     const cached = queryCache.get(endpoint);
-    if (!force && cached && Date.now() - cached.timestamp < QUERY_CACHE_TTL) {
+    const cacheTtlMs = optionsRef.current.cacheTtlMs ?? QUERY_CACHE_TTL;
+    if (!force && cached && Date.now() - cached.timestamp < cacheTtlMs) {
       const cachedData = cached.data as T;
       setData(cachedData);
       setIsLoading(false);
@@ -67,10 +69,12 @@ export function useQuery<T = unknown>(endpoint: string, options: UseQueryOptions
     }
   }, [endpoint, options.enabled, authLoading, isAuthenticated, fetchData]);
 
+  const refetch = useCallback(() => fetchData(true), [fetchData]);
+
   return {
     data,
     isLoading: isLoading || authLoading,
     error,
-    refetch: () => fetchData(true),
+    refetch,
   };
 }
