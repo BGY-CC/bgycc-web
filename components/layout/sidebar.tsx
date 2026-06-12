@@ -13,6 +13,7 @@ import {
   X,
   UserRoundCheck,
   ShieldCheck,
+  KeyRound,
   // Share2,
 } from "lucide-react";
 import { useState } from "react";
@@ -29,6 +30,7 @@ const navItems = [
   { label: "Announcement", href: "/announcement", icon: Megaphone },
   { label: "Leader Management", href: "/leaders", icon: UserRoundCheck },
   { label: "Audit Logs", href: "/audit-logs", icon: ShieldCheck },
+  { label: "Access Management", href: "/access-management", icon: KeyRound },
   // { label: "Referrals", href: "/referrals", icon: Share2 },
 ];
 
@@ -87,6 +89,13 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               if (user?.role === "leader") {
                 return label === "Clubs";
               }
+              if (user?.role === "technical_admin") {
+                if (label === "Dashboard") return user.permissions?.includes("dashboard.view");
+                if (label === "Audit Logs") return user.permissions?.includes("audit.view");
+                if (label === "Announcement") return user.permissions?.includes("notifications.view");
+                return false;
+              }
+              if (label === "Access Management") return user?.role === "super_admin";
               return true;
             })
             .map(({ label, href, icon: Icon }) => {

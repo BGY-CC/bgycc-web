@@ -11,6 +11,7 @@ interface AuthUser {
   role: string;
   full_name?: string | null;
   profile_picture_url?: string | null;
+  permissions?: string[];
   [key: string]: unknown;
 }
 
@@ -25,6 +26,7 @@ interface AuthContextType {
   user: AuthUser | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  updateUser: (updates: Partial<AuthUser>) => void;
   isLoading: boolean;
 }
 
@@ -36,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
   const pathname = usePathname();
+  const permissionKey = user?.permissions?.join(",") ?? "";
 
   const logout = useCallback(() => {
     setIsAuthenticated(false);
@@ -46,6 +49,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("bgycc-user");
     router.push(ROUTES.LOGIN);
   }, [router]);
+
+  const updateUser = useCallback((updates: Partial<AuthUser>) => {
+    setUser((current) => {
+      if (!current) return current;
+      const next = { ...current, ...updates };
+      localStorage.setItem("bgycc-user", JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     // Check if user is logged in from localStorage. Hydrating from a synchronous
@@ -91,9 +103,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         router.push(target);
       } else if (user?.role === "leader" && !pathname.startsWith("/clubs")) {
         router.push("/clubs");
+      } else if (user?.role === "technical_admin" && !canTechnicalAdminAccess(pathname, user.permissions ?? [])) {
+        router.push("/profile");
       }
     }
-  }, [isAuthenticated, isLoading, pathname, router, user?.role]);
+  }, [isAuthenticated, isLoading, pathname, permissionKey, router, user?.role, user?.permissions]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -128,7 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, updateUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
@@ -141,3 +155,11 @@ export const useAuth = () => {
   }
   return context;
 };
+
+function canTechnicalAdminAccess(pathname: string, permissions: string[]) {
+  if (pathname.startsWith("/profile")) return true;
+  if (pathname.startsWith("/dashboard")) return permissions.includes("dashboard.view");
+  if (pathname.startsWith("/audit-logs")) return permissions.includes("audit.view");
+  if (pathname.startsWith("/announcement")) return permissions.includes("notifications.view");
+  return false;
+}

@@ -1,0 +1,106 @@
+"use client";
+
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { Mail, ShieldCheck, UserRound } from "lucide-react";
+import Image from "next/image";
+import { Button, FormField, Input, Skeleton, Textarea, useToast } from "@/components/ui";
+import { useQuery } from "@/hooks/use-query";
+import { useAuth } from "@/hooks/use-auth";
+import { profilesService } from "@/lib/services/profiles";
+
+interface ProfileData {
+  id: string;
+  email: string;
+  full_name: string | null;
+  phone: string | null;
+  bio: string | null;
+  timezone: string | null;
+  profile_picture_url: string | null;
+  role: string;
+  role_assigned_at: string | null;
+  created_at: string;
+  permissions: string[];
+}
+
+type ProfileForm = Pick<ProfileData, "full_name" | "phone" | "bio" | "timezone" | "profile_picture_url">;
+
+export function ProfileClient() {
+  const { toast } = useToast();
+  const { updateUser } = useAuth();
+  const { data, isLoading, refetch } = useQuery<{ profile: ProfileData }>("/profiles/me");
+  const profile = data?.profile;
+  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<ProfileForm>();
+
+  useEffect(() => {
+    if (!profile) return;
+    reset({
+      full_name: profile.full_name ?? "",
+      phone: profile.phone ?? "",
+      bio: profile.bio ?? "",
+      timezone: profile.timezone ?? "",
+      profile_picture_url: profile.profile_picture_url ?? "",
+    });
+  }, [profile, reset]);
+
+  const save = async (values: ProfileForm) => {
+    try {
+      const result = await profilesService.updateMe(values) as { success?: boolean; data?: { profile?: ProfileData }; error?: string };
+      if (!result.success || !result.data?.profile) {
+        toast(result.error || "Failed to update profile", "error");
+        return;
+      }
+      updateUser({
+        full_name: result.data.profile.full_name,
+        profile_picture_url: result.data.profile.profile_picture_url,
+      });
+      refetch();
+      toast("Profile updated successfully");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Failed to update profile", "error");
+    }
+  };
+
+  if (isLoading || !profile) {
+    return <div className="mx-auto w-full max-w-5xl space-y-4 px-4 pb-8 sm:px-6"><Skeleton className="h-44 rounded-2xl" /><Skeleton className="h-96 rounded-2xl" /></div>;
+  }
+
+  return (
+    <div className="mx-auto grid w-full max-w-5xl gap-5 px-4 pb-8 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+      <aside className="h-fit rounded-2xl border border-border bg-white p-5 shadow-sm">
+        <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-primary text-2xl font-semibold text-white">
+          {profile.profile_picture_url ? <Image src={profile.profile_picture_url} alt="" width={80} height={80} className="h-full w-full object-cover" /> : initials(profile.full_name || profile.email)}
+        </div>
+        <h2 className="mt-4 text-lg font-semibold text-primary">{profile.full_name || "Administrator"}</h2>
+        <p className="mt-1 break-all text-sm text-muted">{profile.email}</p>
+        <div className="mt-5 space-y-3 border-t border-gray-100 pt-5 text-sm">
+          <div className="flex items-center gap-2 text-gray-700"><ShieldCheck className="h-4 w-4 text-primary" /><span>{roleLabel(profile.role)}</span></div>
+          <div className="flex items-center gap-2 text-gray-700"><Mail className="h-4 w-4 text-primary" /><span>Active account</span></div>
+        </div>
+        {profile.permissions.length > 0 && (
+          <div className="mt-5 border-t border-gray-100 pt-5">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">Permissions</p>
+            <div className="flex flex-wrap gap-2">{profile.permissions.map((permission) => <span key={permission} className="rounded-full bg-background px-2.5 py-1 text-xs text-primary">{permissionLabel(permission)}</span>)}</div>
+          </div>
+        )}
+      </aside>
+
+      <form onSubmit={handleSubmit(save)} className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-6">
+        <div className="mb-6 flex items-center gap-3"><UserRound className="h-5 w-5 text-primary" /><div><h2 className="font-semibold text-primary">Profile details</h2><p className="text-sm text-muted">Update how your account appears in the control center.</p></div></div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <FormField label="Full name"><Input {...register("full_name")} /></FormField>
+          <FormField label="Email"><Input value={profile.email} disabled /></FormField>
+          <FormField label="Phone"><Input {...register("phone")} /></FormField>
+          <FormField label="Timezone"><Input placeholder="Africa/Lagos" {...register("timezone")} /></FormField>
+          <div className="sm:col-span-2"><FormField label="Profile image URL"><Input type="url" {...register("profile_picture_url")} /></FormField></div>
+          <div className="sm:col-span-2"><FormField label="Bio"><Textarea rows={5} maxLength={500} {...register("bio")} /></FormField></div>
+        </div>
+        <div className="mt-6 flex justify-end"><Button type="submit" isLoading={isSubmitting}>Save profile</Button></div>
+      </form>
+    </div>
+  );
+}
+
+function initials(value: string) { return value.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase(); }
+function roleLabel(role: string) { return role.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase()); }
+function permissionLabel(permission: string) { return permission.replace(".", " ").replace(/\b\w/g, (letter) => letter.toUpperCase()); }

@@ -2,6 +2,7 @@
 
 import { Breadcrumb, type BreadcrumbItem } from "./breadcrumb";
 import Image from "next/image";
+import Link from "next/link";
 import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui";
 import { useSidebar } from "../layout/sidebar-context";
@@ -77,7 +78,7 @@ export function PageHeader({ title, breadcrumb }: PageHeaderProps) {
               </Button>
             </div>
             
-            <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+            <Link href="/profile" aria-label="Open my profile" className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               {user?.profile_picture_url ? (
                 <Image
                   src={user.profile_picture_url}
@@ -91,7 +92,7 @@ export function PageHeader({ title, breadcrumb }: PageHeaderProps) {
                   {getInitials()}
                 </div>
               )}
-            </div>
+            </Link>
           </div>
         </div>
       </div>

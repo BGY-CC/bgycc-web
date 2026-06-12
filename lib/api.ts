@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from "react";
+import { notifyAdminMutation } from "@/lib/audit-events";
 
 /**
  * lib/api.ts
@@ -116,6 +117,11 @@ export function useApi() {
 
       if (!response.ok) {
         throw new Error(result.error || result.message || "Something went wrong");
+      }
+
+      const method = (options.method || "GET").toUpperCase();
+      if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+        notifyAdminMutation(endpoint, method);
       }
 
       return result;
