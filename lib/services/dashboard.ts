@@ -7,6 +7,7 @@ export interface DashboardStats {
   at_risk_members: StatValue;
   reset_members: StatValue;
   audio_reports: StatValue;
+  clubs_created: StatValue;
 }
 
 interface StatValue {
@@ -35,6 +36,18 @@ export interface DashboardData {
     total: number;
   };
   engagement_trends: EngagementTrend[];
+  top_clubs: Array<{
+    id: string;
+    name: string;
+    active_members: number;
+    average_streak: number;
+  }>;
+  top_leaders: Array<{
+    id: string;
+    full_name: string;
+    total_xp: number;
+    current_streak: number;
+  }>;
 }
 
 export const dashboardService = {
@@ -58,4 +71,3 @@ export const dashboardService = {
     return readJson(response);
   },
 };
-

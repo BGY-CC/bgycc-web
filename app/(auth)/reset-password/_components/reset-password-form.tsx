@@ -58,13 +58,13 @@ export function ResetPasswordForm() {
             placeholder="Enter your new password"
             autoComplete="new-password"
             error={!!errors.password}
-            className="pr-10"
+            className="pr-12"
             {...register("password")}
           />
           <button
             type="button"
             onClick={() => setShowNew((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-2xl text-gray-400 transition-colors hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             aria-label={showNew ? "Hide password" : "Show password"}
           >
             {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -84,13 +84,13 @@ export function ResetPasswordForm() {
             placeholder="Enter your new password"
             autoComplete="new-password"
             error={!!errors.confirmPassword}
-            className="pr-10"
+            className="pr-12"
             {...register("confirmPassword")}
           />
           <button
             type="button"
             onClick={() => setShowConfirm((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-2xl text-gray-400 transition-colors hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             aria-label={showConfirm ? "Hide password" : "Show password"}
           >
             {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

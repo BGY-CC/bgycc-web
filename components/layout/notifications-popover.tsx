@@ -115,7 +115,7 @@ export function NotificationsPopover() {
       <Button
         variant="ghost"
         size="icon"
-        className="relative h-10 w-10 text-muted hover:text-primary hover:bg-background rounded-xl"
+        className="relative h-11 w-11 rounded-xl text-muted hover:bg-background hover:text-primary"
         aria-label={
           unreadCount > 0
             ? `${unreadLabel} unread notifications`
@@ -132,7 +132,7 @@ export function NotificationsPopover() {
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 top-12 z-[120] w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-border bg-white shadow-xl">
+        <div className="absolute right-0 top-12 z-[120] w-[min(24rem,calc(100vw-1rem))] overflow-hidden rounded-2xl border border-border bg-white shadow-xl">
           <div className="border-b border-border px-4 py-3">
             <p className="text-sm font-semibold text-primary">Notifications</p>
             <p className="text-xs text-muted">{unreadCount} unread</p>
@@ -141,7 +141,7 @@ export function NotificationsPopover() {
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="max-h-[28rem] overflow-y-auto"
+            className="max-h-[min(28rem,calc(100dvh-8rem))] overflow-y-auto overscroll-contain"
           >
             {notifications.map((notification) => (
               <div

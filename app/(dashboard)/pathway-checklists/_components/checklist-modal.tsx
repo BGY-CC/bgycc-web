@@ -87,7 +87,7 @@ export function ChecklistModal({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <ModalContent className="max-w-xl">
+      <ModalContent className="w-[calc(100vw-1.5rem)] max-w-xl sm:w-full">
         <ModalHeader
           icon={<ClipboardList className="h-5 w-5 text-primary" />}
           title={mode === "add" ? "Add Checklist Item" : "Edit Checklist Item"}
@@ -97,8 +97,8 @@ export function ChecklistModal({
               : "Update the checklist item details below."
           }
         />
-        <form onSubmit={handleSubmit(onSuccess)} noValidate className="space-y-5 px-6 pb-8">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSuccess)} noValidate className="space-y-5 px-4 pb-6 sm:px-6 sm:pb-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField label="Task Type*" error={errors.type?.message}>
               <CustomSelect {...register("type")} value={type} placeholder="Select Type">
                 <option value="Prayer">Prayer</option>
@@ -150,7 +150,7 @@ export function ChecklistModal({
           )}
 
           {schedule === "Specific Day" && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField label="Cycle Number" error={errors.cycle_number?.message}>
                 <Input type="number" placeholder="e.g. 1" {...register("cycle_number")} />
               </FormField>
@@ -160,11 +160,11 @@ export function ChecklistModal({
             </div>
           )}
 
-          <div className="flex gap-3 pt-2">
-            <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
+          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+            <Button type="button" variant="secondary" onClick={onClose} className="min-h-11 flex-1">
               Cancel
             </Button>
-            <Button type="submit" isLoading={isSubmitting} className="flex-1">
+            <Button type="submit" isLoading={isSubmitting} className="min-h-11 flex-1">
               {mode === "add" ? "Add item" : "Save Changes"}
             </Button>
           </div>

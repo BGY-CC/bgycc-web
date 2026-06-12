@@ -47,8 +47,8 @@ export function ClubsTable({
 
   return (
     <>
-      {/* ── Mobile card list (< md) ───────────────────────────────────── */}
-      <div className="md:hidden rounded-2xl border border-border bg-white overflow-hidden shadow-sm divide-y divide-border">
+      {/* ── Card list (< xl) ──────────────────────────────────────────── */}
+      <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-white shadow-sm xl:hidden">
         {clubs.length === 0 ? (
           <div className="py-10 text-center text-sm text-gray-500">
             No clubs found matching your criteria.
@@ -77,22 +77,64 @@ export function ClubsTable({
             return (
               <div
                 key={club.id}
-                className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                className="px-4 py-4 transition-colors hover:bg-gray-50 active:bg-gray-100"
               >
-                <Link
-                  href={`/clubs/${club.id}`}
-                  className="flex-1 min-w-0 mr-2"
-                >
-                  <p className="text-sm font-semibold text-gray-900 truncate">
-                    {club.name}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {[club.city, club.state].filter(Boolean).join(", ") || "No region"}
-                  </p>
-                </Link>
-                {/* Stop link navigation when tapping the menu */}
-                <div onClick={(e) => e.preventDefault()}>
-                  <ActionMenu items={menuItems} align="right" />
+                <div className="flex items-start gap-3">
+                  <Link
+                    href={`/clubs/${club.id}`}
+                    className="min-w-0 flex-1 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  >
+                    <div className="flex flex-wrap items-start gap-2">
+                      <span className="min-w-0 flex-1 text-sm font-semibold text-gray-900 transition-colors hover:text-accent">
+                        <span className="break-words">{club.name}</span>
+                      </span>
+                      <Badge
+                        variant={club.is_active ? "active" : "dormant"}
+                        className="px-3 py-1 whitespace-normal text-center"
+                      >
+                        {club.is_active ? "Active" : "Dormant"}
+                      </Badge>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-1 gap-3 text-sm text-gray-600 sm:grid-cols-2">
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-400">
+                          Region
+                        </p>
+                        <p className="mt-1 break-words">
+                          {[club.city, club.state].filter(Boolean).join(", ") || "No region"}
+                        </p>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-400">
+                          Leader
+                        </p>
+                        <p className="mt-1 break-words">
+                          {club.leader_name || "No Leader"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-400">
+                          Members
+                        </p>
+                        <p className="mt-1 font-semibold text-gray-900">
+                          {club.total_members}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-400">
+                          Score
+                        </p>
+                        <p className="mt-1 font-semibold text-gray-900">
+                          {club.average_streak.toFixed(1)}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <div className="shrink-0 pt-0.5" onClick={(e) => e.preventDefault()}>
+                    <ActionMenu items={menuItems} align="right" />
+                  </div>
                 </div>
               </div>
             );
@@ -100,8 +142,8 @@ export function ClubsTable({
         )}
       </div>
 
-      {/* ── Desktop table (≥ md) ──────────────────────────────────────── */}
-      <div className="hidden md:block rounded-2xl border border-border bg-white overflow-hidden shadow-sm">
+      {/* ── Desktop table (≥ xl) ──────────────────────────────────────── */}
+      <div className="hidden overflow-hidden rounded-2xl border border-border bg-white shadow-sm xl:block">
         <div className="overflow-x-auto">
           <table className="w-full text-sm font-sans">
             <thead>
@@ -169,13 +211,15 @@ export function ClubsTable({
                     className="hover:bg-background/50 transition-colors group"
                   >
                     {/* Club */}
-                    <td className="px-4 py-4 font-semibold text-primary whitespace-nowrap">
+                    <td className="px-4 py-4 font-semibold text-primary">
                       {club.id ? (
                         <Link
                           href={`/clubs/${club.id}`}
-                          className="hover:text-accent transition-colors"
+                          className="transition-colors hover:text-accent"
                         >
-                          {club.name}
+                          <span className="block max-w-[220px] break-words">
+                            {club.name}
+                          </span>
                         </Link>
                       ) : (
                         <span className="text-muted">{club.name}</span>
@@ -183,20 +227,20 @@ export function ClubsTable({
                     </td>
 
                     {/* Region */}
-                    <td className="px-4 py-4 text-subtle font-normal whitespace-nowrap">
+                    <td className="px-4 py-4 text-subtle font-normal">
                       <span className="flex items-center gap-2">
                         <span className="text-muted text-sm">📍</span>
-                        {location}
+                        <span className="max-w-[220px] break-words">{location}</span>
                       </span>
                     </td>
 
                     {/* Leader */}
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4">
                       <span className="flex items-center gap-3">
                         <span className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-xs font-semibold text-primary shrink-0 shadow-sm">
                           {(club.leader_name || "L").charAt(0)}
                         </span>
-                        <span className="text-primary font-semibold">
+                        <span className="max-w-[200px] break-words text-primary font-semibold">
                           {club.leader_name || "No Leader"}
                         </span>
                       </span>
@@ -244,7 +288,7 @@ export function ClubsTable({
         </div>
       </div>
 
-      <div className="flex items-center justify-center mt-12 mb-6">
+      <div className="mt-10 mb-6 flex items-center justify-center sm:mt-12">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

@@ -30,8 +30,8 @@ export function ActionMenu({ items, align = "right" }: ActionMenuProps) {
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       setCoords({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
+        top: rect.bottom,
+        left: rect.left,
         width: rect.width,
       });
     }
@@ -78,10 +78,20 @@ export function ActionMenu({ items, align = "right" }: ActionMenuProps) {
       ref={menuRef}
       role="menu"
       style={{
-        position: 'absolute',
-        top: coords.top,
-        left: align === 'right' ? 'auto' : coords.left,
-        right: align === 'right' ? window.innerWidth - (coords.left + coords.width) : 'auto',
+        position: 'fixed',
+        top: (() => {
+          const menuHeight = Math.min(items.length * 44 + 8, window.innerHeight - 16);
+          const spaceBelow = window.innerHeight - coords.top - 8;
+          const spaceAbove = coords.top - 8;
+          return spaceBelow >= menuHeight || spaceBelow >= spaceAbove
+            ? Math.max(8, Math.min(coords.top + 4, window.innerHeight - menuHeight - 8))
+            : Math.max(8, coords.top - 44 - menuHeight);
+        })(),
+        left: align === 'right' ? 'auto' : Math.max(8, coords.left),
+        right: align === 'right' ? Math.max(8, window.innerWidth - (coords.left + coords.width)) : 'auto',
+        maxWidth: 'calc(100vw - 16px)',
+        maxHeight: 'calc(100dvh - 16px)',
+        overflowY: 'auto',
       }}
       className={cn(
         "z-[9999] mt-1 min-w-[160px] rounded-lg border border-gray-200 bg-white py-1 shadow-xl animate-in fade-in zoom-in-95 duration-100",
@@ -96,7 +106,7 @@ export function ActionMenu({ items, align = "right" }: ActionMenuProps) {
             setOpen(false);
           }}
           className={cn(
-            "flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors",
+            "flex min-h-11 w-full items-center gap-2 px-3 py-2 text-sm transition-colors",
             item.variant === "destructive"
               ? "text-red-600 hover:bg-red-50"
               : "text-gray-700 hover:bg-gray-50",
@@ -120,7 +130,7 @@ export function ActionMenu({ items, align = "right" }: ActionMenuProps) {
         ref={triggerRef}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900",
+          "flex h-11 w-11 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900",
           open && "bg-gray-100 text-gray-900 shadow-sm"
         )}
         aria-label="Open actions menu"

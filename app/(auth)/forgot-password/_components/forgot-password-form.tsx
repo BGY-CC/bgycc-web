@@ -38,8 +38,8 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div className="flex flex-col items-start text-left space-y-6 pt-4">
-        <div className="bg-[#f0f9eb] rounded-2xl p-6 w-full flex items-start gap-4">
+      <div className="flex flex-col items-start space-y-5 pt-2 text-left sm:space-y-6 sm:pt-4">
+        <div className="flex w-full items-start gap-3 rounded-2xl bg-[#f0f9eb] p-4 sm:gap-4 sm:p-6">
           <div className="bg-white rounded-full p-1 shadow-sm shrink-0">
             <CheckCircle2 className="h-5 w-5 text-[#4C7B10]" />
           </div>
@@ -60,7 +60,7 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
       {error && <Alert variant="error">{error}</Alert>}
-      
+
       <FormField label="Email" required error={errors.email?.message}>
         <Input
           type="email"
@@ -77,7 +77,7 @@ export function ForgotPasswordForm() {
 
       <p className="text-center text-sm text-gray-500">
         Remember your password?{" "}
-        <Link href={ROUTES.LOGIN} className="text-primary font-light underline underline-offset-3">
+        <Link href={ROUTES.LOGIN} className="font-light text-primary underline underline-offset-3">
           Back to login
         </Link>
       </p>

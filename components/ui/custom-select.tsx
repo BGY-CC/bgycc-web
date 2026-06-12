@@ -45,8 +45,8 @@ export const CustomSelect = React.forwardRef<
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       setCoords({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
+        top: rect.bottom,
+        left: rect.left,
         width: rect.width,
         height: rect.height,
       });
@@ -97,26 +97,33 @@ export const CustomSelect = React.forwardRef<
   const getMenuStyle = () => {
     const menuHeight = 320; // max-h-80 approximate
     const viewportHeight = window.innerHeight;
-    const spaceBelow = viewportHeight - coords.top;
-    const spaceAbove = coords.top - 40;
+    const viewportWidth = window.innerWidth;
+    const spaceBelow = viewportHeight - coords.top - 8;
+    const spaceAbove = coords.top - coords.height - 8;
+    const availableWidth = Math.max(0, viewportWidth - 16);
+    const width = Math.min(coords.width, availableWidth);
+    const left = Math.min(Math.max(8, coords.left), viewportWidth - width - 8);
 
-    let top = coords.top + 8; // mt-2
+    const placeAbove = spaceBelow < menuHeight && spaceAbove > spaceBelow;
+    const maxHeight = Math.max(44, Math.min(menuHeight, placeAbove ? spaceAbove : spaceBelow));
+    let top = coords.top + 8;
 
-    // If not enough space below, try placing above
-    if (spaceBelow < menuHeight && spaceAbove > menuHeight) {
-      top = coords.top - menuHeight - 8;
+    if (placeAbove) {
+      top = coords.top - coords.height - maxHeight - 8;
     }
 
+    top = Math.max(8, Math.min(top, viewportHeight - maxHeight - 8));
+
     return {
-      position: "absolute" as const,
+      position: "fixed" as const,
       top: `${top}px`,
-      left: `${coords.left}px`,
-      width: `${coords.width}px`,
-      maxHeight: "320px",
+      left: `${left}px`,
+      width: `${width}px`,
+      maxHeight: `${maxHeight}px`,
     };
   };
 
-  const menuStyle = getMenuStyle();
+  const menuStyle = mounted && open ? getMenuStyle() : undefined;
 
   const dropdown =
     mounted && open
@@ -153,7 +160,7 @@ export const CustomSelect = React.forwardRef<
                     setOpen(false);
                   }}
                   className={cn(
-                    "w-full text-left px-3 py-2.5 text-sm hover:bg-gray-50 transition-colors",
+                    "min-h-11 w-full px-3 py-2.5 text-left text-sm transition-colors hover:bg-gray-50",
                     isSelected && "bg-gray-100 font-semibold text-primary",
                     option.props.disabled && "cursor-not-allowed opacity-50",
                   )}
@@ -176,7 +183,7 @@ export const CustomSelect = React.forwardRef<
         onClick={() => setOpen(!open)}
         disabled={disabled}
         className={cn(
-          "flex h-10 w-full items-center justify-between rounded-lg border border-gray-300 bg-white",
+          "flex h-11 w-full items-center justify-between rounded-lg border border-gray-300 bg-white",
           "px-3 text-sm text-gray-900",
           "transition-colors duration-150",
           "focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useId, useState } from "react";
 import {
   AreaChart,
   Area,
@@ -39,31 +39,32 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 
 export function EngagementChart({ data }: { data?: ChartDataPoint[] }) {
   const [isMounted, setIsMounted] = useState(false);
+  const chartId = useId();
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setIsMounted(true); }, []);
 
   if (!isMounted) {
-    return <div className="w-full h-[220px] bg-gray-50/50 rounded-lg animate-pulse" />;
+    return <div className="h-[240px] w-full rounded-lg bg-gray-50/50 animate-pulse sm:h-[280px]" />;
   }
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex h-[220px] items-center justify-center text-sm text-gray-400">
+      <div className="flex h-[240px] items-center justify-center rounded-lg text-center text-sm text-gray-400 sm:h-[280px]">
         No data available for this period.
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-[220px]">
-      <ResponsiveContainer width="100%" height={220}>
-        <AreaChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+    <div className="h-[240px] w-full min-w-0 sm:h-[280px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <defs>
-            <linearGradient id="reportsGradient" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`${chartId}-reports`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#1e293b" stopOpacity={0.1} />
               <stop offset="95%" stopColor="#1e293b" stopOpacity={0} />
             </linearGradient>
-            <linearGradient id="activeUsersGradient" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`${chartId}-active-users`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#e11d48" stopOpacity={0.1} />
               <stop offset="95%" stopColor="#e11d48" stopOpacity={0} />
             </linearGradient>
@@ -74,13 +75,15 @@ export function EngagementChart({ data }: { data?: ChartDataPoint[] }) {
             tick={{ fontSize: 12, fill: "#a3aed0", fontWeight: 500 }}
             axisLine={false}
             tickLine={false}
-            dy={10}
+            minTickGap={24}
+            tickMargin={10}
           />
           <YAxis
             tick={{ fontSize: 12, fill: "#a3aed0", fontWeight: 500 }}
             axisLine={false}
             tickLine={false}
-            dx={-10}
+            tickMargin={8}
+            width={36}
           />
           <Tooltip content={<CustomTooltip />} />
           <Area
@@ -88,7 +91,7 @@ export function EngagementChart({ data }: { data?: ChartDataPoint[] }) {
             dataKey="reports"
             stroke="#1e293b"
             strokeWidth={3}
-            fill="url(#reportsGradient)"
+            fill={`url(#${chartId}-reports)`}
             dot={false}
             activeDot={{ r: 4, fill: "#1e293b", strokeWidth: 2, stroke: "#fff" }}
           />
@@ -97,7 +100,7 @@ export function EngagementChart({ data }: { data?: ChartDataPoint[] }) {
             dataKey="active_users"
             stroke="#e11d48"
             strokeWidth={3}
-            fill="url(#activeUsersGradient)"
+            fill={`url(#${chartId}-active-users)`}
             dot={false}
             activeDot={{ r: 4, fill: "#e11d48", strokeWidth: 2, stroke: "#fff" }}
           />

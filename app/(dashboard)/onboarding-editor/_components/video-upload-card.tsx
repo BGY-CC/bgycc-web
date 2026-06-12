@@ -201,26 +201,26 @@ export function VideoUploadCard({
 
   return (
     <>
-      <div className="rounded-2xl border border-border bg-white p-6 shadow-sm hover:border-primary/20 transition-all group">
+      <div className="group rounded-2xl border border-border bg-white p-4 shadow-sm transition-all hover:border-primary/20 sm:p-6">
         {/* Card header */}
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center gap-3">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 items-start gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-background border border-border text-primary shadow-sm group-hover:scale-105 transition-transform">
               <Play className="h-5 w-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-[15px] font-semibold text-primary tracking-tight">{pathway}</p>
               <p className="text-[13px] font-normal text-muted mt-1">{description}</p>
             </div>
           </div>
-          <Badge variant={hasVideo ? "uploaded" : "no-video"} className="font-semibold px-3 py-1">
+          <Badge variant={hasVideo ? "uploaded" : "no-video"} className="self-start px-3 py-1 font-semibold">
             {isUploading ? "Uploading" : hasVideo ? "Uploaded" : "No Video"}
           </Badge>
         </div>
 
         {/* Content area */}
         {hasVideo ? (
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-4">
             {/* Video thumbnail / link */}
             {videoSrc ? (
               <video
@@ -228,10 +228,10 @@ export function VideoUploadCard({
                 controls
                 preload="metadata"
                 onLoadedMetadata={handleMetadataLoaded}
-                className="h-32 w-48 shrink-0 rounded-lg bg-gray-900 object-cover"
+                className="aspect-video w-full rounded-lg bg-gray-900 object-cover lg:h-32 lg:w-48 lg:shrink-0"
               />
             ) : (
-              <div className="relative h-32 w-48 shrink-0 rounded-lg bg-gray-900 overflow-hidden flex items-center justify-center">
+              <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-lg bg-gray-900 lg:h-32 lg:w-48 lg:shrink-0">
                 <div className="text-white text-xs text-center p-2 opacity-70">
                   <Play className="h-8 w-8 mx-auto mb-1" />
                   Video Preview
@@ -243,32 +243,32 @@ export function VideoUploadCard({
             <div className="flex-1 space-y-4">
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold text-muted uppercase tracking-[0.1em]">File Name</p>
-                <p className="text-sm font-semibold text-primary truncate">{video.name || "Loading..."}</p>
+                <p className="break-words text-sm font-semibold text-primary">{video.name || "Loading..."}</p>
               </div>
  
-              <div className="flex gap-8 border-y border-border py-3">
-                <div className="space-y-1">
+              <div className="grid grid-cols-1 gap-3 border-y border-border py-3 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="min-w-0 space-y-1">
                   <p className="text-[10px] font-semibold text-muted uppercase tracking-[0.1em]">Size</p>
-                  <p className="text-xs font-semibold text-primary">{video.size || "—"}</p>
+                  <p className="break-words text-xs font-semibold text-primary">{video.size || "—"}</p>
                 </div>
-                <div className="space-y-1">
+                <div className="min-w-0 space-y-1">
                   <p className="text-[10px] font-semibold text-muted uppercase tracking-[0.1em]">Duration</p>
-                  <p className="text-xs font-semibold text-primary">{video.duration || "—"}</p>
+                  <p className="break-words text-xs font-semibold text-primary">{video.duration || "—"}</p>
                 </div>
-                <div className="space-y-1">
+                <div className="min-w-0 space-y-1">
                   <p className="text-[10px] font-semibold text-muted uppercase tracking-[0.1em]">Uploaded</p>
-                  <p className="text-xs font-semibold text-primary">{video.uploaded || "—"}</p>
+                  <p className="break-words text-xs font-semibold text-primary">{video.uploaded || "—"}</p>
                 </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Button
                   variant="secondary"
                   size="sm"
                   leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
                   onClick={handleReplace}
                   isLoading={isUploading}
-                  className="bg-background border-border text-primary hover:bg-background/80"
+                  className="min-h-11 w-full justify-center bg-background border-border text-primary hover:bg-background/80 sm:w-auto"
                 >
                   Replace Video
                 </Button>
@@ -278,7 +278,7 @@ export function VideoUploadCard({
                   leftIcon={<Trash2 className="h-3.5 w-3.5" />}
                   onClick={() => setShowConfirm(true)}
                   disabled={isUploading}
-                  className="text-error hover:text-error hover:bg-error-bg font-semibold"
+                  className="min-h-11 w-full justify-center font-semibold text-error hover:bg-error-bg hover:text-error sm:w-auto"
                 >
                   Remove
                 </Button>
@@ -292,7 +292,7 @@ export function VideoUploadCard({
             disabled={isUploading}
             className={cn(
               "flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200",
-              "py-10 text-center transition-colors",
+              "min-h-44 px-4 py-10 text-center transition-colors",
               "hover:border-primary hover:bg-primary/5",
             )}
           >

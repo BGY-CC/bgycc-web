@@ -1,0 +1,194 @@
+"use client";
+
+import { useState } from "react";
+import { Activity, CalendarDays, Filter, ShieldCheck } from "lucide-react";
+import { Alert, Badge, Input, Pagination, Select, Skeleton } from "@/components/ui";
+import { useQuery } from "@/hooks/use-query";
+
+interface AuditActor {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+}
+
+interface AuditLog {
+  id: string;
+  user_id: string | null;
+  action: string;
+  resource_type: string | null;
+  resource_id: string | null;
+  metadata: Record<string, unknown> | null;
+  ip_address: string | null;
+  created_at: string;
+  actor: AuditActor | AuditActor[] | null;
+}
+
+interface AuditLogsResponse {
+  audit_logs: AuditLog[];
+  meta: {
+    page: number;
+    page_size: number;
+    total_count: number;
+    total_pages: number;
+  };
+}
+
+const RESOURCE_OPTIONS = [
+  "clubs",
+  "profiles",
+  "pathways",
+  "checklist",
+  "resources",
+  "detailed-resources",
+  "community",
+  "curriculum",
+  "quotes",
+  "support",
+  "notifications",
+];
+
+export function AuditLogsClient() {
+  const [page, setPage] = useState(1);
+  const [action, setAction] = useState("");
+  const [resourceType, setResourceType] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+
+  const params = new URLSearchParams({ page: page.toString(), page_size: "20" });
+  if (action) params.set("action", action);
+  if (resourceType) params.set("resource_type", resourceType);
+  if (from) params.set("from", from);
+  if (to) params.set("to", to);
+
+  const { data, isLoading, error } = useQuery<AuditLogsResponse>(
+    `/audit-logs?${params.toString()}`,
+  );
+
+  const logs = data?.audit_logs ?? [];
+  const totalPages = data?.meta.total_pages ?? 1;
+
+  const updateFilter = (setter: (value: string) => void, value: string) => {
+    setter(value);
+    setPage(1);
+  };
+
+  return (
+    <div className="mx-auto w-full max-w-[1600px] flex-1 space-y-5 px-4 pb-8 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-background text-primary">
+              <ShieldCheck className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="text-xl font-semibold text-primary">{data?.meta.total_count.toLocaleString() ?? "0"}</p>
+              <p className="text-sm text-muted">Recorded administrative actions</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-background text-primary">
+              <Activity className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="text-xl font-semibold capitalize text-primary">{action || "All"}</p>
+              <p className="text-sm text-muted">Current action filter</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section className="rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-5">
+        <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-primary">
+          <Filter className="h-4 w-4" /> Filters
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <Select value={action} onChange={(event) => updateFilter(setAction, event.target.value)} className="h-11 rounded-xl">
+            <option value="">All actions</option>
+            <option value="create">Create</option>
+            <option value="update">Update</option>
+            <option value="delete">Delete</option>
+          </Select>
+          <Select value={resourceType} onChange={(event) => updateFilter(setResourceType, event.target.value)} className="h-11 rounded-xl">
+            <option value="">All resources</option>
+            {RESOURCE_OPTIONS.map((resource) => (
+              <option key={resource} value={resource}>{formatResource(resource)}</option>
+            ))}
+          </Select>
+          <Input type="date" aria-label="From date" value={from} max={to || undefined} onChange={(event) => updateFilter(setFrom, event.target.value)} leftAddon={<CalendarDays className="h-4 w-4" />} />
+          <Input type="date" aria-label="To date" value={to} min={from || undefined} onChange={(event) => updateFilter(setTo, event.target.value)} leftAddon={<CalendarDays className="h-4 w-4" />} />
+        </div>
+      </section>
+
+      {error && <Alert variant="error">Unable to load audit logs. Please try again.</Alert>}
+
+      <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
+        {isLoading ? (
+          <div className="space-y-3 p-4">
+            {Array.from({ length: 7 }).map((_, index) => <Skeleton key={index} className="h-16 w-full rounded-xl" />)}
+          </div>
+        ) : logs.length === 0 ? (
+          <div className="px-4 py-16 text-center">
+            <ShieldCheck className="mx-auto mb-3 h-10 w-10 text-gray-300" />
+            <p className="text-sm font-medium text-primary">No audit records found</p>
+            <p className="mt-1 text-sm text-muted">New successful admin changes will appear here.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {logs.map((log) => <AuditLogRow key={log.id} log={log} />)}
+          </div>
+        )}
+      </section>
+
+      {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
+    </div>
+  );
+}
+
+function AuditLogRow({ log }: { log: AuditLog }) {
+  const actor = Array.isArray(log.actor) ? log.actor[0] : log.actor;
+  const method = typeof log.metadata?.method === "string" ? log.metadata.method : null;
+  const status = typeof log.metadata?.status === "number" ? log.metadata.status : null;
+
+  return (
+    <article className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] sm:items-center sm:p-5">
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant={actionVariant(log.action)} className="capitalize">{log.action}</Badge>
+          <span className="text-sm font-semibold text-primary">{formatResource(log.resource_type || "unknown")}</span>
+          {method && <span className="text-xs font-medium text-muted">{method}</span>}
+        </div>
+        <p className="mt-1 truncate text-sm text-muted" title={log.resource_id || undefined}>
+          {log.resource_id ? `Entity ${log.resource_id}` : "Collection-level action"}
+        </p>
+      </div>
+      <div className="min-w-0 text-sm">
+        <p className="truncate font-medium text-gray-800">{actor?.full_name || actor?.email || "System administrator"}</p>
+        <p className="truncate text-xs text-muted">{actor?.email || log.ip_address || "No actor details"}</p>
+      </div>
+      <div className="text-left sm:text-right">
+        <p className="text-sm font-medium text-gray-700">{formatDate(log.created_at)}</p>
+        <p className="text-xs text-muted">{status ? `HTTP ${status}` : log.ip_address || "Recorded"}</p>
+      </div>
+    </article>
+  );
+}
+
+function actionVariant(action: string): "active" | "warning" | "dormant" | "default" {
+  if (action === "create") return "active";
+  if (action === "update") return "warning";
+  if (action === "delete") return "dormant";
+  return "default";
+}
+
+function formatResource(value: string) {
+  return value.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}

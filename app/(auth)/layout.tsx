@@ -15,14 +15,17 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start sm:justify-center bg-[#ffffff] px-4 py-12 sm:py-20">
-      {/* Brand mark */}
-      <div className="mb-8 text-center sm:mb-10">
-        <Logo size="lg" className="flex-row items-center gap-4" />
+    <div className="flex min-h-[100dvh] flex-col items-center justify-start bg-[#ffffff] px-4 py-6 sm:px-6 sm:py-10 lg:justify-center lg:px-8 lg:py-12">
+      <div className="mb-5 flex w-full max-w-[512px] justify-center text-center sm:mb-8">
+        <div className="sm:hidden">
+          <Logo size="md" className="flex-row items-center gap-3" />
+        </div>
+        <div className="hidden sm:block">
+          <Logo size="lg" className="flex-row items-center gap-4" />
+        </div>
       </div>
 
-      {/* Auth card */}
-      <div className="w-full max-w-[512px] rounded-3xl border border-border bg-white p-10 shadow-none">
+      <div className="w-full max-w-[512px] rounded-3xl border border-border bg-white px-5 py-6 shadow-none sm:px-8 sm:py-8 lg:px-10 lg:py-10">
         {children}
       </div>
 

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useQuery } from "@/hooks/use-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Crown, Trophy, Medal } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -33,7 +32,7 @@ export function ReferralLeaderboard() {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Crown className="h-5 w-5 text-yellow-500 animate-bounce" />;
+        return <Crown className="h-5 w-5 text-yellow-500 motion-safe:animate-bounce" />;
       case 2:
         return <Trophy className="h-4 w-4 text-slate-400" />;
       case 3:
@@ -45,15 +44,18 @@ export function ReferralLeaderboard() {
 
   return (
     <Card className="border-none shadow-xl bg-white/50 backdrop-blur-sm overflow-hidden">
-      <CardHeader className="pb-2 border-b border-gray-50">
-        <CardTitle className="text-lg font-bold flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-primary" />
-          Top Referrers
-          <div className="ml-auto flex items-center gap-1 bg-secondary rounded-md p-0.5">
+      <CardHeader className="border-b border-gray-50 pb-2">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <CardTitle className="flex items-center gap-2 text-lg font-bold">
+            <Trophy className="h-5 w-5 text-primary" />
+            Top Referrers
+          </CardTitle>
+          <div className="grid min-h-11 grid-cols-2 gap-1 rounded-md bg-secondary p-0.5 lg:flex lg:w-auto">
             <button
               onClick={() => handleTimeframeChange("weekly")}
+              aria-pressed={timeframe === "weekly"}
               className={cn(
-                "px-2 py-1 text-[10px] font-medium rounded-sm transition-colors",
+                "h-11 rounded-sm px-3 text-[10px] font-medium transition-colors",
                 timeframe === "weekly" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -61,21 +63,22 @@ export function ReferralLeaderboard() {
             </button>
             <button
               onClick={() => handleTimeframeChange("monthly")}
+              aria-pressed={timeframe === "monthly"}
               className={cn(
-                "px-2 py-1 text-[10px] font-medium rounded-sm transition-colors",
+                "h-11 rounded-sm px-3 text-[10px] font-medium transition-colors",
                 timeframe === "monthly" ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
               MONTHLY
             </button>
           </div>
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className="divide-y divide-gray-50">
           {isLoading ? (
             Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="p-4 animate-pulse flex items-center gap-4">
+              <div key={i} className="flex items-center gap-4 p-4 animate-pulse">
                 <div className="h-8 w-8 rounded-full bg-gray-100" />
                 <div className="flex-1 space-y-2">
                   <div className="h-3 w-24 bg-gray-100 rounded" />
@@ -89,22 +92,22 @@ export function ReferralLeaderboard() {
               <div
                 key={item.referrer_id}
                 className={cn(
-                  "p-4 flex items-center gap-4 transition-colors hover:bg-gray-50/50",
+                  "grid grid-cols-[auto_1fr] gap-3 p-4 transition-colors hover:bg-gray-50/50 sm:grid-cols-[auto_auto_1fr_auto]",
                   item.rank === 1 && "bg-yellow-50/30"
                 )}
               >
-                <div className="w-8 flex justify-center">
+                <div className="flex w-8 items-center justify-center self-center sm:self-auto">
                   {getRankIcon(item.rank)}
                 </div>
-                
-                <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+
+                <Avatar className="h-10 w-10 border-2 border-white shadow-sm sm:self-center">
                   <AvatarImage src={item.profile_picture_url || ""} />
                   <AvatarFallback className="bg-primary/5 text-primary text-xs">
                     {item.full_name?.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 sm:self-center">
                   <p className="text-sm font-semibold truncate text-gray-900">
                     {item.full_name}
                   </p>
@@ -113,7 +116,7 @@ export function ReferralLeaderboard() {
                   </p>
                 </div>
 
-                <div className="flex gap-4 items-center text-right">
+                <div className="col-span-2 flex items-center justify-between gap-3 border-t border-gray-100 pt-3 text-right sm:col-span-1 sm:border-t-0 sm:pt-0">
                   <div>
                     <p className="text-sm font-bold text-emerald-600">
                       {item.xp}
@@ -143,19 +146,19 @@ export function ReferralLeaderboard() {
         </div>
 
         {leaderboard && leaderboard.length > 0 && (
-          <div className="p-4 bg-gray-50/50 border-t border-gray-50 flex justify-between items-center">
+          <div className="flex items-center justify-between gap-2 border-t border-gray-50 bg-gray-50/50 p-4">
             <button 
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="text-xs font-semibold text-primary disabled:opacity-50 disabled:hover:no-underline hover:underline px-2"
+              className="min-h-11 rounded-md px-3 text-xs font-semibold text-primary hover:underline disabled:opacity-50 disabled:hover:no-underline"
             >
               Previous
             </button>
-            <span className="text-xs text-muted-foreground">Page {page}</span>
+            <span className="text-center text-xs text-muted-foreground">Page {page}</span>
             <button 
               onClick={() => setPage(p => p + 1)}
               disabled={leaderboard.length < pageSize}
-              className="text-xs font-semibold text-primary disabled:opacity-50 disabled:hover:no-underline hover:underline px-2"
+              className="min-h-11 rounded-md px-3 text-xs font-semibold text-primary hover:underline disabled:opacity-50 disabled:hover:no-underline"
             >
               Next
             </button>

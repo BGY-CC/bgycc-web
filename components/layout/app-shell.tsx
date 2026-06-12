@@ -15,7 +15,7 @@ function AppShellContent({ children }: AppShellProps) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen overflow-hidden bg-gray-50">
+      <div className="flex h-screen h-dvh overflow-hidden bg-gray-50">
         <aside className="hidden w-72 shrink-0 border-r border-border bg-white p-5 md:block">
           <Skeleton className="h-12 w-40 rounded-xl" />
           <div className="mt-8 space-y-3">
@@ -50,11 +50,11 @@ function AppShellContent({ children }: AppShellProps) {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f8fafc]">
+    <div className="flex h-screen h-dvh min-w-0 overflow-hidden bg-[#f8fafc]">
       <Sidebar isOpen={isOpen} onClose={() => setIsOpen(false)} />
 
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="min-w-0 flex-1 overflow-y-auto overscroll-y-contain">
           {children}
         </main>
       </div>

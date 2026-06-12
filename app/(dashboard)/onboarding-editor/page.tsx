@@ -17,16 +17,16 @@ function OnboardingEditorSkeleton() {
       />
 
       <div className="flex-1 space-y-6 px-4 py-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
-        <div className="rounded-3xl border border-border bg-white p-8 shadow-sm">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-4">
+        <div className="rounded-3xl border border-border bg-white p-5 shadow-sm sm:p-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex min-w-0 items-start gap-4">
               <Skeleton className="h-10 w-10 rounded-xl" />
-              <div className="space-y-2">
+              <div className="min-w-0 space-y-2">
                 <Skeleton className="h-5 w-36" />
                 <Skeleton className="h-4 w-80 max-w-full" />
               </div>
             </div>
-            <Skeleton className="h-7 w-36 rounded-full" />
+            <Skeleton className="h-7 w-36 self-start rounded-full" />
           </div>
 
           <div className="mt-5 space-y-4">
@@ -35,15 +35,15 @@ function OnboardingEditorSkeleton() {
                 key={index}
                 className="rounded-2xl border border-border bg-white p-5 shadow-sm"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-4">
                     <Skeleton className="h-12 w-12 rounded-xl" />
-                    <div className="space-y-2">
+                    <div className="min-w-0 space-y-2">
                       <Skeleton className="h-5 w-44" />
                       <Skeleton className="h-4 w-72 max-w-full" />
                     </div>
                   </div>
-                  <Skeleton className="h-8 w-24 rounded-full" />
+                  <Skeleton className="h-8 w-24 self-start rounded-full" />
                 </div>
                 <Skeleton className="mt-4 h-28 w-full rounded-xl" />
               </div>
@@ -83,20 +83,20 @@ export default function OnboardingEditorPage() {
 
       <div className="flex-1 space-y-6 px-4 py-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full">
         {/* Section header */}
-        <div className="rounded-3xl border border-border bg-white p-8 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
+        <div className="rounded-3xl border border-border bg-white p-5 shadow-sm sm:p-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex min-w-0 items-start gap-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-background border border-border text-primary shadow-sm">
                 <span className="text-primary text-sm">▶</span>
               </div>
-              <div>
+              <div className="min-w-0">
                 <h2 className="text-[17px] font-semibold text-primary tracking-tight">Pathway Videos</h2>
                 <p className="text-sm font-normal text-muted mt-1">
                   Manage the welcome videos that new members see during onboarding for each pathway.
                 </p>
               </div>
             </div>
-            <Badge variant="warning" className="px-4 py-1.5 font-semibold uppercase tracking-wider">
+            <Badge variant="warning" className="self-start px-4 py-1.5 font-semibold uppercase tracking-wider">
               {uploaded}/{total} Videos Uploaded
             </Badge>
           </div>

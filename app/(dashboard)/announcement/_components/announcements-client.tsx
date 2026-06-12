@@ -215,7 +215,7 @@ export function AnnouncementsClient() {
   return (
     <div className="space-y-6">
       {/* Search */}
-      <div className="w-full bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+      <div className="w-full rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
         <SearchInput
           placeholder="Search Announcements..."
           containerClassName="max-w-md w-full"
@@ -240,10 +240,10 @@ export function AnnouncementsClient() {
             return (
               <div
                 key={a.id}
-                className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm hover:border-primary/20 hover:shadow-md transition-all group"
+                className="group rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:border-primary/20 hover:shadow-md sm:p-6"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4 flex-1">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex min-w-0 flex-1 items-start gap-4">
                     {/* Icon */}
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                       <Megaphone className="h-6 w-6" />
@@ -286,7 +286,7 @@ export function AnnouncementsClient() {
                       )}
 
                       {/* Footer Info */}
-                      <div className="mt-4 flex items-center flex-wrap gap-2">
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
                         {targets.map((t: string) => (
                           <Badge 
                             key={t} 
@@ -295,7 +295,6 @@ export function AnnouncementsClient() {
                             {t}
                           </Badge>
                         ))}
-                        <span className="text-slate-300 mx-1">•</span>
                         <span className="text-[13px] text-slate-400 font-normal">
                           {formatDate(a.created_at)}
                         </span>
@@ -304,18 +303,20 @@ export function AnnouncementsClient() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center justify-end gap-1 sm:justify-start">
                     <button
                       onClick={() => setEditTarget(a)}
-                      className="p-2.5 text-slate-400 hover:text-primary hover:bg-slate-50 rounded-xl transition-all"
+                      className="h-11 w-11 rounded-xl p-0 text-slate-400 transition-all hover:bg-slate-50 hover:text-primary"
                       title="Edit"
+                      aria-label={`Edit announcement ${a.title}`}
                     >
                       <Pencil className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => setDeleteTarget(a)}
-                      className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                      className="h-11 w-11 rounded-xl p-0 text-slate-400 transition-all hover:bg-red-50 hover:text-red-600"
                       title="Delete"
+                      aria-label={`Delete announcement ${a.title}`}
                     >
                       <Trash2 className="h-5 w-5 text-red-500" />
                     </button>

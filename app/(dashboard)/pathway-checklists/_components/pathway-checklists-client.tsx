@@ -240,20 +240,19 @@ export function PathwayChecklistsClient() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto">
-          <TabsList className="bg-primary p-1 w-full sm:w-auto overflow-x-auto no-scrollbar">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <Tabs value={tab} onValueChange={setTab} className="w-full lg:w-auto">
+          <TabsList className="grid w-full grid-cols-2 gap-1 bg-primary p-1 lg:w-auto lg:min-w-[420px]">
             <TabsTrigger
               value="leadership"
-              className="flex-1 sm:flex-none text-white hover:bg-white hover:text-primary data-[state=active]:bg-[#B20C22] data-[state=active]:text-white data-[state=active]:hover:bg-[#B20C22] data-[state=active]:hover:text-white px-2 sm:px-5"
+              className="flex min-h-11 flex-col items-center justify-center px-2 text-center text-white hover:bg-white hover:text-primary data-[state=active]:bg-[#B20C22] data-[state=active]:text-white data-[state=active]:hover:bg-[#B20C22] data-[state=active]:hover:text-white sm:flex-none sm:px-5"
             >
               <span className="sm:hidden">Leadership</span>
               <span className="hidden sm:inline">Leadership Pathway</span>
             </TabsTrigger>
             <TabsTrigger
               value="public_speaking"
-              className="flex-1 sm:flex-none text-white hover:bg-white hover:text-primary data-[state=active]:bg-[#B20C22] data-[state=active]:text-white data-[state=active]:hover:bg-[#B20C22] data-[state=active]:hover:text-white px-2 sm:px-5"
+              className="flex min-h-11 flex-col items-center justify-center px-2 text-center text-white hover:bg-white hover:text-primary data-[state=active]:bg-[#B20C22] data-[state=active]:text-white data-[state=active]:hover:bg-[#B20C22] data-[state=active]:hover:text-white sm:flex-none sm:px-5"
             >
               <span className="sm:hidden">Public Speaking</span>
               <span className="hidden sm:inline">Public Speaking Pathway</span>
@@ -264,13 +263,12 @@ export function PathwayChecklistsClient() {
         <Button
           leftIcon={<Plus className="h-4 w-4" />}
           onClick={() => setShowAdd(true)}
-          className="bg-primary hover:bg-primary/90"
+          className="min-h-11 w-full bg-primary hover:bg-primary/90 lg:w-auto"
         >
           Add Checklist
         </Button>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
           <StatCard
@@ -283,8 +281,7 @@ export function PathwayChecklistsClient() {
         ))}
       </div>
 
-      {/* Search area */}
-      <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+      <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
         <SearchInput
           placeholder="Search Checklist Items..."
           containerClassName="w-full sm:max-w-md"
@@ -293,15 +290,13 @@ export function PathwayChecklistsClient() {
         />
       </div>
 
-      {/* Checklist Sections */}
       <div className="space-y-8">
-        {/* Everyday Tasks */}
         {sectionedItems.everyday.length > 0 && (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Everyday Tasks
             </h2>
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100 sm:bg-transparent sm:border-0 sm:p-0 sm:shadow-none sm:divide-y-0 sm:space-y-4">
+            <div className="divide-y divide-gray-100 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:space-y-4 sm:divide-y-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
               {sectionedItems.everyday.map((item) => (
                 <ChecklistItemRow
                   key={item.id}
@@ -314,13 +309,12 @@ export function PathwayChecklistsClient() {
           </div>
         )}
 
-        {/* Weekly Tasks */}
         {sectionedItems.weekly.length > 0 && (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Weekly Tasks
             </h2>
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100 sm:bg-transparent sm:border-0 sm:p-0 sm:shadow-none sm:divide-y-0 sm:space-y-4">
+            <div className="divide-y divide-gray-100 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:space-y-4 sm:divide-y-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
               {sectionedItems.weekly.map((item) => (
                 <ChecklistItemRow
                   key={item.id}
@@ -333,13 +327,12 @@ export function PathwayChecklistsClient() {
           </div>
         )}
 
-        {/* Specific Day & Cycle Tasks */}
         {sectionedItems.specific.length > 0 && (
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
               Specific Day & Cycle Tasks
             </h2>
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm divide-y divide-gray-100 sm:bg-transparent sm:border-0 sm:p-0 sm:shadow-none sm:divide-y-0 sm:space-y-4">
+            <div className="divide-y divide-gray-100 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:space-y-4 sm:divide-y-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
               {sectionedItems.specific.map((item) => (
                 <ChecklistItemRow
                   key={item.id}
@@ -357,7 +350,7 @@ export function PathwayChecklistsClient() {
             <p className="text-slate-500 font-normal">No checklist items found for this pathway.</p>
             <Button 
               variant="secondary" 
-              className="mt-4"
+              className="mt-4 min-h-11"
               onClick={() => setSearch("")}
             >
               Clear Filter
@@ -366,7 +359,6 @@ export function PathwayChecklistsClient() {
         )}
       </div>
 
-      {/* Modals */}
       <ChecklistModal
         open={showAdd}
         onClose={() => setShowAdd(false)}

@@ -98,8 +98,9 @@ export function AnnouncementModal({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <ModalContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+      <ModalContent className="mx-2 w-[calc(100%-1rem)] p-4 sm:mx-0 sm:max-w-xl sm:p-6">
         <ModalHeader
+          className="pr-8"
           icon={<Megaphone className="h-5 w-5 text-gray-600" />}
           title={mode === "add" ? "Add New Announcement" : "Edit Announcement"}
           description={
@@ -108,7 +109,7 @@ export function AnnouncementModal({
               : "Update your announcement details"
           }
         />
-        <form onSubmit={handleSubmit(onSuccess)} noValidate className="space-y-6">
+        <form onSubmit={handleSubmit(onSuccess)} noValidate className="space-y-5">
           <FormField label="Title" required error={errors.title?.message}>
             <Input placeholder="Enter announcement title" {...register("title")} />
           </FormField>
@@ -154,7 +155,7 @@ export function AnnouncementModal({
 
           <div className="space-y-3">
              <p className="text-sm font-semibold text-primary">Target Audience*</p>
-             <div className="flex gap-10">
+             <div className="flex flex-col gap-3 sm:flex-row sm:gap-10">
                 <Radio 
                     id="all" 
                     label="All Users" 
@@ -177,7 +178,7 @@ export function AnnouncementModal({
                 <p className="text-xs font-semibold text-muted uppercase tracking-wider">Select Clubs*</p>
                 
                 {isLoadingClubs ? (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {[1, 2, 3, 4].map((i) => (
                       <div key={i} className="flex items-center gap-2">
                         <Skeleton className="h-4 w-4 rounded" />
@@ -186,7 +187,7 @@ export function AnnouncementModal({
                     ))}
                   </div>
                 ) : availableClubs.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {availableClubs.map(club => (
                           <Checkbox 
                               key={club.id}
@@ -208,11 +209,11 @@ export function AnnouncementModal({
             </div>
           )}
 
-          <ModalFooter>
-            <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
+          <ModalFooter className="flex-col-reverse sm:flex-row">
+            <Button type="button" variant="secondary" onClick={onClose} className="min-h-11 flex-1">
               Cancel
             </Button>
-            <Button type="submit" isLoading={isSubmitting} className="flex-1">
+            <Button type="submit" isLoading={isSubmitting} className="min-h-11 flex-1">
               {mode === "add" ? "Send Announcement" : "Save Changes"}
             </Button>
           </ModalFooter>

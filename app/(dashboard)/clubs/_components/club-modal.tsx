@@ -191,7 +191,7 @@ export function ClubModal({
 
       {/* Panel container — bottom-anchored on mobile, centred on sm+ */}
       <div
-        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
+        className="fixed inset-0 z-50 flex items-end justify-center pt-[env(safe-area-inset-top)] sm:items-center sm:p-4"
         role="dialog"
         aria-modal="true"
         aria-label={isCreate ? "Create club" : "Edit club"}
@@ -201,11 +201,11 @@ export function ClubModal({
         <div
           ref={sheetRef}
           className={cn(
-            "relative w-full bg-white shadow-xl overflow-hidden",
+            "relative w-full overflow-hidden bg-white shadow-xl",
             // Mobile: full-width sheet
-            "rounded-t-3xl max-h-[92dvh]",
+            "max-h-[calc(100dvh-env(safe-area-inset-top))] rounded-t-3xl",
             // sm+: floating card
-            "sm:rounded-2xl sm:max-w-lg sm:max-h-[90vh]",
+            "sm:max-h-[90vh] sm:max-w-xl sm:rounded-2xl",
           )}
           style={sheetStyle}
           onClick={(e) => e.stopPropagation()}
@@ -221,16 +221,16 @@ export function ClubModal({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 z-10 p-1.5 rounded-full bg-gray-50 border border-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-gray-100 bg-gray-50 text-gray-400 transition-colors hover:text-gray-600 sm:right-4 sm:top-4"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
 
           {/* Scrollable content */}
-          <div className="overflow-y-auto max-h-[inherit] px-5 pt-3 pb-6">
+          <div className="max-h-[inherit] overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-3 sm:px-5 sm:pb-6">
             {/* Header */}
-            <div className="mb-5">
+            <div className="mb-5 pr-12">
               <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100">
                 <Users className="h-4 w-4 text-gray-600" />
               </div>
@@ -293,25 +293,25 @@ export function ClubModal({
                 </div>
               )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <FormField label="State" required error={errors.state?.message}>
-              <CustomSelect {...register("state")} value={selectedState} placeholder="Select State">
-                <option value="">Select State</option>
-                {allStates.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </CustomSelect>
-            </FormField>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <FormField label="State" required error={errors.state?.message}>
+                  <CustomSelect {...register("state")} value={selectedState} placeholder="Select State">
+                    <option value="">Select State</option>
+                    {allStates.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </CustomSelect>
+                </FormField>
 
-            <FormField label="City / LGA" required error={errors.city?.message}>
-              <CustomSelect {...register("city")} value={selectedCity} disabled={!selectedState} placeholder={selectedState ? "Select City" : "Select state first"}>
-                <option value="">{selectedState ? "Select City" : "Select state first"}</option>
-                {cities.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </CustomSelect>
-            </FormField>
-          </div>
+                <FormField label="City / LGA" required error={errors.city?.message}>
+                  <CustomSelect {...register("city")} value={selectedCity} disabled={!selectedState} placeholder={selectedState ? "Select City" : "Select state first"}>
+                    <option value="">{selectedState ? "Select City" : "Select state first"}</option>
+                    {cities.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </CustomSelect>
+                </FormField>
+              </div>
 
               <FormField label="WhatsApp Link" error={errors.whatsappLink?.message}>
                 <Input placeholder="https://chat.whatsapp.com/..." {...register("whatsappLink")} />
@@ -322,16 +322,16 @@ export function ClubModal({
               </FormField>
 
               {/* Footer */}
-              <div className="flex items-center gap-3 pt-1">
+              <div className="flex flex-col-reverse gap-3 pt-1 sm:flex-row">
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={onClose}
-                  className="flex-1"
+                  className="min-h-11 flex-1"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" isLoading={isSubmitting} className="flex-1">
+                <Button type="submit" isLoading={isSubmitting} className="min-h-11 flex-1">
                   {isCreate ? "Create" : "Save"}
                 </Button>
               </div>

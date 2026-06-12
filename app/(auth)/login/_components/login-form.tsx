@@ -27,7 +27,6 @@ export function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-   
   const onSubmit = async (data: LoginInput) => {
     setServerError(null);
     try {
@@ -60,10 +59,10 @@ export function LoginForm() {
           error={!!errors.email}
           {...register("email")}
         />
-        <div className="flex justify-end mt-2">
+        <div className="mt-1 flex justify-end">
           <Link
             href={ROUTES.FORGOT_PASSWORD}
-            className="text-sm font-normal text-primary hover:underline underline-offset-2"
+            className="inline-flex min-h-11 items-center px-1 text-sm font-normal text-primary underline-offset-2 hover:underline"
           >
             Forgot your password?
           </Link>
@@ -78,13 +77,13 @@ export function LoginForm() {
             placeholder="••••••"
             autoComplete="current-password"
             error={!!errors.password || !!serverError}
-            className="pr-10"
+            className="pr-12"
             {...register("password")}
           />
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-2xl text-gray-400 transition-colors hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -102,7 +101,6 @@ export function LoginForm() {
       <Button type="submit" className="w-full" isLoading={isSubmitting}>
         Sign in
       </Button>
-
     </form>
   );
 }
