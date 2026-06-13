@@ -87,4 +87,18 @@ export const profilesService = {
     });
     return readJson(response);
   },
+
+  uploadMyImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    const token = typeof window !== "undefined" ? localStorage.getItem("bgycc-token") : null;
+    const response = await fetch(`${API_CONFIG.BASE_URL}/profiles/me/upload-image`, {
+      method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+    return readJson(response);
+  },
 };
