@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { render, renderHook, act, screen } from "@testing-library/react";
 import { UploadProvider, useUploads } from "@/lib/contexts/upload-context";
 import * as pathwaysService from "@/lib/services/pathways";
 
@@ -180,5 +180,28 @@ describe("UploadProvider / useUploads", () => {
     });
 
     expect(result.current.uploads["leadership"].fileSize).toBe("1.0 MB");
+  });
+
+  it("V22 - renders concurrent upload rows with stable map identities", async () => {
+    let resolveUpload: ((value: UploadVideoResult) => void) | undefined;
+    vi.spyOn(pathwaysService.pathwaysService, "uploadVideo").mockImplementation(
+      () => new Promise((resolve) => { resolveUpload = resolve; }),
+    );
+
+    function UploadStarter() {
+      const { startUpload } = useUploads();
+      return (
+        <button onClick={() => {
+          void startUpload("leadership", new File(["a"], "same.mp4"));
+          void startUpload("public_speaking", new File(["b"], "same.mp4"));
+        }}>Start</button>
+      );
+    }
+
+    render(<UploadProvider><UploadStarter /></UploadProvider>);
+    await act(async () => screen.getByRole("button", { name: "Start" }).click());
+
+    expect(screen.getAllByText("Uploading Video...")).toHaveLength(2);
+    await act(async () => resolveUpload?.({ success: true, data: {} } as unknown as UploadVideoResult));
   });
 });

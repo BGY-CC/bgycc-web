@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { ADMIN_MUTATION_EVENT, notifyAdminMutation } from "@/lib/audit-events";
-import { formatAuditStatement } from "@/lib/audit-format";
+import { formatAuditStatement, isAuditDateInRange } from "@/lib/audit-format";
 
 describe("audit presentation", () => {
   it("V14 - describes an audit record as actor, action, and resource", () => {
@@ -24,5 +24,11 @@ describe("audit presentation", () => {
       method: "PUT",
     });
     window.removeEventListener(ADMIN_MUTATION_EVENT, listener);
+  });
+
+  it("V22 - filters timestamps by Lagos calendar date", () => {
+    expect(isAuditDateInRange("2026-06-12T23:30:00.000Z", "2026-06-13", "2026-06-13")).toBe(true);
+    expect(isAuditDateInRange("2026-06-12T22:59:59.000Z", "2026-06-13", "2026-06-13")).toBe(false);
+    expect(isAuditDateInRange("2026-06-13T22:59:59.000Z", "2026-06-13", "2026-06-13")).toBe(true);
   });
 });

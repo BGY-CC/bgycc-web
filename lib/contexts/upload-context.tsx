@@ -98,7 +98,7 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const activeUploads = Object.values(uploads);
+  const activeUploads = Object.entries(uploads);
 
   return (
     <UploadContext.Provider value={{ uploads, startUpload, clearUpload }}>
@@ -106,9 +106,9 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
       
       {/* Global Upload Status Overlay */}
       <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
-        {activeUploads.map((upload) => (
+        {activeUploads.map(([uploadKey, upload]) => (
           <div 
-            key={upload.id}
+            key={uploadKey}
             className={cn(
               "pointer-events-auto bg-white border rounded-2xl p-4 shadow-2xl transition-all duration-500 transform translate-y-0",
               "flex flex-col gap-3 overflow-hidden",
