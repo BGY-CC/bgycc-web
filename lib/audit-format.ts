@@ -33,3 +33,21 @@ export function formatAuditStatement(
   if (action === "delete") return `${actorName} deleted ${resource}${namedResource}`;
   return `${actorName} ${action.replaceAll("_", " ")} ${resource}${namedResource}`;
 }
+
+export function isAuditDateInRange(
+  createdAt: string,
+  from?: string,
+  to?: string,
+  timeZone = "Africa/Lagos",
+) {
+  if (!from && !to) return true;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(createdAt));
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const date = `${values.year}-${values.month}-${values.day}`;
+  return (!from || date >= from) && (!to || date <= to);
+}
