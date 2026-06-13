@@ -4,8 +4,11 @@ import { formatAuditStatement } from "@/lib/audit-format";
 
 describe("audit presentation", () => {
   it("V14 - describes an audit record as actor, action, and resource", () => {
-    expect(formatAuditStatement("Super Admin", "update", "profiles")).toBe(
-      "Super Admin performed the update action on Profiles",
+    expect(formatAuditStatement("Admin X", "create", "users", "User Y")).toBe(
+      "Admin X created a new user User Y",
+    );
+    expect(formatAuditStatement("Super Admin", "update", "clubs", "Lagos Speakers Hub")).toBe(
+      "Super Admin updated club Lagos Speakers Hub",
     );
   });
 

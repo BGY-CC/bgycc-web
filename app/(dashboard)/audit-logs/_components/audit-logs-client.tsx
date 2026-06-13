@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Activity, CalendarDays, Filter, ShieldCheck } from "lucide-react";
-import { Alert, Badge, Input, Pagination, Select, Skeleton } from "@/components/ui";
+import { Alert, Badge, Input, Modal, ModalContent, ModalHeader, Pagination, Select, Skeleton } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
 import { ADMIN_MUTATION_EVENT } from "@/lib/audit-events";
 import { formatAuditResource, formatAuditStatement } from "@/lib/audit-format";
@@ -38,6 +38,7 @@ interface AuditLogsResponse {
 const RESOURCE_OPTIONS = [
   "clubs",
   "profiles",
+  "users",
   "pathways",
   "checklist",
   "resources",
@@ -47,6 +48,7 @@ const RESOURCE_OPTIONS = [
   "quotes",
   "support",
   "notifications",
+  "access-management",
 ];
 
 export function AuditLogsClient() {
@@ -55,6 +57,7 @@ export function AuditLogsClient() {
   const [resourceType, setResourceType] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
   const params = new URLSearchParams({ page: page.toString(), page_size: "20" });
   if (action) params.set("action", action);
@@ -149,29 +152,31 @@ export function AuditLogsClient() {
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
-            {logs.map((log) => <AuditLogRow key={log.id} log={log} />)}
+            {logs.map((log) => <AuditLogRow key={log.id} log={log} onClick={() => setSelectedLog(log)} />)}
           </div>
         )}
       </section>
 
       {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
+      <AuditDetailsModal log={selectedLog} onClose={() => setSelectedLog(null)} />
     </div>
   );
 }
 
-function AuditLogRow({ log }: { log: AuditLog }) {
+function AuditLogRow({ log, onClick }: { log: AuditLog; onClick: () => void }) {
   const actor = Array.isArray(log.actor) ? log.actor[0] : log.actor;
   const status = typeof log.metadata?.status === "number" ? log.metadata.status : null;
   const actorName = actor?.full_name || actor?.email || "System administrator";
+  const resourceName = typeof log.metadata?.resource_name === "string" ? log.metadata.resource_name : null;
 
   return (
-    <article className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
+    <button type="button" onClick={onClick} className="grid w-full gap-3 p-4 text-left transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-5">
       <div className="min-w-0">
         <div className="flex items-start gap-3">
           <Badge variant={actionVariant(log.action)} className="mt-0.5 shrink-0 capitalize">{log.action}</Badge>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-primary">
-              {formatAuditStatement(actorName, log.action, log.resource_type)}
+              {formatAuditStatement(actorName, log.action, log.resource_type, resourceName)}
             </p>
             <p className="mt-1 truncate text-xs text-muted">
               {actor?.email || "No actor email"}
@@ -184,8 +189,62 @@ function AuditLogRow({ log }: { log: AuditLog }) {
         <p className="text-sm font-medium text-gray-700">{formatDate(log.created_at)}</p>
         <p className="text-xs text-muted">Recorded</p>
       </div>
-    </article>
+    </button>
   );
+}
+
+function AuditDetailsModal({ log, onClose }: { log: AuditLog | null; onClose: () => void }) {
+  if (!log) return null;
+  const actor = Array.isArray(log.actor) ? log.actor[0] : log.actor;
+  const actorName = actor?.full_name || actor?.email || "System administrator";
+  const resourceName = typeof log.metadata?.resource_name === "string" ? log.metadata.resource_name : null;
+  const changes = log.metadata?.changes && typeof log.metadata.changes === "object"
+    ? log.metadata.changes as Record<string, unknown>
+    : null;
+
+  return (
+    <Modal open onClose={onClose}>
+      <ModalContent className="max-w-2xl">
+        <ModalHeader
+          icon={<Activity className="h-5 w-5 text-primary" />}
+          title="Audit log details"
+          description={formatAuditStatement(actorName, log.action, log.resource_type, resourceName)}
+        />
+        <dl className="grid gap-4 text-sm sm:grid-cols-2">
+          <AuditDetail label="Actor" value={`${actorName}${actor?.email && actor.email !== actorName ? ` (${actor.email})` : ""}`} />
+          <AuditDetail label="Recorded" value={formatDate(log.created_at)} />
+          <AuditDetail label="Action" value={log.action} />
+          <AuditDetail label="Resource" value={formatAuditResource(log.resource_type)} />
+          <AuditDetail label="Result" value={typeof log.metadata?.status === "number" ? `HTTP ${log.metadata.status}` : "Successful"} />
+          <AuditDetail label="IP address" value={log.ip_address || "Not recorded"} />
+        </dl>
+        <div className="mt-5">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">Submitted changes</p>
+          {changes && Object.keys(changes).length > 0 ? (
+            <div className="divide-y divide-gray-100 rounded-xl border border-gray-200">
+              {Object.entries(changes).map(([key, value]) => (
+                <div key={key} className="grid gap-1 px-3 py-2.5 sm:grid-cols-[160px_1fr]">
+                  <span className="font-medium text-gray-600">{formatAuditResource(key.replaceAll("_", "-"))}</span>
+                  <span className="break-words text-gray-900">{formatAuditValue(value)}</span>
+                </div>
+              ))}
+            </div>
+          ) : <p className="rounded-xl bg-gray-50 p-3 text-sm text-muted">No field-level details were recorded for this older event.</p>}
+        </div>
+      </ModalContent>
+    </Modal>
+  );
+}
+
+function AuditDetail({ label, value }: { label: string; value: string }) {
+  return <div><dt className="text-xs font-semibold uppercase tracking-wide text-muted">{label}</dt><dd className="mt-1 break-words font-medium text-gray-900">{value}</dd></div>;
+}
+
+function formatAuditValue(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "None";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
 }
 
 function actionVariant(action: string): "active" | "warning" | "dormant" | "default" {

@@ -27,6 +27,7 @@ export const CustomSelect = React.forwardRef<
   const menuRef = React.useRef<HTMLDivElement>(null);
   const internalRef = React.useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = React.useState(false);
+  const [positioned, setPositioned] = React.useState(false);
 
   // Get the current selected value
   const selectedValue = (props.value || "") as string;
@@ -50,6 +51,7 @@ export const CustomSelect = React.forwardRef<
         width: rect.width,
         height: rect.height,
       });
+      setPositioned(true);
     }
   }, []);
 
@@ -126,7 +128,7 @@ export const CustomSelect = React.forwardRef<
   const menuStyle = mounted && open ? getMenuStyle() : undefined;
 
   const dropdown =
-    mounted && open
+    mounted && open && positioned
       ? createPortal(
           <div
             ref={menuRef}
@@ -180,7 +182,10 @@ export const CustomSelect = React.forwardRef<
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          if (!open) updateCoords();
+          setOpen(!open);
+        }}
         disabled={disabled}
         className={cn(
           "flex h-11 w-full items-center justify-between rounded-lg border border-gray-300 bg-white",

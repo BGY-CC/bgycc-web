@@ -22,6 +22,7 @@ interface ActionMenuProps {
 
 export function ActionMenu({ items, align = "right" }: ActionMenuProps) {
   const [open, setOpen] = React.useState(false);
+  const [positioned, setPositioned] = React.useState(false);
   const [coords, setCoords] = React.useState({ top: 0, left: 0, width: 0 });
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const menuRef = React.useRef<HTMLDivElement>(null);
@@ -34,6 +35,7 @@ export function ActionMenu({ items, align = "right" }: ActionMenuProps) {
         left: rect.left,
         width: rect.width,
       });
+      setPositioned(true);
     }
   }, []);
 
@@ -73,7 +75,7 @@ export function ActionMenu({ items, align = "right" }: ActionMenuProps) {
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
-  const dropdown = open ? createPortal(
+  const dropdown = open && positioned ? createPortal(
     <div
       ref={menuRef}
       role="menu"
@@ -128,7 +130,10 @@ export function ActionMenu({ items, align = "right" }: ActionMenuProps) {
     <>
       <button
         ref={triggerRef}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (!open) updateCoords();
+          setOpen((v) => !v);
+        }}
         className={cn(
           "flex h-11 w-11 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-900",
           open && "bg-gray-100 text-gray-900 shadow-sm"

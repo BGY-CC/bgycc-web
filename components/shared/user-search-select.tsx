@@ -41,12 +41,13 @@ export function UserSearchSelect({
 
   // Fetch initial user if value is provided
   useEffect(() => {
-    if (value && !selectedUser) {
+    if (value && selectedUser?.id !== value) {
       profilesService.getDetails(value).then((res) => {
-        const data = res.data as UserProfile | undefined;
-        if (res.success && data) {
-          setSelectedUser(data);
-          setQuery(data.full_name || data.email || "");
+        const payload = res.data as { profile?: UserProfile } | UserProfile | undefined;
+        const profile = payload && "profile" in payload ? payload.profile : payload as UserProfile | undefined;
+        if (res.success && profile) {
+          setSelectedUser(profile);
+          setQuery(profile.full_name || profile.email || "");
         }
       });
     }

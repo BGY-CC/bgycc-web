@@ -90,6 +90,7 @@ export function PathwayChecklistsClient() {
     day_of_week?: string;
     day_number?: string;
     cycle_number?: string;
+    is_active: boolean;
   }
 
   const handleAdd = async (formData: ChecklistFormData) => {
@@ -108,7 +109,7 @@ export function PathwayChecklistsClient() {
         day_number: formData.schedule === "Specific Day" ? parseInt(formData.day_number ?? "0") : null,
         cycle_number: formData.schedule === "Specific Day" ? parseInt(formData.cycle_number ?? "0") : null,
         xp_value: 1,
-        is_active: true,
+        is_active: formData.is_active,
         is_curriculum_based: false,
         metadata: {
           type: formData.type,
@@ -138,6 +139,7 @@ export function PathwayChecklistsClient() {
         day_of_week: formData.schedule === "Weekly" ? parseInt(formData.day_of_week ?? "0") : null,
         day_number: formData.schedule === "Specific Day" ? parseInt(formData.day_number ?? "0") : null,
         cycle_number: formData.schedule === "Specific Day" ? parseInt(formData.cycle_number ?? "0") : null,
+        is_active: formData.is_active,
         metadata: { ...editTarget.metadata, type: formData.type, schedule: formData.schedule }
       });
 

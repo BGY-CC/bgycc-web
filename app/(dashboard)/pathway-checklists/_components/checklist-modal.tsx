@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ClipboardList } from "lucide-react";
@@ -13,6 +13,7 @@ import {
   FormField,
   Input,
   CustomSelect,
+  Checkbox,
   Textarea,
 } from "@/components/ui";
 import { ChecklistItem } from "@/lib/services/checklist";
@@ -25,6 +26,7 @@ const schema = z.object({
   day_of_week: z.string().optional(),
   day_number: z.string().optional(),
   cycle_number: z.string().optional(),
+  is_active: z.boolean(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -60,12 +62,11 @@ export function ChecklistModal({
       day_of_week: defaultValues?.day_of_week?.toString() ?? "1",
       day_number: defaultValues?.day_number?.toString() ?? "",
       cycle_number: defaultValues?.cycle_number?.toString() ?? "",
+      is_active: defaultValues?.is_active ?? true,
     },
   });
 
-  const type = useWatch({ control, name: "type" });
   const schedule = useWatch({ control, name: "schedule" });
-  const day_of_week = useWatch({ control, name: "day_of_week" });
 
   useEffect(() => {
     if (open) {
@@ -79,11 +80,23 @@ export function ChecklistModal({
         day_of_week: defaultValues?.day_of_week?.toString() ?? "1",
         day_number: defaultValues?.day_number?.toString() ?? "",
         cycle_number: defaultValues?.cycle_number?.toString() ?? "",
+        is_active: defaultValues?.is_active ?? true,
       });
     } else {
       reset();
     }
-  }, [open, reset, defaultValues]);
+  }, [
+    open,
+    reset,
+    defaultValues?.id,
+    defaultValues?.name,
+    defaultValues?.description,
+    defaultValues?.day_of_week,
+    defaultValues?.day_number,
+    defaultValues?.cycle_number,
+    defaultValues?.is_active,
+    defaultValues?.metadata,
+  ]);
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -100,7 +113,8 @@ export function ChecklistModal({
         <form onSubmit={handleSubmit(onSuccess)} noValidate className="space-y-5 px-4 pb-6 sm:px-6 sm:pb-8">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField label="Task Type*" error={errors.type?.message}>
-              <CustomSelect {...register("type")} value={type} placeholder="Select Type">
+              <Controller name="type" control={control} render={({ field }) => (
+              <CustomSelect name={field.name} value={field.value} onChange={field.onChange} placeholder="Select Type">
                 <option value="Prayer">Prayer</option>
                 <option value="Bible Study">Bible Study</option>
                 <option value="Meditation">Meditation</option>
@@ -112,14 +126,17 @@ export function ChecklistModal({
                 <option value="Practice Speech">Practice Speech</option>
                 <option value="Watch Video">Watch Video</option>
               </CustomSelect>
+              )} />
             </FormField>
 
             <FormField label="Schedule*" error={errors.schedule?.message}>
-              <CustomSelect {...register("schedule")} value={schedule} placeholder="Select Schedule">
+              <Controller name="schedule" control={control} render={({ field }) => (
+              <CustomSelect name={field.name} value={field.value} onChange={field.onChange} placeholder="Select Schedule">
                 <option value="Everyday">Everyday</option>
                 <option value="Weekly">Weekly</option>
                 <option value="Specific Day">Specific Day</option>
               </CustomSelect>
+              )} />
             </FormField>
           </div>
 
@@ -137,7 +154,8 @@ export function ChecklistModal({
 
           {schedule === "Weekly" && (
             <FormField label="Day of Week" error={errors.day_of_week?.message}>
-              <CustomSelect {...register("day_of_week")} value={day_of_week} placeholder="Select Day">
+              <Controller name="day_of_week" control={control} render={({ field }) => (
+              <CustomSelect name={field.name} value={field.value} onChange={field.onChange} placeholder="Select Day">
                 <option value="0">Sunday</option>
                 <option value="1">Monday</option>
                 <option value="2">Tuesday</option>
@@ -146,8 +164,22 @@ export function ChecklistModal({
                 <option value="5">Friday</option>
                 <option value="6">Saturday</option>
               </CustomSelect>
+              )} />
             </FormField>
           )}
+
+          <Controller
+            name="is_active"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                id="checklist-is-active"
+                label="Active and visible to members"
+                checked={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
 
           {schedule === "Specific Day" && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
