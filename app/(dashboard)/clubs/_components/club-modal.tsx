@@ -128,7 +128,6 @@ export function ClubModal({
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const selectedState = watch("state");
-  const selectedCity = watch("city");
   const allStates: string[] = getStates();
   const cities: string[] = useMemo(
     () => (selectedState ? getLgas(selectedState) : []),
@@ -148,7 +147,16 @@ export function ClubModal({
     } else {
       reset({ name: "", leaderId: "", state: "", city: "", whatsappLink: "", description: "" });
     }
-  }, [open, reset, defaultValues]);
+  }, [
+    open,
+    reset,
+    defaultValues?.name,
+    defaultValues?.leaderId,
+    defaultValues?.state,
+    defaultValues?.city,
+    defaultValues?.whatsappLink,
+    defaultValues?.description,
+  ]);
 
   useEffect(() => {
     if (open && defaultValues?.city && cities.includes(defaultValues.city)) {
@@ -295,21 +303,21 @@ export function ClubModal({
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <FormField label="State" required error={errors.state?.message}>
-                  <CustomSelect {...register("state")} value={selectedState} placeholder="Select State">
-                    <option value="">Select State</option>
-                    {allStates.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </CustomSelect>
+                  <Controller name="state" control={control} render={({ field }) => (
+                    <CustomSelect name={field.name} value={field.value} onChange={field.onChange} placeholder="Select State">
+                      <option value="">Select State</option>
+                      {allStates.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </CustomSelect>
+                  )} />
                 </FormField>
 
                 <FormField label="City / LGA" required error={errors.city?.message}>
-                  <CustomSelect {...register("city")} value={selectedCity} disabled={!selectedState} placeholder={selectedState ? "Select City" : "Select state first"}>
-                    <option value="">{selectedState ? "Select City" : "Select state first"}</option>
-                    {cities.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </CustomSelect>
+                  <Controller name="city" control={control} render={({ field }) => (
+                    <CustomSelect name={field.name} value={field.value} onChange={field.onChange} disabled={!selectedState} placeholder={selectedState ? "Select City" : "Select state first"}>
+                      <option value="">{selectedState ? "Select City" : "Select state first"}</option>
+                      {cities.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </CustomSelect>
+                  )} />
                 </FormField>
               </div>
 

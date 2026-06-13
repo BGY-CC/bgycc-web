@@ -9,7 +9,6 @@ import { ClubModal } from "./club-modal";
 import { SuccessModal } from "./success-modal";
 import { useQuery } from "@/hooks/use-query";
 import { clubsService, Club, PaginatedClubs } from "@/lib/services/clubs";
-import { profilesService } from "@/lib/services/profiles";
 import { filterAndNormalizeClubs } from "@/lib/services/club-utils";
 import { useAuth } from "@/hooks/use-auth";
 // @ts-expect-error – no types bundled
@@ -119,10 +118,6 @@ export function ClubsListClient() {
         country: "Nigeria",
       });
 
-      if (result.success && leaderId && currentUser?.role !== "leader") {
-        // Promote to leader if they aren't one already (Admin assignment)
-        await profilesService.updateRole(leaderId, "leader");
-      }
       if (result.success) {
         setShowCreate(false);
         setShowSuccess(true);
@@ -152,10 +147,6 @@ export function ClubsListClient() {
         country: "Nigeria",
       });
 
-      if (result.success && formData.leaderId && formData.leaderId !== editingClub.leader?.id) {
-        // Promote new leader
-        await profilesService.updateRole(formData.leaderId, "leader");
-      }
       if (result.success) {
         setEditingClub(null);
         toast("Club updated successfully", "success");

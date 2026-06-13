@@ -88,7 +88,7 @@ export function ResourcesClient() {
     },
     {
       label: "Drive Links",
-      value: resources.filter(r => r.link?.includes("drive.google.com")).length,
+      value: resources.filter(r => Boolean(r.link?.trim())).length,
       icon: <Link2 className="h-5 w-5 text-blue-600" />,
     },
   ];
