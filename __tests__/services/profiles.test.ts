@@ -92,6 +92,29 @@ describe("profilesService.search", () => {
   });
 });
 
+describe("profilesService.uploadMyImage", () => {
+  it("V16 - uploads an authenticated multipart profile image", async () => {
+    const fetchMock = mockFetch({
+      success: true,
+      data: { public_url: "https://cdn.example.com/profile.jpg" },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const file = new File(["image"], "profile.jpg", { type: "image/jpeg" });
+    await profilesService.uploadMyImage(file);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/profiles/me/upload-image`,
+      expect.objectContaining({
+        method: "POST",
+        headers: { Authorization: `Bearer ${TOKEN}` },
+        body: expect.any(FormData),
+      }),
+    );
+    expect(fetchMock.mock.calls[0][1].headers).not.toHaveProperty("Content-Type");
+  });
+});
+
 describe("profilesService.updateRole", () => {
   it("sends PUT /profiles/:userId with role in body", async () => {
     const fetchMock = mockFetch({ success: true });
