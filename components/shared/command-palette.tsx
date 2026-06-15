@@ -36,7 +36,7 @@ const PAGES: PageEntry[] = [
   { label: "Dashboard", href: "/dashboard", description: "Overview & key metrics", icon: LayoutDashboard, keywords: ["home", "overview", "stats"] },
   { label: "Clubs", href: "/clubs", description: "Manage all clubs", icon: Users, keywords: ["chapters"] },
   { label: "Pathway Checklists", href: "/pathway-checklists", description: "Edit pathway curriculum", icon: ClipboardList, keywords: ["curriculum", "checklist"] },
-  { label: "Onboarding Editor", href: "/onboarding-editor", description: "Edit onboarding flow", icon: PenSquare, keywords: ["onboard", "intro"] },
+  // { label: "Onboarding Editor", href: "/onboarding-editor", description: "Edit onboarding flow", icon: PenSquare, keywords: ["onboard", "intro"] },
   { label: "Resources", href: "/resources", description: "Manage learning resources", icon: FolderOpen, keywords: ["library", "materials"] },
   { label: "Announcement", href: "/announcement", description: "Send announcements", icon: Megaphone, keywords: ["broadcast", "notice"] },
   { label: "Leader Management", href: "/leaders", description: "Promote & revoke leaders", icon: UserRoundCheck, keywords: ["users", "members", "people"] },
