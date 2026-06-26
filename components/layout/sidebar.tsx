@@ -25,7 +25,7 @@ const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Clubs", href: "/clubs", icon: Users },
   { label: "Pathway Checklists", href: "/pathway-checklists", icon: ClipboardList },
-  // { label: "Onboarding Editor", href: "/onboarding-editor", icon: PenSquare },
+  { label: "Onboarding Editor", href: "/onboarding-editor", icon: PenSquare },
   { label: "Resources", href: "/resources", icon: FolderOpen },
   { label: "Announcement", href: "/announcement", icon: Megaphone },
   { label: "Leader Management", href: "/leaders", icon: UserRoundCheck },
