@@ -1,9 +1,10 @@
 "use client";
 
-import { Share2, TrendingUp, Users, Award } from "lucide-react";
+import { Share2, TrendingUp, Users } from "lucide-react";
 import { PageHeader, StatCard, StatCardSkeleton } from "@/components/shared";
 import { ReferralLeaderboard } from "./_components/referral-leaderboard";
 import { ReferralAnalytics } from "./_components/referral-analytics";
+import { ReferralTopReferrer } from "./_components/referral-top-referrer";
 import { useQuery } from "@/hooks/use-query";
 
 interface ReferralStats {
@@ -53,16 +54,11 @@ export default function ReferralsPage() {
               />
               <StatCard
                 label="Conversion Rate"
-                value="68%" 
+                value="—"
                 icon={<Share2 className="h-4 w-4" />}
-                description="Click to install ratio"
+                description="Click-to-signup tracking not yet enabled"
               />
-              <StatCard
-                label="Top Referrer"
-                value="24"
-                icon={<Award className="h-4 w-4" />}
-                description="Most invites this month"
-              />
+              <ReferralTopReferrer />
             </>
           )}
         </div>
