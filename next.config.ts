@@ -16,6 +16,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Cloudflare dev runtime removed — using Vercel for deployment
+// Deployed to Cloudflare Workers via OpenNext (see wrangler.jsonc + open-next.config.ts)
 
 export default nextConfig;
