@@ -4,8 +4,47 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { BarChart3, Globe, MousePointer2, UserPlus, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@/hooks/use-query";
+
+interface ReferralStatsData {
+  total_referrals: number;
+  monthly_referrals: number;
+  weekly_referrals: number;
+}
+
+interface GeoData {
+  locations: { label: string; count: number; percentage: number }[];
+}
+
+interface LeaderboardItem {
+  referrer_id: string;
+  full_name: string | null;
+  username: string | null;
+  referral_count: number;
+}
 
 export function ReferralAnalytics() {
+  const { data: stats } = useQuery<ReferralStatsData>("/referrals/stats");
+  const { data: geo } = useQuery<GeoData>("/referrals/geo");
+  const { data: leaderboard } = useQuery<LeaderboardItem[]>("/referrals/leaderboard?timeframe=monthly");
+
+  const locations = geo?.locations ?? [];
+
+  const handleExport = () => {
+    if (!leaderboard || leaderboard.length === 0) return;
+    const header = "Name,Username,Referral Count\n";
+    const rows = leaderboard
+      .map((r) => `"${r.full_name ?? ""}","${r.username ?? ""}",${r.referral_count}`)
+      .join("\n");
+    const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `referral-leaderboard-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       {/* Conversion Funnel */}
@@ -19,6 +58,8 @@ export function ReferralAnalytics() {
             variant="outline"
             size="sm"
             className="h-11 w-full gap-2 px-4 sm:w-auto"
+            onClick={handleExport}
+            disabled={!leaderboard || leaderboard.length === 0}
           >
             <Download className="h-4 w-4" />
             Export Data
@@ -30,10 +71,10 @@ export function ReferralAnalytics() {
               <div className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-blue-100">
                 <MousePointer2 className="h-5 w-5 text-blue-600" />
               </div>
-              <p className="text-3xl font-black text-blue-900">1,240</p>
+              <p className="text-3xl font-black text-blue-900">—</p>
               <p className="text-sm font-semibold text-blue-700">Link Clicks</p>
               <Badge variant="outline" className="border-blue-200 bg-white/50 text-blue-600">
-                +12% vs last month
+                Not tracked
               </Badge>
             </div>
 
@@ -41,10 +82,10 @@ export function ReferralAnalytics() {
               <div className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-indigo-100">
                 <UserPlus className="h-5 w-5 text-indigo-600" />
               </div>
-              <p className="text-3xl font-black text-indigo-900">845</p>
-              <p className="text-sm font-semibold text-indigo-700">App Installs</p>
+              <p className="text-3xl font-black text-indigo-900">{stats?.total_referrals ?? 0}</p>
+              <p className="text-sm font-semibold text-indigo-700">Referred Signups</p>
               <Badge variant="outline" className="border-indigo-200 bg-white/50 text-indigo-600">
-                68% CR
+                All-time
               </Badge>
             </div>
 
@@ -52,10 +93,10 @@ export function ReferralAnalytics() {
               <div className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100">
                 <BarChart3 className="h-5 w-5 text-emerald-600" />
               </div>
-              <p className="text-3xl font-black text-emerald-900">512</p>
+              <p className="text-3xl font-black text-emerald-900">—</p>
               <p className="text-sm font-semibold text-emerald-700">Active Members</p>
               <Badge variant="outline" className="border-emerald-200 bg-white/50 text-emerald-600">
-                60% Retention
+                Not tracked
               </Badge>
             </div>
           </div>
@@ -73,16 +114,10 @@ export function ReferralAnalytics() {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {[
-              { location: "Lagos, Nigeria", count: 245, percentage: 48 },
-              { location: "Abuja, Nigeria", count: 112, percentage: 22 },
-              { location: "Port Harcourt, Nigeria", count: 78, percentage: 15 },
-              { location: "Accra, Ghana", count: 42, percentage: 8 },
-              { location: "Others", count: 35, percentage: 7 },
-            ].map((item, i) => (
+            {locations.length > 0 ? locations.map((item, i) => (
               <div key={i} className="space-y-2">
                 <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between">
-                  <span className="font-semibold text-gray-700">{item.location}</span>
+                  <span className="font-semibold text-gray-700">{item.label}</span>
                   <span className="text-subtle font-medium">{item.count} referrals</span>
                 </div>
                 <div className="h-3 w-full rounded-full bg-gray-100">
@@ -92,7 +127,9 @@ export function ReferralAnalytics() {
                   />
                 </div>
               </div>
-            ))}
+            )) : (
+              <p className="text-sm text-gray-500 italic">No geo data available yet.</p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -103,29 +140,18 @@ export function ReferralAnalytics() {
           <div className="space-y-4 bg-primary p-6 text-white sm:p-8">
             <h3 className="text-2xl font-black">QR vs Link</h3>
             <p className="text-primary-foreground/80 text-sm">
-              In-person events drive 40% of our referrals through scannable QR codes.
+              Source tracking not yet enabled. QR vs link attribution requires additional tracking infrastructure.
             </p>
-            <div className="flex flex-col gap-4 pt-4 sm:flex-row sm:items-center">
-              <div className="flex-1 text-center">
-                <p className="text-2xl font-bold">60%</p>
-                <p className="text-[10px] uppercase tracking-widest opacity-70">Direct Links</p>
-              </div>
-              <div className="h-px bg-white/20 sm:h-12 sm:w-px" />
-              <div className="flex-1 text-center">
-                <p className="text-2xl font-bold">40%</p>
-                <p className="text-[10px] uppercase tracking-widest opacity-70">QR Codes</p>
-              </div>
-            </div>
           </div>
           <div className="flex items-center justify-center bg-gray-50 p-6 sm:p-8">
-             <div className="space-y-2 text-center">
-               <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl border border-gray-100 bg-white shadow-inner">
-                  <BarChart3 className="h-10 w-10 text-gray-300" />
-               </div>
-               <p className="text-xs text-muted-foreground font-medium uppercase tracking-tighter">
-                 Source Distribution Chart
-               </p>
-             </div>
+            <div className="space-y-2 text-center">
+              <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl border border-gray-100 bg-white shadow-inner">
+                <BarChart3 className="h-10 w-10 text-gray-300" />
+              </div>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-tighter">
+                Source Distribution Chart
+              </p>
+            </div>
           </div>
         </div>
       </Card>
