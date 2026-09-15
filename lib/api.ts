@@ -9,7 +9,7 @@ import { notifyAdminMutation } from "@/lib/audit-events";
  * Base configuration for API requests.
  */
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "https://uzdrrelxsjtvjvqbxcfy.supabase.co/functions/v1/admin",
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || "",
   TIMEOUT: 10000,
 };
 
@@ -80,6 +80,11 @@ export function useApi() {
   };
 
   const request = useCallback(async <T = unknown>(endpoint: string, options: RequestInit = {}): Promise<T> => {
+    if (!API_CONFIG.BASE_URL) {
+      throw new Error(
+        "NEXT_PUBLIC_API_URL is not configured. Add it to .env.local (see .env.example)."
+      );
+    }
     const url = `${API_CONFIG.BASE_URL}${endpoint}`;
     
     const executeRequest = async () => {
