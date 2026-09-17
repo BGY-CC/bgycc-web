@@ -5,6 +5,9 @@ export default defineConfig({
   test: {
     environment: "happy-dom",
     globals: true,
+    env: {
+      NEXT_PUBLIC_API_URL: "https://uzdrrelxsjtvjvqbxcfy.supabase.co/functions/v1/admin",
+    },
     setupFiles: ["./vitest.setup.ts"],
     include: ["**/__tests__/**/*.test.ts", "**/__tests__/**/*.test.tsx"],
     exclude: ["node_modules", ".next"],

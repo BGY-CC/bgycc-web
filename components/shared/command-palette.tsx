@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Users,
   ClipboardList,
-  PenSquare,
   FolderOpen,
   Megaphone,
   UserRoundCheck,
