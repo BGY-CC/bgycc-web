@@ -62,6 +62,24 @@ describe("resourcesService.update", () => {
       })
     );
   });
+
+  it("sends tags and bumped version in the update payload", async () => {
+    const fetchMock = mockFetch({ success: true });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await resourcesService.update("res-1", {
+      tags: ["leadership", "video"],
+      version: 3,
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/resources/res-1`,
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ tags: ["leadership", "video"], version: 3 }),
+      })
+    );
+  });
 });
 
 describe("resourcesService.delete", () => {

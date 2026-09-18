@@ -12,6 +12,9 @@ export interface Resource {
   min_rank_required: string | null;
   min_streak_required: number;
   pathway: "leadership" | "public_speaking" | null;
+  category: string | null;
+  tags: string[];
+  version: number;
   created_at: string;
   updated_at: string;
 }

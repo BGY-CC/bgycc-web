@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { Plus, ExternalLink, Pencil, Trash2, FolderOpen, Link2 } from "lucide-react";
 import { Button, ConfirmDialog, Skeleton, useToast } from "@/components/ui";
 import { SearchInput, StatCard, StatCardSkeleton } from "@/components/shared";
-import { ResourceModal } from "./resource-modal";
+import { ResourceModal, type ResourceFormData } from "./resource-modal";
 import { useQuery } from "@/hooks/use-query";
 import {
   resourcesService,
@@ -93,12 +93,6 @@ export function ResourcesClient() {
     },
   ];
 
-  interface ResourceFormData {
-    title: string;
-    description?: string;
-    link?: string;
-  }
-
   const handleAdd = async (formData: ResourceFormData) => {
     try {
       const result = await resourcesService.create({
@@ -107,6 +101,8 @@ export function ResourcesClient() {
         link: formData.link,
         is_active: true,
         slug: formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        tags: formData.tags,
+        version: formData.version,
       });
 
       if (result.success) {
@@ -128,6 +124,14 @@ export function ResourcesClient() {
         title: formData.title,
         description: formData.description,
         link: formData.link,
+        tags: formData.tags,
+        version: formData.version,
+        min_rank_required: formData.min_rank_required,
+        min_streak_required: formData.min_streak_required
+          ? parseInt(formData.min_streak_required, 10)
+          : undefined,
+        pathway: formData.pathway || null,
+        category: formData.category,
       });
 
       if (result.success) {
@@ -296,6 +300,14 @@ export function ResourcesClient() {
                 title: editTarget.title,
                 description: editTarget.description || "",
                 link: editTarget.link || "",
+                tags: editTarget.tags ?? [],
+                version: editTarget.version ?? 1,
+                min_rank_required: editTarget.min_rank_required || "",
+                min_streak_required: editTarget.min_streak_required
+                  ? String(editTarget.min_streak_required)
+                  : "",
+                pathway: (editTarget.pathway ?? "") as ResourceFormData["pathway"],
+                category: editTarget.category || "",
               }
             : undefined
         }
