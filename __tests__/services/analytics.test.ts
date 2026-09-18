@@ -42,26 +42,61 @@ describe("analyticsService.exportCsv", () => {
   });
 });
 
-describe("analyticsService.getFunnel", () => {
-  it("loads the onboarding funnel rows", async () => {
-    const fetchMock = mockFetch({
-      success: true,
-      funnel: [
-        { step: "started", count: 100 },
-        { step: "completed", count: 58 },
-      ],
-    });
+describe("analyticsService.getFunnelCsv", () => {
+  it("requests the onboarding funnel CSV export", async () => {
+    const fetchMock = mockFetch("step,started,completed,drop_rate\n");
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await analyticsService.getFunnel();
+    await analyticsService.getFunnelCsv();
 
     expect(fetchMock).toHaveBeenCalledWith(
-      `${API_CONFIG.BASE_URL}/analytics/funnel`,
+      `${API_CONFIG.BASE_URL}/analytics/funnel?format=csv`,
       expect.objectContaining({ method: "GET" })
     );
-    expect(result).toEqual([
-      { step: "started", count: 100 },
-      { step: "completed", count: 58 },
+  });
+
+  it("parses funnel rows from the CSV response", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(
+        [
+          "step,started,completed,drop_rate",
+          "1. Welcome Audio,120,100,16.7",
+          "2. Community Call,100,80,20.0",
+          "complete,80,58,27.5",
+        ].join("\n")
+      )
+    );
+
+    const csv = await analyticsService.getFunnelCsv();
+
+    expect(csv.rows).toEqual([
+      { step: "1. Welcome Audio", started: 120, completed: 100, dropRate: 16.7 },
+      { step: "2. Community Call", started: 100, completed: 80, dropRate: 20.0 },
+      { step: "complete", started: 80, completed: 58, dropRate: 27.5 },
     ]);
+  });
+
+  it("handles quoted step labels containing commas", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch(
+        [
+          "step,started,completed,drop_rate",
+          '"1. Welcome, Audio",120,100,16.7',
+        ].join("\n")
+      )
+    );
+
+    const csv = await analyticsService.getFunnelCsv();
+
+    expect(csv.rows[0].step).toBe("1. Welcome, Audio");
+    expect(csv.rows[0].started).toBe(120);
+  });
+
+  it("throws when the export fails", async () => {
+    vi.stubGlobal("fetch", mockFetch(null, 500));
+
+    await expect(analyticsService.getFunnelCsv()).rejects.toThrow();
   });
 });
