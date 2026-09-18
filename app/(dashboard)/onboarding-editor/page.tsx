@@ -3,6 +3,7 @@
 import { PageHeader } from "@/components/shared";
 import { Badge, Skeleton } from "@/components/ui";
 import { VideoUploadCard } from "./_components/video-upload-card";
+import { FlowEditor } from "./_components/flow-editor";
 import { useQuery } from "@/hooks/use-query";
 import { Pathway } from "@/lib/services/pathways";
 
@@ -121,6 +122,8 @@ export default function OnboardingEditorPage() {
             )}
           </div>
         </div>
+
+        <FlowEditor />
       </div>
     </div>
   );
