@@ -16,7 +16,7 @@ import {
   ShieldAlert,
   KeyRound,
   BarChart3,
-  // Share2,
+  Share2,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -35,7 +35,7 @@ const navItems = [
   { label: "Leader Management", href: "/leaders", icon: UserRoundCheck },
   { label: "Audit Logs", href: "/audit-logs", icon: ShieldCheck },
   { label: "Access Management", href: "/access-management", icon: KeyRound },
-  // { label: "Referrals", href: "/referrals", icon: Share2 },
+  { label: "Referrals", href: "/referrals", icon: Share2 },
 ];
 
 interface SidebarProps {

@@ -5,28 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { BarChart3, Globe, MousePointer2, UserPlus, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@/hooks/use-query";
-
-interface ReferralStatsData {
-  total_referrals: number;
-  monthly_referrals: number;
-  weekly_referrals: number;
-}
-
-interface GeoData {
-  locations: { label: string; count: number; percentage: number }[];
-}
-
-interface LeaderboardItem {
-  referrer_id: string;
-  full_name: string | null;
-  username: string | null;
-  referral_count: number;
-}
+import {
+  type ReferralStats,
+  ReferralGeoData,
+  ReferralLeaderboardItem,
+} from "@/lib/services/referrals";
 
 export function ReferralAnalytics() {
-  const { data: stats } = useQuery<ReferralStatsData>("/referrals/stats");
-  const { data: geo } = useQuery<GeoData>("/referrals/geo");
-  const { data: leaderboard } = useQuery<LeaderboardItem[]>("/referrals/leaderboard?timeframe=monthly");
+  const { data: stats } = useQuery<ReferralStats>("/referrals/stats");
+  const { data: geo } = useQuery<ReferralGeoData>("/referrals/geo");
+  const { data: leaderboard } = useQuery<ReferralLeaderboardItem[]>("/referrals/leaderboard?timeframe=monthly");
 
   const locations = geo?.locations ?? [];
 
@@ -71,10 +59,10 @@ export function ReferralAnalytics() {
               <div className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-blue-100">
                 <MousePointer2 className="h-5 w-5 text-blue-600" />
               </div>
-              <p className="text-3xl font-black text-blue-900">—</p>
+              <p className="text-3xl font-black text-blue-900">{stats?.link_clicks ?? 0}</p>
               <p className="text-sm font-semibold text-blue-700">Link Clicks</p>
               <Badge variant="outline" className="border-blue-200 bg-white/50 text-blue-600">
-                Not tracked
+                Tracked
               </Badge>
             </div>
 
@@ -82,10 +70,10 @@ export function ReferralAnalytics() {
               <div className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-indigo-100">
                 <UserPlus className="h-5 w-5 text-indigo-600" />
               </div>
-              <p className="text-3xl font-black text-indigo-900">{stats?.total_referrals ?? 0}</p>
+              <p className="text-3xl font-black text-indigo-900">{stats?.signups ?? 0}</p>
               <p className="text-sm font-semibold text-indigo-700">Referred Signups</p>
               <Badge variant="outline" className="border-indigo-200 bg-white/50 text-indigo-600">
-                All-time
+                {stats?.conversion_rate ?? 0}% conversion
               </Badge>
             </div>
 
@@ -93,10 +81,10 @@ export function ReferralAnalytics() {
               <div className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100">
                 <BarChart3 className="h-5 w-5 text-emerald-600" />
               </div>
-              <p className="text-3xl font-black text-emerald-900">—</p>
+              <p className="text-3xl font-black text-emerald-900">{stats?.active_members ?? 0}</p>
               <p className="text-sm font-semibold text-emerald-700">Active Members</p>
               <Badge variant="outline" className="border-emerald-200 bg-white/50 text-emerald-600">
-                Not tracked
+                {stats?.monthly_referrals ?? 0} this month
               </Badge>
             </div>
           </div>

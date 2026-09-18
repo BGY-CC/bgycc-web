@@ -11,11 +11,13 @@ interface ReferralStats {
   total_referrals: number;
   monthly_referrals: number;
   weekly_referrals: number;
+  link_clicks: number;
+  signups: number;
+  active_members: number;
+  conversion_rate: number;
 }
 
 export default function ReferralsPage() {
-  // In a real app, we'd have a specific stats endpoint for admin referrals
-  // For now, let's assume /referrals/stats or similar
   const { data: stats, isLoading } = useQuery<ReferralStats>("/referrals/stats");
 
   return (
@@ -54,9 +56,9 @@ export default function ReferralsPage() {
               />
               <StatCard
                 label="Conversion Rate"
-                value="—"
+                value={stats?.conversion_rate != null ? `${stats.conversion_rate}%` : "—"}
                 icon={<Share2 className="h-4 w-4" />}
-                description="Click-to-signup tracking not yet enabled"
+                description={`${stats?.link_clicks ?? 0} clicks -> ${stats?.signups ?? 0} signups`}
               />
               <ReferralTopReferrer />
             </>
