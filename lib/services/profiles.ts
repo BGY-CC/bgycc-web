@@ -101,4 +101,13 @@ export const profilesService = {
     });
     return readJson(response);
   },
+
+  relinkParent: async (childId: string, parentId: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/parent-child/relink`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ childId, parentId }),
+    });
+    return readJson(response);
+  },
 };

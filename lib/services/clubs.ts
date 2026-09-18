@@ -156,5 +156,14 @@ export const clubsService = {
     });
     return readJson(response);
   },
+
+  reassignMembers: async (clubId: string, userIds: string[]) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/clubs/${clubId}/reassign`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ userIds }),
+    });
+    return readJson(response);
+  },
 };
 

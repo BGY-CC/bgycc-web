@@ -212,3 +212,24 @@ describe("clubsService.getTopPerformers", () => {
     expect(url).toContain("limit=5");
   });
 });
+
+describe("clubsService.reassignMembers", () => {
+  it("calls POST /clubs/{clubId}/reassign with userIds", async () => {
+    const fetchMock = mockFetch({
+      success: true,
+      data: { reassigned: 2, reassigned_ids: ["u1", "u2"], demoted: [], errors: [] },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await clubsService.reassignMembers("club-123", ["u1", "u2"]);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/clubs/club-123/reassign`,
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ userIds: ["u1", "u2"] }),
+      })
+    );
+  });
+});

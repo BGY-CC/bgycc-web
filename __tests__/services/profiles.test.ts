@@ -115,6 +115,27 @@ describe("profilesService.uploadMyImage", () => {
   });
 });
 
+describe("profilesService.relinkParent", () => {
+  it("calls POST /parent-child/relink with childId and parentId", async () => {
+    const fetchMock = mockFetch({
+      success: true,
+      data: { relationship: { child_id: "child-1", parent_id: "parent-1" } },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await profilesService.relinkParent("child-1", "parent-1");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/parent-child/relink`,
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ childId: "child-1", parentId: "parent-1" }),
+      })
+    );
+  });
+});
+
 describe("profilesService.updateRole", () => {
   it("sends PUT /profiles/:userId with role in body", async () => {
     const fetchMock = mockFetch({ success: true });

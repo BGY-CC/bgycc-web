@@ -14,10 +14,14 @@ import {
   Search,
   X,
   Phone,
+  UserPlus,
+  Link2,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { ReassignMembersModal } from "@/app/(dashboard)/clubs/_components/reassign-members-modal";
 
 interface MemberDetailModalProps {
   userId: string | null;
@@ -108,6 +112,7 @@ export function MemberDetailModal({
   );
 
   const profile = data?.profile;
+  const [reassignMode, setReassignMode] = useState<"reassign" | "relinkParent" | null>(null);
 
   return (
     <Modal open={isOpen} onClose={onClose}>
@@ -365,22 +370,19 @@ export function MemberDetailModal({
                       variant="secondary"
                       className="h-11 w-full justify-start text-xs font-bold"
                       size="sm"
+                      leftIcon={<UserPlus className="h-4 w-4" />}
+                      onClick={() => setReassignMode("reassign")}
                     >
-                      Send Message
+                      Reassign
                     </Button>
                     <Button
                       variant="secondary"
                       className="h-11 w-full justify-start text-xs font-bold"
                       size="sm"
+                      leftIcon={<Link2 className="h-4 w-4" />}
+                      onClick={() => setReassignMode("relinkParent")}
                     >
-                      Reset Password
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="h-11 w-full justify-start border-red-100 text-xs font-bold text-red-500 hover:bg-red-50"
-                      size="sm"
-                    >
-                      Deactivate Account
+                      Reassign Parent
                     </Button>
                   </div>
                 </div>
@@ -389,6 +391,12 @@ export function MemberDetailModal({
           </div>
         )}
       </ModalContent>
+      <ReassignMembersModal
+        open={reassignMode !== null}
+        userId={userId}
+        mode={reassignMode ?? "relinkParent"}
+        onClose={() => setReassignMode(null)}
+      />
     </Modal>
   );
 }
