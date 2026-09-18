@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Download } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Download, UserPlus, CheckCircle2 } from "lucide-react";
 import { Button, useToast } from "@/components/ui";
 import { StatCard, StatCardSkeleton } from "@/components/shared";
 import { useQuery } from "@/hooks/use-query";
-import { analyticsService, FunnelStep } from "@/lib/services/analytics";
+import { analyticsService } from "@/lib/services/analytics";
 
 const PERIOD_OPTIONS = [
   { label: "This Week", value: "week" },
@@ -15,22 +15,36 @@ const PERIOD_OPTIONS = [
 
 export type Period = (typeof PERIOD_OPTIONS)[number]["value"];
 
+type FunnelRawData =
+  | FunnelStep[]
+  | { funnel?: FunnelStep[]; data?: { funnel?: FunnelStep[] } };
+
+interface FunnelStep {
+  step: string;
+  count: number;
+}
+
 export function AnalyticsClient() {
   const { toast } = useToast();
   const [period, setPeriod] = useState<Period>("month");
   const [exporting, setExporting] = useState(false);
 
-  const { data: funnel, isLoading } = useQuery<FunnelStep[]>(() =>
-    analyticsService.getFunnel()
+  const { data: rawData, isLoading } = useQuery<FunnelRawData>(
+    "/analytics/funnel"
   );
+
+  const funnel: FunnelStep[] = useMemo(() => {
+    if (Array.isArray(rawData)) return rawData;
+    return rawData?.funnel ?? rawData?.data?.funnel ?? [];
+  }, [rawData]);
 
   const started = funnel?.find((s) => s.step === "started")?.count ?? 0;
   const completed = funnel?.find((s) => s.step === "completed")?.count ?? 0;
   const conversion = started > 0 ? Math.round((completed / started) * 100) : 0;
 
   const handleExport = async () => {
+    setExporting(true);
     try {
-      setExporting(true);
       const csv = await analyticsService.exportCsv(period);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
@@ -77,12 +91,14 @@ export function AnalyticsClient() {
         <StatCard
           label="Attendees Started"
           value={started}
-          sublabel="Onboarding funnel entry"
+          icon={<UserPlus className="h-5 w-5 text-primary" />}
+          description="Onboarding funnel entry"
         />
         <StatCard
           label="Attendees Completed"
           value={completed}
-          sublabel={`${conversion}% conversion`}
+          icon={<CheckCircle2 className="h-5 w-5 text-primary" />}
+          description={`${conversion}% conversion`}
         />
       </div>
 
@@ -91,7 +107,7 @@ export function AnalyticsClient() {
           {PERIOD_OPTIONS.map((option) => (
             <Button
               key={option.value}
-              variant={period === option.value ? "default" : "outline"}
+              variant={period === option.value ? "primary" : "outline"}
               size="sm"
               onClick={() => setPeriod(option.value)}
             >
