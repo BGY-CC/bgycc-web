@@ -14,6 +14,7 @@ import {
   UserRoundCheck,
   ShieldCheck,
   KeyRound,
+  BarChart3,
   // Share2,
 } from "lucide-react";
 import { useState } from "react";
@@ -27,6 +28,7 @@ const navItems = [
   { label: "Pathway Checklists", href: "/pathway-checklists", icon: ClipboardList },
   { label: "Onboarding Editor", href: "/onboarding-editor", icon: PenSquare },
   { label: "Resources", href: "/resources", icon: FolderOpen },
+  { label: "Analytics", href: "/analytics", icon: BarChart3 },
   { label: "Announcement", href: "/announcement", icon: Megaphone },
   { label: "Leader Management", href: "/leaders", icon: UserRoundCheck },
   { label: "Audit Logs", href: "/audit-logs", icon: ShieldCheck },
