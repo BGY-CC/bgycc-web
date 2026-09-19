@@ -17,6 +17,7 @@ import {
   KeyRound,
   BarChart3,
   Share2,
+  Crown,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,7 @@ const navItems = [
   { label: "Moderation", href: "/moderation", icon: ShieldAlert },
   { label: "Announcement", href: "/announcement", icon: Megaphone },
   { label: "Leader Management", href: "/leaders", icon: UserRoundCheck },
+  { label: "Leadership", href: "/leadership", icon: Crown },
   { label: "Audit Logs", href: "/audit-logs", icon: ShieldCheck },
   { label: "Access Management", href: "/access-management", icon: KeyRound },
   { label: "Referrals", href: "/referrals", icon: Share2 },
