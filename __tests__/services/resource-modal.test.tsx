@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ResourceModal } from "@/app/(dashboard)/resources/_components/resource-modal";
+import { resourcesService } from "@/lib/services/resources";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -85,5 +86,55 @@ describe("ResourceModal", () => {
     expect(categorySelect).toBeTruthy();
     expect(screen.getByRole("option", { name: "Toolkits" })).toBeTruthy();
     expect(screen.getByRole("option", { name: "Growth Guides" })).toBeTruthy();
+  });
+
+  it("submits cover image, access level, and visibility with save", async () => {
+    vi.spyOn(resourcesService, "uploadImage").mockResolvedValue({
+      success: true,
+      data: {
+        url: "https://cdn.example.com/cover.png",
+        image_path: "resources/cover.png",
+        public_url: "https://cdn.example.com/cover.png",
+      },
+      error: null,
+    });
+
+    const onSuccess = vi.fn();
+    render(
+      <ResourceModal
+        open
+        onClose={vi.fn()}
+        onSuccess={onSuccess}
+        mode="edit"
+        defaultValues={{
+          title: "Audit Guide",
+          description: "desc",
+          link: "https://drive.google.com/audit",
+          tags: ["leadership"],
+          version: 2,
+        }}
+      />
+    );
+
+    const file = new File(["img"], "cover.png", { type: "image/png" });
+    await userEvent.upload(screen.getByLabelText("Cover image"), file);
+    await waitFor(() => {
+      expect(resourcesService.uploadImage).toHaveBeenCalledWith(file);
+    });
+
+    await userEvent.type(screen.getByPlaceholderText("e.g. member"), "member");
+    await userEvent.click(screen.getByLabelText("Visible to members"));
+
+    await userEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalled();
+      const [data] = onSuccess.mock.calls[0];
+      expect(data).toMatchObject({
+        image_url: "https://cdn.example.com/cover.png",
+        access_level: "member",
+        is_active: false,
+      });
+    });
   });
 });

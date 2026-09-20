@@ -30,6 +30,7 @@ const RESOURCE = {
   category: "toolkit",
   tags: ["leadership"],
   version: 1,
+  access_level: null,
   created_at: "2026-09-01T00:00:00.000Z",
   updated_at: "2026-09-01T00:00:00.000Z",
 };
@@ -146,6 +147,9 @@ describe("ResourcesClient", () => {
         min_rank_required: "gold",
         min_streak_required: 3,
         pathway: null,
+        image_url: null,
+        access_level: null,
+        is_active: true,
       });
     });
   });

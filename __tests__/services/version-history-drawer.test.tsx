@@ -20,6 +20,7 @@ const RESOURCE = {
   category: "toolkit",
   tags: ["leadership"],
   version: 3,
+  access_level: null,
   created_at: "2026-09-01T00:00:00.000Z",
   updated_at: "2026-09-02T00:00:00.000Z",
 };

@@ -13,6 +13,7 @@ export interface Resource {
   min_streak_required: number;
   pathway: "leadership" | "public_speaking" | null;
   category: string | null;
+  access_level: string | null;
   tags: string[];
   version: number;
   created_at: string;

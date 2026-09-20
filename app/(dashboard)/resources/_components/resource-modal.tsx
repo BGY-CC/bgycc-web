@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FolderOpen, Tag, X } from "lucide-react";
+import { FolderOpen, ImagePlus, Tag, Upload, X } from "lucide-react";
+import Image from "next/image";
 import {
   Modal,
   ModalContent,
@@ -15,8 +16,12 @@ import {
   Textarea,
   Select,
   Badge,
+  Checkbox,
 } from "@/components/ui";
-import type { ResourceCategoryOption } from "@/lib/services/resources";
+import {
+  resourcesService,
+  type ResourceCategoryOption,
+} from "@/lib/services/resources";
 
 const schema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -24,6 +29,9 @@ const schema = z.object({
   link: z.string().min(1, "Resource link is required"),
   tags: z.array(z.string()),
   version: z.number().int().min(1),
+  image_url: z.string().optional(),
+  access_level: z.string().optional(),
+  is_active: z.boolean(),
   min_rank_required: z.string().optional(),
   min_streak_required: z.string().optional(),
   pathway: z.enum(["leadership", "public_speaking", ""]).optional(),
@@ -52,6 +60,8 @@ export function ResourceModal({
   categories = [],
 }: ResourceModalProps) {
   const [tagInput, setTagInput] = useState("");
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -59,6 +69,7 @@ export function ResourceModal({
     reset,
     setValue,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<ResourceFormData>({
     resolver: zodResolver(schema),
@@ -68,6 +79,9 @@ export function ResourceModal({
       link: defaultValues?.link ?? "",
       tags: defaultValues?.tags ?? [],
       version: defaultValues?.version ?? 1,
+      image_url: defaultValues?.image_url ?? "",
+      access_level: defaultValues?.access_level ?? "",
+      is_active: defaultValues?.is_active ?? true,
       min_rank_required: defaultValues?.min_rank_required ?? "",
       min_streak_required: defaultValues?.min_streak_required ?? "",
       pathway: defaultValues?.pathway ?? "",
@@ -78,6 +92,7 @@ export function ResourceModal({
   // eslint-disable-next-line react-hooks/incompatible-library
   const tags = watch("tags") ?? [];
   const version = watch("version") ?? 1;
+  const imageUrl = watch("image_url") ?? "";
 
   useEffect(() => {
     if (open) {
@@ -87,6 +102,9 @@ export function ResourceModal({
         link: defaultValues?.link ?? "",
         tags: defaultValues?.tags ?? [],
         version: defaultValues?.version ?? 1,
+        image_url: defaultValues?.image_url ?? "",
+        access_level: defaultValues?.access_level ?? "",
+        is_active: defaultValues?.is_active ?? true,
         min_rank_required: defaultValues?.min_rank_required ?? "",
         min_streak_required: defaultValues?.min_streak_required ?? "",
         pathway: defaultValues?.pathway ?? "",
@@ -96,6 +114,27 @@ export function ResourceModal({
       reset();
     }
   }, [open, reset, defaultValues]);
+
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setIsUploadingCover(true);
+    try {
+      const result = (await resourcesService.uploadImage(file)) as {
+        success?: boolean;
+        data?: { public_url?: string };
+      };
+      if (result.success && result.data?.public_url) {
+        setValue("image_url", result.data.public_url, { shouldDirty: true });
+      }
+    } catch {
+      // Upload failed; the cover URL input below still allows a manual value.
+    } finally {
+      setIsUploadingCover(false);
+    }
+  };
 
   const addTag = () => {
     const value = tagInput.trim().replace(/^#/, "");
@@ -143,6 +182,59 @@ export function ResourceModal({
               placeholder="https://drive.google.com/..."
               {...register("link")}
             />
+          </FormField>
+
+          <FormField label="Cover image">
+            <div className="flex items-start gap-3">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingCover}
+                className="group relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50"
+                aria-label="Upload cover image"
+              >
+                {imageUrl ? (
+                  <Image
+                    src={imageUrl}
+                    alt="Cover preview"
+                    width={64}
+                    height={64}
+                    className="h-full w-full object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <ImagePlus className="h-5 w-5 text-slate-400" />
+                )}
+                <span className="absolute inset-0 flex items-center justify-center bg-black/45 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                  <Upload className="h-4 w-4 text-white" />
+                </span>
+              </button>
+              <div className="min-w-0 flex-1 space-y-2">
+                <Input
+                  type="url"
+                  placeholder="https://example.com/cover.jpg"
+                  {...register("image_url")}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={isUploadingCover}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="min-h-9"
+                >
+                  {isUploadingCover ? "Uploading..." : "Upload cover image"}
+                </Button>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                aria-label="Cover image"
+                className="sr-only"
+                onChange={handleCoverChange}
+              />
+            </div>
           </FormField>
 
           <FormField label="Tags" error={errors.tags?.message}>
@@ -210,6 +302,10 @@ export function ResourceModal({
               <Input placeholder="e.g. gold" {...register("min_rank_required")} />
             </FormField>
 
+            <FormField label="Access Level">
+              <Input placeholder="e.g. member" {...register("access_level")} />
+            </FormField>
+
             <FormField label="Minimum Streak (days)">
               <Input
                 type="number"
@@ -241,6 +337,19 @@ export function ResourceModal({
               </Select>
             </FormField>
           </div>
+
+          <Controller
+            name="is_active"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                id="resource-is-active"
+                label="Visible to members"
+                checked={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
 
           <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
             <Button type="button" variant="secondary" onClick={onClose} className="min-h-11 flex-1">
