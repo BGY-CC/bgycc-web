@@ -99,4 +99,36 @@ describe("analyticsService.getFunnelCsv", () => {
 
     await expect(analyticsService.getFunnelCsv()).rejects.toThrow();
   });
+
+  it("appends clubId/region/role query params when filters are given", async () => {
+    const fetchMock = mockFetch("step,started,completed,drop_rate\n");
+    vi.stubGlobal("fetch", fetchMock);
+
+    await analyticsService.getFunnelCsv({
+      clubId: "club-1",
+      region: "Lagos",
+      role: "member",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_CONFIG.BASE_URL}/analytics/funnel?format=csv&clubId=club-1&region=Lagos&role=member`,
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
+  it("omits empty or missing filter params", async () => {
+    const fetchMock = mockFetch("step,started,completed,drop_rate\n");
+    vi.stubGlobal("fetch", fetchMock);
+
+    await analyticsService.getFunnelCsv({
+      clubId: "",
+      region: "Lagos",
+      role: undefined,
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_CONFIG.BASE_URL}/analytics/funnel?format=csv&region=Lagos`,
+      expect.objectContaining({ method: "GET" })
+    );
+  });
 });

@@ -12,6 +12,12 @@ export interface FunnelCsvData {
   rows: FunnelRow[];
 }
 
+export interface FunnelQueryParams {
+  clubId?: string;
+  region?: string;
+  role?: string;
+}
+
 const getAuthHeaders = () => {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("bgycc-token") : null;
@@ -88,9 +94,14 @@ export const analyticsService = {
     return response.text();
   },
 
-  getFunnelCsv: async (): Promise<FunnelCsvData> => {
+  getFunnelCsv: async (params?: FunnelQueryParams): Promise<FunnelCsvData> => {
+    const query = new URLSearchParams();
+    if (params?.clubId?.trim()) query.set("clubId", params.clubId.trim());
+    if (params?.region?.trim()) query.set("region", params.region.trim());
+    if (params?.role?.trim()) query.set("role", params.role.trim());
+    const queryString = query.toString();
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/analytics/funnel?format=csv`,
+      `${API_CONFIG.BASE_URL}/analytics/funnel?format=csv${queryString ? `&${queryString}` : ""}`,
       { method: "GET", headers: getAuthHeaders() }
     );
     if (!response.ok) {
