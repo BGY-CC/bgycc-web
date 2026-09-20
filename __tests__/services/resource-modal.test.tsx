@@ -66,4 +66,24 @@ describe("ResourceModal", () => {
       });
     });
   });
+
+  it("renders a category picker populated from resource categories", async () => {
+    render(
+      <ResourceModal
+        open
+        onClose={vi.fn()}
+        onSuccess={vi.fn()}
+        mode="add"
+        categories={[
+          { id: "cat-1", slug: "toolkit", title: "Toolkits" },
+          { id: "cat-2", slug: "growth-guides", title: "Growth Guides" },
+        ]}
+      />
+    );
+
+    const categorySelect = screen.getByRole("combobox", { name: "Category" });
+    expect(categorySelect).toBeTruthy();
+    expect(screen.getByRole("option", { name: "Toolkits" })).toBeTruthy();
+    expect(screen.getByRole("option", { name: "Growth Guides" })).toBeTruthy();
+  });
 });

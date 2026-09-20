@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Plus, ExternalLink, Pencil, Trash2, FolderOpen, Link2 } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Plus, ExternalLink, Pencil, Trash2, FolderOpen, Link2, History, Download } from "lucide-react";
 import { Button, ConfirmDialog, Skeleton, useToast } from "@/components/ui";
 import { SearchInput, StatCard, StatCardSkeleton } from "@/components/shared";
 import { ResourceModal, type ResourceFormData } from "./resource-modal";
+import { VersionHistoryDrawer } from "./version-history-drawer";
 import { useQuery } from "@/hooks/use-query";
 import {
   resourcesService,
   Resource,
+  ResourceCategoryOption,
+  ResourceCompletionCount,
 } from "@/lib/services/resources";
 
 
@@ -60,7 +63,30 @@ export function ResourcesClient() {
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState<Resource | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Resource | null>(null);
+  const [historyTarget, setHistoryTarget] = useState<Resource | null>(null);
   const [search, setSearch] = useState("");
+  const [categories, setCategories] = useState<ResourceCategoryOption[]>([]);
+  const [completions, setCompletions] = useState<ResourceCompletionCount[]>([]);
+  const [exporting, setExporting] = useState(false);
+
+  useEffect(() => {
+    resourcesService
+      .categories()
+      .then((res) => setCategories(res?.data?.categories ?? []))
+      .catch(() => setCategories([]));
+  }, []);
+
+  useEffect(() => {
+    resourcesService
+      .completions()
+      .then((res) => setCompletions(res?.data?.completions ?? []))
+      .catch(() => setCompletions([]));
+  }, []);
+
+  const totalCompletions = useMemo(
+    () => completions.reduce((sum, row) => sum + row.completions, 0),
+    [completions]
+  );
 
   type ResourcesRawData =
     | Resource[]
@@ -167,6 +193,27 @@ export function ResourcesClient() {
     toast("Link copied to clipboard", "success");
   };
 
+  const handleExportCompletions = async () => {
+    setExporting(true);
+    try {
+      const csv = await resourcesService.exportCompletionsCsv();
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "resource-completions.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast("Completions CSV downloaded", "success");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "Export failed", "error");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (isLoading && resources.length === 0) {
     return <ResourcesSkeleton />;
   }
@@ -202,6 +249,25 @@ export function ResourcesClient() {
         </Button>
       </div>
 
+      {/* Completions export */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-900">Resource completions</h3>
+          <p className="mt-1 text-sm text-slate-500">
+            {totalCompletions} completions across {completions.length} resources
+          </p>
+        </div>
+        <Button
+          leftIcon={<Download className="h-4 w-4" />}
+          variant="secondary"
+          onClick={handleExportCompletions}
+          isLoading={exporting}
+          className="min-h-11 sm:w-auto"
+        >
+          Export completions CSV
+        </Button>
+      </div>
+
       {/* Resource list */}
       <div className="space-y-4">
         {filteredResources.length > 0 ? (
@@ -234,6 +300,14 @@ export function ResourcesClient() {
                       aria-label={`Copy link for ${r.title}`}
                     >
                       <ExternalLink className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setHistoryTarget(r)}
+                      className="h-11 w-11 rounded-xl p-0 text-slate-400 transition-all hover:bg-slate-50 hover:text-primary"
+                      title="Version history"
+                      aria-label={`Version history for ${r.title}`}
+                    >
+                      <History className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => setEditTarget(r)}
@@ -288,12 +362,14 @@ export function ResourcesClient() {
         onClose={() => setShowAdd(false)}
         onSuccess={handleAdd}
         mode="add"
+        categories={categories}
       />
       <ResourceModal
         open={!!editTarget}
         onClose={() => setEditTarget(null)}
         onSuccess={handleEdit}
         mode="edit"
+        categories={categories}
         defaultValues={
           editTarget
             ? {
@@ -318,6 +394,12 @@ export function ResourcesClient() {
         onConfirm={handleDelete}
         title="Delete Resource"
         description="Are you sure you want to delete this resource? This action cannot be undone."
+      />
+      <VersionHistoryDrawer
+        resource={historyTarget}
+        open={!!historyTarget}
+        onClose={() => setHistoryTarget(null)}
+        onRollback={() => refetch()}
       />
     </div>
   );

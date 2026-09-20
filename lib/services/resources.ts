@@ -23,6 +23,29 @@ export interface ResourceResponse {
   resources: Resource[];
 }
 
+export interface ResourceVersionRow {
+  id: string;
+  resource_id: string;
+  version: number;
+  editor_id: string | null;
+  change_note: string | null;
+  snapshot: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface ResourceCategoryOption {
+  id: string;
+  slug: string;
+  title: string;
+}
+
+export interface ResourceCompletionCount {
+  resource_id: string;
+  title: string;
+  category: string | null;
+  completions: number;
+}
+
 const getAuthHeaders = () => {
   const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
   return {
@@ -71,6 +94,56 @@ export const resourcesService = {
     } catch {
       return { success: response.ok };
     }
+  },
+
+  listVersions: async (id: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/resources/${id}/versions`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return readJson<{ success: boolean; data: { versions: ResourceVersionRow[]; total: number } }>(
+      response
+    );
+  },
+
+  rollback: async (id: string, version: number) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/resources/${id}/rollback`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ version }),
+    });
+    return readJson<{ success: boolean; data: { resource: Resource } }>(response);
+  },
+
+  categories: async () => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/resources/categories`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return readJson<{ success: boolean; data: { categories: ResourceCategoryOption[] } }>(
+      response
+    );
+  },
+
+  completions: async () => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/resources/completions`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return readJson<{ success: boolean; data: { completions: ResourceCompletionCount[]; total: number } }>(
+      response
+    );
+  },
+
+  exportCompletionsCsv: async () => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/resources/export/completions`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error(`Completions export failed (${response.status})`);
+    }
+    return response.text();
   },
 
 

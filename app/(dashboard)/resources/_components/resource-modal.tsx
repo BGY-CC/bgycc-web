@@ -16,6 +16,7 @@ import {
   Select,
   Badge,
 } from "@/components/ui";
+import type { ResourceCategoryOption } from "@/lib/services/resources";
 
 const schema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -37,6 +38,7 @@ interface ResourceModalProps {
   onSuccess: (data: ResourceFormData) => void;
   mode: "add" | "edit";
   defaultValues?: Partial<ResourceFormData>;
+  categories?: ResourceCategoryOption[];
 }
 
 const PATHWAY_OPTIONS = ["leadership", "public_speaking"] as const;
@@ -47,6 +49,7 @@ export function ResourceModal({
   onSuccess,
   mode,
   defaultValues,
+  categories = [],
 }: ResourceModalProps) {
   const [tagInput, setTagInput] = useState("");
 
@@ -228,7 +231,14 @@ export function ResourceModal({
             </FormField>
 
             <FormField label="Category">
-              <Input placeholder="e.g. toolkit" {...register("category")} />
+              <Select aria-label="Category" {...register("category")}>
+                <option value="">No category</option>
+                {categories.map((cat) => (
+                  <option key={cat.slug} value={cat.slug}>
+                    {cat.title}
+                  </option>
+                ))}
+              </Select>
             </FormField>
           </div>
 
