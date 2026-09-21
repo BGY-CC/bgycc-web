@@ -81,16 +81,18 @@ export function FlowEditor() {
   };
 
   // Fold the dedicated content fields into their matching steps so the
-  // preview and published payload reflect unsaved edits.
+  // preview and published payload reflect unsaved edits. The value is assigned
+  // unconditionally (including empty) so clearing a field persists rather than
+  // silently leaving the previously saved value in place.
   const withContentOverrides = (list: OnboardingStep[]): OnboardingStep[] =>
     list.map((s) => {
-      if (s.id === "welcome_video" && welcomeVideoUrl) {
+      if (s.id === "welcome_video") {
         return { ...s, video_url: welcomeVideoUrl };
       }
-      if (s.id === "consent" && consentText) {
+      if (s.id === "consent") {
         return { ...s, text: consentText };
       }
-      if (s.id === "vision" && visionText) {
+      if (s.id === "vision") {
         return { ...s, text: visionText };
       }
       return s;

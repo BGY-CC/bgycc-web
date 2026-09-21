@@ -341,3 +341,40 @@ describe("FlowEditor step editing", () => {
     expect(screen.getByText("Consent")).toBeTruthy();
   });
 });
+
+describe("FlowEditor clearing dedicated content fields", () => {
+  it("persists cleared welcome video, consent and vision values in the published payload", async () => {
+    const updateSpy = vi
+      .spyOn(onboardingService, "updateFlow")
+      .mockResolvedValue({ success: true, data: { message: "ok", flow: flowBody.data } });
+    vi.stubGlobal("fetch", mockFetch(flowBody));
+
+    renderFlowEditor();
+
+    const urlInput = await screen.findByDisplayValue(
+      "https://cdn.example.com/welcome.mp4"
+    );
+    const consentInput = await screen.findByDisplayValue(
+      "I agree to the community guidelines."
+    );
+    const visionInput = await screen.findByDisplayValue(
+      "Confident, articulate youth."
+    );
+
+    await userEvent.clear(urlInput);
+    await userEvent.clear(consentInput);
+    await userEvent.clear(visionInput);
+
+    await userEvent.click(screen.getByRole("button", { name: "Publish" }));
+
+    await waitFor(() => {
+      const [input] = updateSpy.mock.calls[0];
+      const welcome = input.steps.find((s) => s.id === "welcome_video");
+      const consent = input.steps.find((s) => s.id === "consent");
+      const vision = input.steps.find((s) => s.id === "vision");
+      expect(welcome?.video_url ?? "").toBe("");
+      expect(consent?.text ?? "").toBe("");
+      expect(vision?.text ?? "").toBe("");
+    });
+  });
+});
