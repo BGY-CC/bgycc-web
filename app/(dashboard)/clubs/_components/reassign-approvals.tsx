@@ -5,6 +5,7 @@ import { CheckCircle2, UserCheck, XCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge, Button, useToast } from "@/components/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/hooks/use-auth";
 import { reassignApprovalsService, type ReassignApprovalRequest } from "@/lib/services/families";
 
 const statusVariant = (
@@ -28,6 +29,8 @@ const statusLabel = (status: string) =>
 
 export function ReassignApprovals() {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   const [requests, setRequests] = useState<ReassignApprovalRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,9 +50,10 @@ export function ReassignApprovals() {
   }, []);
 
   useEffect(() => {
+    if (!isAdmin) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
-  }, [load]);
+  }, [load, isAdmin]);
 
   const run = async (request: ReassignApprovalRequest, type: "confirm" | "reject") => {
     setAction({ id: request.id, type });
@@ -68,6 +72,10 @@ export function ReassignApprovals() {
       setAction(null);
     }
   };
+
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <Card className="border-none shadow-xl bg-white/50 backdrop-blur-sm overflow-hidden">

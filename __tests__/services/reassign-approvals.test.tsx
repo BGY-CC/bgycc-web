@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { ReassignApprovals } from "@/app/(dashboard)/clubs/_components/reassign-approvals";
 import { ToastProvider } from "@/components/ui";
 import { reassignApprovalsService, type ReassignApprovalRequest } from "@/lib/services/families";
+import { useAuth } from "@/hooks/use-auth";
 
 vi.mock("@/lib/services/families", () => ({
   reassignApprovalsService: {
@@ -13,9 +14,24 @@ vi.mock("@/lib/services/families", () => ({
   },
 }));
 
+vi.mock("@/hooks/use-auth", () => ({
+  useAuth: vi.fn(),
+}));
+
 const mockedList = vi.mocked(reassignApprovalsService.list);
 const mockedConfirm = vi.mocked(reassignApprovalsService.confirm);
 const mockedReject = vi.mocked(reassignApprovalsService.reject);
+const mockedUseAuth = vi.mocked(useAuth);
+
+const authAs = (role: string) =>
+  mockedUseAuth.mockReturnValue({
+    user: { id: `${role}-1`, email: `${role}@bgycc.org`, role },
+    isAuthenticated: true,
+    isLoading: false,
+    login: vi.fn(),
+    logout: vi.fn(),
+    updateUser: vi.fn(),
+  } as never);
 
 const REQUESTS: ReassignApprovalRequest[] = [
   {
@@ -46,6 +62,7 @@ const REQUESTS: ReassignApprovalRequest[] = [
 
 beforeEach(() => {
   localStorage.setItem("bgycc-token", "tok");
+  authAs("admin");
   mockedList.mockReset();
   mockedList.mockResolvedValue({ success: true, data: { requests: REQUESTS } });
   mockedConfirm.mockReset();
@@ -122,5 +139,21 @@ describe("ReassignApprovals queue", () => {
     await user.click(screen.getByRole("button", { name: /Retry/i }));
 
     expect(await screen.findByText("Lagos Hub Leader")).toBeTruthy();
+  });
+
+  it("renders nothing and does not fetch the admin queue for a leader", async () => {
+    authAs("leader");
+    renderQueue();
+
+    expect(screen.queryByText("Reassign Approvals")).toBeNull();
+    expect(mockedList).not.toHaveBeenCalled();
+  });
+
+  it("renders the queue for a super_admin", async () => {
+    authAs("super_admin");
+    renderQueue();
+
+    expect(await screen.findByText("Reassign Approvals")).toBeTruthy();
+    expect(mockedList).toHaveBeenCalledTimes(1);
   });
 });

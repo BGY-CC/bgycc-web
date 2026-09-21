@@ -105,6 +105,12 @@ describe("reassignApprovalsService.list", () => {
       expect.objectContaining({ method: "GET" })
     );
   });
+
+  it("throws on a non-ok response with the server message", async () => {
+    vi.stubGlobal("fetch", mockFetch({ success: false, error: "Forbidden" }, 403));
+
+    await expect(reassignApprovalsService.list()).rejects.toThrow("Forbidden");
+  });
 });
 
 describe("reassignApprovalsService.confirm", () => {

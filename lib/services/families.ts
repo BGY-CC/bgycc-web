@@ -93,7 +93,16 @@ export const reassignApprovalsService = {
       method: "GET",
       headers: getAuthHeaders(),
     });
-    return readJson<{ success?: boolean; data?: { requests: ReassignApprovalRequest[] } }>(response);
+    const result = await readJson<{
+      success?: boolean;
+      error?: string;
+      message?: string;
+      data?: { requests: ReassignApprovalRequest[] };
+    }>(response);
+    if (!response.ok) {
+      throw new Error(result.error || result.message || "Failed to load reassign requests");
+    }
+    return result;
   },
 
   confirm: async (requestId: string) => {
