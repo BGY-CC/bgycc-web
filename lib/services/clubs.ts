@@ -25,6 +25,18 @@ export interface Club {
   status?: "Active" | "Dormant";
 }
 
+export interface AtRiskMember {
+  user_id: string;
+  full_name: string | null;
+  email: string | null;
+  profile_picture_url: string | null;
+  current_streak: number;
+  longest_streak: number;
+  last_activity_date: string | null;
+  joined_at: string;
+  severity?: "red" | "yellow" | null;
+}
+
 export interface ClubMemberHealth {
   demographics: {
     total: number;
@@ -32,16 +44,7 @@ export interface ClubMemberHealth {
     at_risk: number;
     reset: number;
   };
-  at_risk_members: Array<{
-    user_id: string;
-    full_name: string | null;
-    email: string | null;
-    profile_picture_url: string | null;
-    current_streak: number;
-    longest_streak: number;
-    last_activity_date: string | null;
-    joined_at: string;
-  }>;
+  at_risk_members: AtRiskMember[];
 }
 
 export interface ClubStats {
@@ -162,6 +165,15 @@ export const clubsService = {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify({ userIds }),
+    });
+    return readJson(response);
+  },
+
+  broadcastAlert: async (clubId: string, userId: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/clubs/${clubId}/broadcast-alert`, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ userId }),
     });
     return readJson(response);
   },

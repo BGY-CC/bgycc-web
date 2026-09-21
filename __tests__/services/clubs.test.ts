@@ -233,3 +233,24 @@ describe("clubsService.reassignMembers", () => {
     );
   });
 });
+
+describe("clubsService.broadcastAlert", () => {
+  it("calls POST /clubs/{clubId}/broadcast-alert with the target userId", async () => {
+    const fetchMock = mockFetch({
+      success: true,
+      data: { message: "Broadcast alert sent" },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await clubsService.broadcastAlert("club-123", "user-9");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/clubs/club-123/broadcast-alert`,
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ userId: "user-9" }),
+      })
+    );
+  });
+});

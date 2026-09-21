@@ -8,8 +8,9 @@ import { Badge, Button, Skeleton, useToast } from "@/components/ui";
 import { StatCard, StatCardSkeleton, PageHeader, MemberDetailModal } from "@/components/shared";
 import { EngagementChart, MemberStatusChart } from "@/components/charts";
 import { useQuery } from "@/hooks/use-query";
-import { clubsService, Club } from "@/lib/services/clubs";
+import { clubsService, Club, AtRiskMember } from "@/lib/services/clubs";
 import { ClubModal } from "../_components/club-modal";
+import { AtRiskMemberList } from "../_components/at-risk-list";
 import { useParams } from "next/navigation";
 
 const ENGAGEMENT_PERIOD_OPTIONS = [
@@ -95,11 +96,6 @@ export default function ClubDetailPage() {
     { enabled: hasValidClubId },
   );
   
-  interface AtRiskMember {
-    user_id: string;
-    full_name?: string | null;
-    current_streak?: number;
-  }
   interface TopPerformer {
     user_id: string;
     full_name?: string | null;
@@ -112,7 +108,7 @@ export default function ClubDetailPage() {
     [key: string]: unknown;
   }
 
-  const { data: healthData, isLoading: isLoadingHealth } = useQuery<{ demographics: Demographics; at_risk_members: AtRiskMember[] }>(
+  const { data: healthData, isLoading: isLoadingHealth, refetch: refetchHealth } = useQuery<{ demographics: Demographics; at_risk_members: AtRiskMember[] }>(
     `/clubs/${clubId}/member-health`,
     { enabled: hasValidClubId },
   );
@@ -485,33 +481,16 @@ export default function ClubDetailPage() {
           <div className="space-y-3">
             {isLoadingHealth ? (
                <MemberListSkeleton />
-            ) : atRiskMembers.length === 0 ? (
-               <div className="text-sm text-gray-500">No at-risk members found.</div>
             ) : (
-              atRiskMembers.map((m, i: number) => (
-                <button
-                  type="button"
-                  key={i} 
-                  className="group flex min-h-11 w-full flex-col gap-2 rounded-xl p-3 text-left transition-colors hover:bg-gray-50 sm:flex-row sm:items-center sm:justify-between"
-                  onClick={() => {
-                    setSelectedMemberId(m.user_id);
-                    setShowMemberDetail(true);
-                  }}
-                >
-                  <div className="flex min-w-0 items-start gap-2.5">
-                    <span className="h-8 w-8 rounded-full bg-gray-100 group-hover:bg-white flex items-center justify-center text-xs font-bold text-gray-600 shrink-0 transition-colors">
-                      {(m.full_name || "U").charAt(0)}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="break-words text-sm font-bold text-gray-900 transition-colors group-hover:text-primary">{m.full_name || "Unknown"}</p>
-                      <p className="text-xs text-gray-400 font-medium">{m.current_streak === 0 ? "Broken streak" : "Low activity"}</p>
-                    </div>
-                  </div>
-                  <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.08em] text-red-500">
-                    {m.current_streak === 0 ? "Broken streak" : "Low activity"}
-                  </span>
-                </button>
-              ))
+              <AtRiskMemberList
+                clubId={clubId}
+                members={atRiskMembers}
+                onSelectMember={(userId) => {
+                  setSelectedMemberId(userId);
+                  setShowMemberDetail(true);
+                }}
+                onBroadcasted={refetchHealth}
+              />
             )}
           </div>
         </div>
