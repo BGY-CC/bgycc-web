@@ -1,5 +1,11 @@
 import { API_CONFIG, readJson } from "../api";
 
+export interface ReferralSourceBreakdown {
+  deep_link: number;
+  qr: number;
+  share: number;
+}
+
 export interface ReferralStats {
   total_referrals: number;
   monthly_referrals: number;
@@ -8,7 +14,10 @@ export interface ReferralStats {
   signups: number;
   active_members: number;
   conversion_rate: number;
+  source_breakdown?: ReferralSourceBreakdown;
 }
+
+export type ReferralStatsPeriod = "all" | "week" | "month";
 
 export interface ReferralLeaderboardItem {
   referrer_id: string;
@@ -41,8 +50,9 @@ const getAuthHeaders = () => {
 };
 
 export const referralsService = {
-  getStats: async (): Promise<ReferralStats> => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/referrals/stats`, {
+  getStats: async (period: ReferralStatsPeriod = "all"): Promise<ReferralStats> => {
+    const query = period === "all" ? "" : `?period=${period}`;
+    const response = await fetch(`${API_CONFIG.BASE_URL}/referrals/stats${query}`, {
       method: "GET",
       headers: getAuthHeaders(),
     });

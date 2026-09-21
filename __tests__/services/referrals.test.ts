@@ -30,6 +30,7 @@ describe("referralsService.getStats", () => {
         signups: 42,
         active_members: 18,
         conversion_rate: 42.0,
+        source_breakdown: { deep_link: 60, qr: 20, share: 20 },
       },
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -44,6 +45,7 @@ describe("referralsService.getStats", () => {
       signups: 42,
       active_members: 18,
       conversion_rate: 42.0,
+      source_breakdown: { deep_link: 60, qr: 20, share: 20 },
     });
     expect(fetchMock).toHaveBeenCalledWith(
       `${API_CONFIG.BASE_URL}/referrals/stats`,
@@ -54,6 +56,44 @@ describe("referralsService.getStats", () => {
         }),
       })
     );
+  });
+
+  it("passes the period filter through as a query param", async () => {
+    const fetchMock = mockFetch({
+      success: true,
+      data: {
+        total_referrals: 3,
+        monthly_referrals: 3,
+        weekly_referrals: 3,
+        link_clicks: 4,
+        signups: 3,
+        active_members: 1,
+        conversion_rate: 75.0,
+        source_breakdown: { deep_link: 2, qr: 2, share: 0 },
+      },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const stats = await referralsService.getStats("month");
+
+    expect(stats.source_breakdown?.qr).toBe(2);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_CONFIG.BASE_URL}/referrals/stats?period=month`,
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
+  it("defaults to the all-time funnel fields when the response is empty", async () => {
+    vi.stubGlobal(
+      "fetch",
+      mockFetch({ success: true, data: null })
+    );
+
+    const stats = await referralsService.getStats();
+
+    expect(stats.link_clicks).toBe(0);
+    expect(stats.active_members).toBe(0);
+    expect(stats.conversion_rate).toBe(0);
   });
 });
 

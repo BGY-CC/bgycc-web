@@ -1,22 +1,55 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, Globe, MousePointer2, UserPlus, Download } from "lucide-react";
+import {
+  BarChart3,
+  Globe,
+  Link2,
+  MousePointer2,
+  QrCode,
+  Share2,
+  UserPlus,
+  Download,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@/hooks/use-query";
 import {
   type ReferralStats,
+  type ReferralSourceBreakdown,
+  type ReferralStatsPeriod,
   ReferralGeoData,
   ReferralLeaderboardItem,
 } from "@/lib/services/referrals";
 
+const PERIOD_OPTIONS = [
+  { label: "All Time", value: "all" },
+  { label: "This Week", value: "week" },
+  { label: "This Month", value: "month" },
+] as const;
+
+const SOURCE_ROWS = [
+  { key: "deep_link", label: "Deep Link", color: "bg-blue-500" },
+  { key: "qr", label: "QR Scan", color: "bg-indigo-500" },
+  { key: "share", label: "Share", color: "bg-emerald-500" },
+] as const;
+
 export function ReferralAnalytics() {
-  const { data: stats } = useQuery<ReferralStats>("/referrals/stats");
+  const [period, setPeriod] = useState<ReferralStatsPeriod>("all");
+  const periodQuery = period === "all" ? "" : `?period=${period}`;
+
+  const { data: stats } = useQuery<ReferralStats>(`/referrals/stats${periodQuery}`);
   const { data: geo } = useQuery<ReferralGeoData>("/referrals/geo");
   const { data: leaderboard } = useQuery<ReferralLeaderboardItem[]>("/referrals/leaderboard?timeframe=monthly");
 
   const locations = geo?.locations ?? [];
+  const breakdown: ReferralSourceBreakdown = stats?.source_breakdown ?? {
+    deep_link: 0,
+    qr: 0,
+    share: 0,
+  };
+  const sourceTotal = breakdown.deep_link + breakdown.qr + breakdown.share;
 
   const handleExport = () => {
     if (!leaderboard || leaderboard.length === 0) return;
@@ -42,16 +75,34 @@ export function ReferralAnalytics() {
             <CardTitle className="text-xl font-bold text-primary">Conversion Funnel</CardTitle>
             <CardDescription>Measuring the journey from invite to active member</CardDescription>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-11 w-full gap-2 px-4 sm:w-auto"
-            onClick={handleExport}
-            disabled={!leaderboard || leaderboard.length === 0}
-          >
-            <Download className="h-4 w-4" />
-            Export Data
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="grid min-h-11 grid-cols-3 gap-1 rounded-md bg-secondary p-0.5">
+              {PERIOD_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setPeriod(option.value)}
+                  aria-pressed={period === option.value}
+                  className={`h-11 rounded-sm px-3 text-[10px] font-medium transition-colors ${
+                    period === option.value
+                      ? "bg-white text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {option.label.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 w-full gap-2 px-4 sm:w-auto"
+              onClick={handleExport}
+              disabled={!leaderboard || leaderboard.length === 0}
+            >
+              <Download className="h-4 w-4" />
+              Export Data
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -126,20 +177,52 @@ export function ReferralAnalytics() {
       <Card className="border-none bg-white shadow-xl">
         <div className="grid grid-cols-1 lg:grid-cols-2">
           <div className="space-y-4 bg-primary p-6 text-white sm:p-8">
-            <h3 className="text-2xl font-black">QR vs Link</h3>
+            <h3 className="flex items-center gap-2 text-2xl font-black">
+              <QrCode className="h-6 w-6" />
+              QR vs Link
+            </h3>
             <p className="text-primary-foreground/80 text-sm">
-              Source tracking not yet enabled. QR vs link attribution requires additional tracking infrastructure.
+              Where referral link clicks come from — a scanned QR code, a shared link, or a plain
+              deep link.
             </p>
           </div>
-          <div className="flex items-center justify-center bg-gray-50 p-6 sm:p-8">
-            <div className="space-y-2 text-center">
-              <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl border border-gray-100 bg-white shadow-inner">
-                <BarChart3 className="h-10 w-10 text-gray-300" />
-              </div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-tighter">
-                Source Distribution Chart
+          <div className="space-y-5 bg-gray-50 p-6 sm:p-8">
+            {sourceTotal > 0 ? (
+              SOURCE_ROWS.map(({ key, label, color }) => {
+                const count = breakdown[key];
+                const share = Math.round((count / sourceTotal) * 100);
+                return (
+                  <div key={key} className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2 font-semibold text-gray-700">
+                        {key === "qr" ? (
+                          <QrCode className="h-4 w-4 text-indigo-500" />
+                        ) : key === "share" ? (
+                          <Share2 className="h-4 w-4 text-emerald-500" />
+                        ) : (
+                          <Link2 className="h-4 w-4 text-blue-500" />
+                        )}
+                        {label}
+                      </span>
+                      <span className="text-subtle font-medium">
+                        {count} · {share}%
+                      </span>
+                    </div>
+                    <div className="h-2.5 w-full rounded-full bg-gray-200/70">
+                      <div
+                        className={`h-full rounded-full ${color} transition-all duration-700`}
+                        style={{ width: `${share}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-sm text-gray-500 italic">
+                No source attribution data yet — click tracking records a source the first time
+                you share a QR code or link.
               </p>
-            </div>
+            )}
           </div>
         </div>
       </Card>
