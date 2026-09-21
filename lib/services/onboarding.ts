@@ -29,6 +29,21 @@ export interface UpdateFlowInput {
   is_active?: boolean;
 }
 
+export interface OnboardingVersion {
+  id: string;
+  flow_id: string;
+  steps: OnboardingStep[];
+  version: number;
+  description: string | null;
+  created_at: string;
+  created_by: string | null;
+  creator: {
+    id: string;
+    full_name: string | null;
+    email: string | null;
+  } | null;
+}
+
 const getAuthHeaders = () => {
   const token = typeof window !== "undefined" ? localStorage.getItem("bgycc-token") : null;
   return {
@@ -52,6 +67,25 @@ export const onboardingService = {
       headers: getAuthHeaders(),
       body: JSON.stringify(input),
     });
+    return readJson<{ success: boolean; data: { message: string; flow: OnboardingFlow } }>(response);
+  },
+
+  getVersions: async () => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/onboarding/versions`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+    return readJson<{ success: boolean; data: { versions: OnboardingVersion[] } }>(response);
+  },
+
+  rollbackVersion: async (versionId: string) => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/onboarding/versions/${versionId}/rollback`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+      }
+    );
     return readJson<{ success: boolean; data: { message: string; flow: OnboardingFlow } }>(response);
   },
 };

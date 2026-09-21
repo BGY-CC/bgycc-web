@@ -1,10 +1,30 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, Check } from "lucide-react";
-import { Button, Textarea, Input, FormField, useToast } from "@/components/ui";
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  Eye,
+  History,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import {
+  Button,
+  ConfirmDialog,
+  Textarea,
+  Input,
+  FormField,
+  useToast,
+} from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
 import { onboardingService, OnboardingFlow, OnboardingStep } from "@/lib/services/onboarding";
+import { OnboardingPreviewModal } from "./onboarding-preview-modal";
+import { OnboardingHistoryDrawer } from "./onboarding-history-drawer";
+import { StepEditorModal } from "./step-editor-modal";
+import { CORE_STEP_IDS, makeStepId } from "./step-config";
 
 type FlowRawData =
   | OnboardingFlow
@@ -21,6 +41,13 @@ export function FlowEditor() {
   const [visionText, setVisionText] = useState("");
   const [steps, setSteps] = useState<OnboardingStep[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [editing, setEditing] = useState<{
+    mode: "add" | "edit";
+    step: OnboardingStep | null;
+  } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<OnboardingStep | null>(null);
 
   const { data: rawData, refetch } = useQuery<FlowRawData>("/onboarding/flow", {
     onSuccess: (raw) => {
@@ -53,11 +80,27 @@ export function FlowEditor() {
     });
   };
 
+  // Fold the dedicated content fields into their matching steps so the
+  // preview and published payload reflect unsaved edits.
+  const withContentOverrides = (list: OnboardingStep[]): OnboardingStep[] =>
+    list.map((s) => {
+      if (s.id === "welcome_video" && welcomeVideoUrl) {
+        return { ...s, video_url: welcomeVideoUrl };
+      }
+      if (s.id === "consent" && consentText) {
+        return { ...s, text: consentText };
+      }
+      if (s.id === "vision" && visionText) {
+        return { ...s, text: visionText };
+      }
+      return s;
+    });
+
   const publish = async () => {
     setIsSaving(true);
     try {
       await onboardingService.updateFlow({
-        steps,
+        steps: withContentOverrides(steps),
         consent_text: consentText,
         vision_text: visionText,
         welcome_video_url: welcomeVideoUrl,
@@ -72,16 +115,88 @@ export function FlowEditor() {
     }
   };
 
+  const handleSaveStep = (next: OnboardingStep) => {
+    if (editing?.mode === "add") {
+      const created: OnboardingStep = {
+        ...next,
+        id: makeStepId(next.title, steps),
+        order: steps.length + 1,
+      };
+      setSteps((prev) => [...prev, created]);
+    } else {
+      setSteps((prev) => prev.map((s) => (s.id === next.id ? next : s)));
+    }
+
+    if (next.id === "welcome_video") setWelcomeVideoUrl(next.video_url ?? "");
+    if (next.id === "consent") setConsentText(next.text ?? "");
+    if (next.id === "vision") setVisionText(next.text ?? "");
+
+    setEditing(null);
+  };
+
+  const requestDelete = (step: OnboardingStep) => {
+    if (CORE_STEP_IDS.includes(step.id)) {
+      toast(
+        `${step.title} is a core onboarding screen and can't be deleted.`,
+        "error"
+      );
+      return;
+    }
+    if (steps.length <= 1) {
+      toast("At least one onboarding step is required.", "error");
+      return;
+    }
+    setDeleteTarget(step);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    setSteps((prev) =>
+      prev
+        .filter((s) => s.id !== deleteTarget.id)
+        .map((s, i) => ({ ...s, order: i + 1 }))
+    );
+    setDeleteTarget(null);
+  };
+
   return (
     <div className="space-y-5">
       <div className="rounded-3xl border border-border bg-white p-5 shadow-sm sm:p-8">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-[17px] font-semibold text-primary tracking-tight">
-            Onboarding Flow Editor
-          </h2>
-          <p className="text-sm font-normal text-muted">
-            Edit the consent/vision copy and welcome video shown during member onboarding, then publish a new version.
-          </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-[17px] font-semibold text-primary tracking-tight">
+              Onboarding Flow Editor
+            </h2>
+            <p className="text-sm font-normal text-muted">
+              Edit the consent/vision copy and welcome video shown during member onboarding, then publish a new version.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              leftIcon={<Eye className="h-4 w-4" />}
+              onClick={() => setPreviewOpen(true)}
+            >
+              Preview
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              leftIcon={<History className="h-4 w-4" />}
+              onClick={() => setHistoryOpen(true)}
+            >
+              Version history
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              leftIcon={<Plus className="h-4 w-4" />}
+              onClick={() => setEditing({ mode: "add", step: null })}
+            >
+              Add step
+            </Button>
+          </div>
         </div>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
@@ -129,6 +244,24 @@ export function FlowEditor() {
                   <Button
                     variant="ghost"
                     size="icon"
+                    aria-label={`Edit ${step.title}`}
+                    disabled={isSaving}
+                    onClick={() => setEditing({ mode: "edit", step })}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Delete ${step.title}`}
+                    disabled={isSaving}
+                    onClick={() => requestDelete(step)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     aria-label={`Move ${step.title} up`}
                     disabled={index === 0 || isSaving}
                     onClick={() => move(index, -1)}
@@ -160,6 +293,38 @@ export function FlowEditor() {
           </Button>
         </div>
       </div>
+
+      <OnboardingPreviewModal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        steps={withContentOverrides(steps)}
+      />
+
+      <OnboardingHistoryDrawer
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        onRollback={refetch}
+      />
+
+      {editing && (
+        <StepEditorModal
+          mode={editing.mode}
+          step={editing.step}
+          onClose={() => setEditing(null)}
+          onSave={handleSaveStep}
+        />
+      )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        variant="destructive"
+        title="Delete step?"
+        description={`Remove "${deleteTarget?.title ?? ""}" from the onboarding flow?`}
+        confirmLabel="Delete step"
+        icon={<Trash2 className="h-6 w-6 text-red-500" />}
+      />
     </div>
   );
 }

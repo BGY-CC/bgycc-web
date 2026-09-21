@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { onboardingService, type OnboardingFlow } from "@/lib/services/onboarding";
+import {
+  onboardingService,
+  type OnboardingFlow,
+  type OnboardingVersion,
+} from "@/lib/services/onboarding";
 
 const BASE_URL = "https://uzdrrelxsjtvjvqbxcfy.supabase.co/functions/v1/admin";
 
@@ -92,6 +96,48 @@ describe("onboardingService.updateFlow", () => {
     vi.stubGlobal("fetch", mockFetch(body));
 
     const result = await onboardingService.updateFlow({ steps: sampleFlow.steps });
+    expect(result).toEqual(body);
+  });
+});
+
+const sampleVersion: OnboardingVersion = {
+  id: "22222222-2222-2222-2222-222222222222",
+  flow_id: "11111111-1111-1111-1111-111111111111",
+  steps: sampleFlow.steps,
+  version: 2,
+  description: "Updated onboarding flow",
+  created_at: "2026-09-02T00:00:00.000Z",
+  created_by: "33333333-3333-3333-3333-333333333333",
+  creator: { id: "33333333-3333-3333-3333-333333333333", full_name: "Ada Admin", email: "ada@bgycc.org" },
+};
+
+describe("onboardingService.getVersions", () => {
+  it("calls GET /onboarding/versions and returns the version list", async () => {
+    const fetchMock = mockFetch({ success: true, data: { versions: [sampleVersion] } });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await onboardingService.getVersions();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/onboarding/versions`,
+      expect.objectContaining({ method: "GET" })
+    );
+    expect(result.data.versions).toEqual([sampleVersion]);
+  });
+});
+
+describe("onboardingService.rollbackVersion", () => {
+  it("calls POST /onboarding/versions/{id}/rollback and returns the new flow", async () => {
+    const body = { success: true, data: { message: "ok", flow: sampleFlow } };
+    const fetchMock = mockFetch(body);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await onboardingService.rollbackVersion(sampleVersion.id);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/onboarding/versions/${sampleVersion.id}/rollback`,
+      expect.objectContaining({ method: "POST" })
+    );
     expect(result).toEqual(body);
   });
 });
