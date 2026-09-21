@@ -59,6 +59,33 @@ export const moderationService = {
     return result.success;
   },
 
+  approveReport: async (reportId: string) => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/moderation/reports/${reportId}/approve`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+      }
+    );
+    const result = await readJson<{ success: boolean }>(response);
+    if (!result.success) throw new Error("Failed to approve report");
+    return result.success;
+  },
+
+  rejectReport: async (reportId: string, reason: string) => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/moderation/reports/${reportId}/reject`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ reason }),
+      }
+    );
+    const result = await readJson<{ success: boolean }>(response);
+    if (!result.success) throw new Error("Failed to reject report");
+    return result.success;
+  },
+
   muteUser: async (userId: string, isMuted = true, reason?: string) => {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/moderation/users/${userId}/mute`,

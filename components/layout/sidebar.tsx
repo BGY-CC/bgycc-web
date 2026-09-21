@@ -101,6 +101,9 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 if (label === "Announcement") return user.permissions?.includes("notifications.view");
                 return false;
               }
+              if (label === "Moderation") {
+                return user?.role === "admin" || user?.role === "super_admin";
+              }
               if (label === "Access Management") return user?.role === "super_admin";
               return true;
             })

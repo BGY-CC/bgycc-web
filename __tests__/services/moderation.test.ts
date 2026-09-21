@@ -115,4 +115,39 @@ describe("moderationService", () => {
       "Failed to mute user"
     );
   });
+
+  it("approves a report through the approve endpoint", async () => {
+    const fetchMock = mockFetch({ success: true, data: { message: "ok" } });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await moderationService.approveReport("report_123");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_CONFIG.BASE_URL}/moderation/reports/report_123/approve`,
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          Authorization: `Bearer ${TOKEN}`,
+        }),
+      })
+    );
+  });
+
+  it("rejects a report with the required reason body", async () => {
+    const fetchMock = mockFetch({ success: true, data: { message: "ok" } });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await moderationService.rejectReport("report_123", "Not a violation");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_CONFIG.BASE_URL}/moderation/reports/report_123/reject`,
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          Authorization: `Bearer ${TOKEN}`,
+        }),
+        body: JSON.stringify({ reason: "Not a violation" }),
+      })
+    );
+  });
 });
