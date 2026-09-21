@@ -16,6 +16,7 @@ import {
   Phone,
   UserPlus,
   Link2,
+  Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -384,6 +385,22 @@ export function MemberDetailModal({
                     >
                       Reassign Parent
                     </Button>
+                    {(profile.role === "parent" || profile.role === "super_admin") && (
+                      <Link
+                        href={`/families/${profile.id}`}
+                        onClick={onClose}
+                        className="block"
+                      >
+                        <Button
+                          variant="secondary"
+                          className="h-11 w-full justify-start text-xs font-bold"
+                          size="sm"
+                          leftIcon={<Users className="h-4 w-4" />}
+                        >
+                          Family Ops
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

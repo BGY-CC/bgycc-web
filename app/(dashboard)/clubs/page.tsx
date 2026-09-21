@@ -3,6 +3,7 @@
 import { Users, Activity, TrendingUp } from "lucide-react";
 import { PageHeader, StatCard, StatCardSkeleton } from "@/components/shared";
 import { ClubsListClient } from "./_components/clubs-list-client";
+import { ReassignApprovals } from "./_components/reassign-approvals";
 import { useQuery } from "@/hooks/use-query";
 import { ClubStats } from "@/lib/services/clubs";
 
@@ -51,6 +52,9 @@ export default function ClubsPage() {
 
         {/* Interactive list */}
         <ClubsListClient />
+
+        {/* Leader reassign requests awaiting admin review */}
+        <ReassignApprovals />
       </div>
     </div>
   );
