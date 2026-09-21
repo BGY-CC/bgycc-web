@@ -22,6 +22,21 @@ const PENDING = [
   },
 ];
 
+const RESOLVED = [
+  {
+    id: "report-9",
+    reporter_id: "user_1",
+    reported_user_id: "user_2",
+    content_type: "comment",
+    content_id: null,
+    reason: "Already handled",
+    status: "resolved",
+    action_taken: "muted",
+    resolved_at: "2026-09-18T10:00:00.000Z",
+    created_at: "2026-09-18T09:00:00.000Z",
+  },
+];
+
 vi.mock("@/lib/services/moderation", () => ({
   moderationService: {
     getReports: vi.fn(),
@@ -149,6 +164,27 @@ describe("ModerationClient approve/reject", () => {
     expect(mockedUseQuery).toHaveBeenCalledWith(
       "/moderation/reports",
       expect.objectContaining({ enabled: false })
+    );
+  });
+
+  it("disables approve/reject buttons on non-pending rows", async () => {
+    mockedUseQuery.mockReturnValue({
+      data: { reports: RESOLVED },
+      isLoading: false,
+      error: null,
+      refetch: refetchMock,
+    } as never);
+
+    renderClient();
+
+    expect(await screen.findByText("Already handled")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /approve/i })).toHaveProperty(
+      "disabled",
+      true
+    );
+    expect(screen.getByRole("button", { name: /reject/i })).toHaveProperty(
+      "disabled",
+      true
     );
   });
 });

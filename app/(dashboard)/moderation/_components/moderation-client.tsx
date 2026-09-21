@@ -177,7 +177,7 @@ export function ModerationClient() {
                       size="sm"
                       variant="outline"
                       onClick={() => runAction(report, "approve")}
-                      disabled={action !== null}
+                      disabled={action !== null || report.status !== "pending"}
                     >
                       <ShieldCheck className="h-4 w-4" />
                       Approve
@@ -189,7 +189,7 @@ export function ModerationClient() {
                         setRejectReason("");
                         setRejecting(report);
                       }}
-                      disabled={action !== null}
+                      disabled={action !== null || report.status !== "pending"}
                     >
                       <XCircle className="h-4 w-4" />
                       Reject
