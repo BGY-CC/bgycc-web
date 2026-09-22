@@ -80,6 +80,40 @@ describe("authService.verifyOtp", () => {
   });
 });
 
+describe("authService.requestOtp", () => {
+  it("calls request-otp with the email", async () => {
+    const fetchMock = mockFetch({ success: true });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await authService.requestOtp("user@test.com");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/auth/request-otp`,
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ email: "user@test.com" }),
+      })
+    );
+  });
+});
+
+describe("authService.verifyLoginOtp", () => {
+  it("calls verify-otp with email, token, and type login", async () => {
+    const fetchMock = mockFetch({ success: true });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await authService.verifyLoginOtp("user@test.com", "123456");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/auth/verify-otp`,
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ email: "user@test.com", token: "123456", type: "login" }),
+      })
+    );
+  });
+});
+
 describe("authService.resetPassword", () => {
   it("calls reset-password with bearer token", async () => {
     const fetchMock = mockFetch({ success: true });

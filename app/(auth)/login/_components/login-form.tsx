@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -8,10 +8,35 @@ import { useAuth } from "@/hooks/use-auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
-import { Button, Input, FormField, Checkbox, Alert } from "@/components/ui";
+import { Button, Input, FormField, Checkbox, Alert, Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui";
 import { ROUTES } from "@/lib/constants";
 
 export function LoginForm() {
+  const [tab, setTab] = useState<"password" | "otp">("password");
+
+  return (
+    <div className="space-y-4">
+      <Tabs value={tab} onValueChange={(value) => setTab(value as "password" | "otp")}>
+        <TabsList className="w-full">
+          <TabsTrigger value="password" className="flex-1">
+            Password
+          </TabsTrigger>
+          <TabsTrigger value="otp" className="flex-1">
+            One-time code
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="password" className="mt-4">
+          <PasswordLoginForm />
+        </TabsContent>
+        <TabsContent value="otp" className="mt-4">
+          <OtpLoginForm />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+function PasswordLoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const { login } = useAuth();
@@ -101,6 +126,121 @@ export function LoginForm() {
       <Button type="submit" className="w-full" isLoading={isSubmitting}>
         Sign in
       </Button>
+    </form>
+  );
+}
+
+function OtpLoginForm() {
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [step, setStep] = useState<"request" | "verify">("request");
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  const { requestOtp, loginWithOtp } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown((seconds) => seconds - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
+
+  const sendCode = async () => {
+    setServerError(null);
+    if (!email.trim()) {
+      setServerError("Please enter your email first.");
+      return;
+    }
+    setIsSending(true);
+    const result = await requestOtp(email.trim());
+    setIsSending(false);
+    if (result.success) {
+      setStep("verify");
+      setResendCooldown(30);
+    } else {
+      setServerError(result.error || "Unable to send a sign-in code. Please try again.");
+    }
+  };
+
+  const onSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setServerError(null);
+    if (!code.trim()) {
+      setServerError("Please enter the 6-digit code.");
+      return;
+    }
+    setIsVerifying(true);
+    const result = await loginWithOtp(email.trim(), code.trim());
+    setIsVerifying(false);
+    if (result.success) {
+      router.push("/dashboard");
+    } else {
+      setServerError(result.error || "Invalid or expired code. Please try again.");
+    }
+  };
+
+  return (
+    <form onSubmit={onSubmit} noValidate className="space-y-4">
+      {serverError && (
+        <Alert variant="error">{serverError}</Alert>
+      )}
+
+      {/* Email */}
+      <FormField label="Email" required>
+        <Input
+          type="email"
+          aria-label="Email"
+          placeholder="antonyviolin@gmail.com"
+          autoComplete="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+        />
+      </FormField>
+
+      {step === "verify" && (
+        <FormField label="6-digit code" required>
+          <Input
+            type="text"
+            aria-label="6-digit code"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={6}
+            placeholder="••••••"
+            value={code}
+            onChange={(event) => setCode(event.target.value)}
+          />
+        </FormField>
+      )}
+
+      {step === "request" ? (
+        <Button
+          type="button"
+          className="w-full"
+          onClick={sendCode}
+          isLoading={isSending}
+        >
+          Send code
+        </Button>
+      ) : (
+        <>
+          <Button type="submit" className="w-full" isLoading={isVerifying}>
+            Sign in
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full"
+            onClick={sendCode}
+            disabled={resendCooldown > 0}
+            isLoading={isSending}
+          >
+            {resendCooldown > 0 ? `Resend code (${resendCooldown}s)` : "Resend code"}
+          </Button>
+        </>
+      )}
     </form>
   );
 }

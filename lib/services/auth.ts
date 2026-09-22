@@ -41,5 +41,23 @@ export const authService = {
       body: JSON.stringify({ email, password }),
     });
     return readJson(response);
-  }
+  },
+
+  requestOtp: async (email: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/auth/request-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    return readJson(response);
+  },
+
+  verifyLoginOtp: async (email: string, token: string) => {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/auth/verify-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, token, type: "login" }),
+    });
+    return readJson(response);
+  },
 };

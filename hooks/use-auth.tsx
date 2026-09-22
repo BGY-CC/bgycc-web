@@ -25,6 +25,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: AuthUser | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  loginWithOtp: (email: string, token: string) => Promise<{ success: boolean; error?: string }>;
+  requestOtp: (email: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateUser: (updates: Partial<AuthUser>) => void;
   isLoading: boolean;
@@ -141,8 +143,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const requestOtp = async (email: string) => {
+    try {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/auth/request-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const result = await readJson<ServiceResult>(response);
+
+      if (response.ok && result.success) {
+        return { success: true };
+      }
+      return {
+        success: false,
+        error: result.error || result.message || "Unable to send a sign-in code. Please try again."
+      };
+    } catch (error: unknown) {
+      console.error("Request OTP failed:", error);
+      return {
+        success: false,
+        error: "Something went wrong. Please check your connection and try again."
+      };
+    }
+  };
+
+  const loginWithOtp = async (email: string, token: string) => {
+    try {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/auth/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, token, type: "login" }),
+      });
+
+      const result = await readJson<ServiceResult<LoginData>>(response);
+
+      if (response.ok && result.success && result.data) {
+        setIsAuthenticated(true);
+        setUser(result.data.user);
+        localStorage.setItem("bgycc-auth", "true");
+        localStorage.setItem("bgycc-token", result.data.token);
+        localStorage.setItem("bgycc-refresh-token", result.data.refresh_token);
+        localStorage.setItem("bgycc-user", JSON.stringify(result.data.user));
+        return { success: true };
+      }
+      return {
+        success: false,
+        error: result.error || result.message || "Invalid or expired code. Please try again."
+      };
+    } catch (error: unknown) {
+      console.error("OTP login failed:", error);
+      return {
+        success: false,
+        error: "Something went wrong. Please check your connection and try again."
+      };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, updateUser, isLoading }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, loginWithOtp, requestOtp, logout, updateUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
