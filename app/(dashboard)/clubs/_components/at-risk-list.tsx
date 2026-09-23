@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send } from "lucide-react";
+import { CalendarCheck, Heart, Send } from "lucide-react";
 import { Badge, Button, ConfirmDialog, useToast } from "@/components/ui";
 import { clubsService, type AtRiskMember } from "@/lib/services/clubs";
 
@@ -68,6 +68,16 @@ export function AtRiskMemberList({
                 <p className="text-xs text-gray-400 font-medium">
                   {m.current_streak === 0 ? "Broken streak" : "Low activity"}
                 </p>
+                {m.suggestion && (
+                  <p className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-gray-600">
+                    {m.severity === "red" ? (
+                      <CalendarCheck className="h-3.5 w-3.5 text-red-500" />
+                    ) : (
+                      <Heart className="h-3.5 w-3.5 text-amber-500" />
+                    )}
+                    {m.suggestion}
+                  </p>
+                )}
               </div>
             </button>
             <div className="flex shrink-0 items-center gap-2">

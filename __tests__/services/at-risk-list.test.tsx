@@ -25,6 +25,7 @@ const RED = {
   longest_streak: 9,
   last_activity_date: null,
   severity: "red" as const,
+  suggestion: "Schedule check-in",
 };
 
 const YELLOW = {
@@ -35,6 +36,7 @@ const YELLOW = {
   longest_streak: 3,
   last_activity_date: null,
   severity: "yellow" as const,
+  suggestion: "Send encouragement",
 };
 
 const NONE = {
@@ -80,6 +82,15 @@ describe("AtRiskMemberList severity + broadcast", () => {
     expect(screen.getAllByRole("button", { name: /broadcast/i })).toHaveLength(1);
   });
 
+  it("renders the server-authored intervention suggestion on red and yellow rows", async () => {
+    renderList();
+
+    await screen.findByText("Red Member");
+
+    expect(screen.getByText("Schedule check-in")).toBeTruthy();
+    expect(screen.getByText("Send encouragement")).toBeTruthy();
+  });
+
   it("renders no badge and no Broadcast button for members without a severity", async () => {
     render(
       <ToastProvider>
@@ -91,6 +102,8 @@ describe("AtRiskMemberList severity + broadcast", () => {
 
     expect(screen.queryByText("Red")).toBeNull();
     expect(screen.queryByText("Yellow")).toBeNull();
+    expect(screen.queryByText("Schedule check-in")).toBeNull();
+    expect(screen.queryByText("Send encouragement")).toBeNull();
     expect(screen.queryAllByRole("button", { name: /broadcast/i })).toHaveLength(0);
   });
 

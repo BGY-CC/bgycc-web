@@ -35,6 +35,7 @@ export interface AtRiskMember {
   last_activity_date: string | null;
   joined_at: string;
   severity?: "red" | "yellow" | null;
+  suggestion?: string | null;
 }
 
 export interface ClubMemberHealth {
