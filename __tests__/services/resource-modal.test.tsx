@@ -137,4 +137,51 @@ describe("ResourceModal", () => {
       });
     });
   });
+
+  it("submits access override and minimum rank tier with save", async () => {
+    const onSuccess = vi.fn();
+    render(
+      <ResourceModal
+        open
+        onClose={vi.fn()}
+        onSuccess={onSuccess}
+        mode="edit"
+        defaultValues={{
+          title: "Audit Guide",
+          description: "desc",
+          link: "https://drive.google.com/audit",
+          tags: ["leadership"],
+          version: 2,
+        }}
+      />
+    );
+
+    await userEvent.click(screen.getByRole("radio", { name: "Access override: closed" }));
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Minimum rank tier" }), "3");
+
+    await userEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalled();
+      const [data] = onSuccess.mock.calls[0];
+      expect(data).toMatchObject({
+        access_override: "closed",
+        min_rank_tier: "3",
+      });
+    });
+  });
+
+  it("defaults access override control to none", async () => {
+    render(
+      <ResourceModal
+        open
+        onClose={vi.fn()}
+        onSuccess={vi.fn()}
+        mode="add"
+      />
+    );
+
+    expect(screen.getByRole("radio", { name: "Access override: none" }).getAttribute("aria-checked")).toBe("true");
+    expect(screen.getByRole("combobox", { name: "Minimum rank tier" })).toBeTruthy();
+  });
 });

@@ -33,9 +33,11 @@ const schema = z.object({
   access_level: z.string().optional(),
   is_active: z.boolean(),
   min_rank_required: z.string().optional(),
+  min_rank_tier: z.string().optional(),
   min_streak_required: z.string().optional(),
   pathway: z.enum(["leadership", "public_speaking", ""]).optional(),
   category: z.string().optional(),
+  access_override: z.enum(["none", "open", "closed"]).optional(),
 });
 
 export type ResourceFormData = z.infer<typeof schema>;
@@ -50,6 +52,14 @@ interface ResourceModalProps {
 }
 
 const PATHWAY_OPTIONS = ["leadership", "public_speaking"] as const;
+const ACCESS_OVERRIDE_OPTIONS = ["none", "open", "closed"] as const;
+const RANK_TIER_OPTIONS = [
+  { value: "1", label: "1 — Rising Star" },
+  { value: "2", label: "2 — Trainer" },
+  { value: "3", label: "3 — Executive Trainer" },
+  { value: "4", label: "4 — Master Trainer" },
+  { value: "5", label: "5 — Global Trainer" },
+] as const;
 
 export function ResourceModal({
   open,
@@ -83,9 +93,11 @@ export function ResourceModal({
       access_level: defaultValues?.access_level ?? "",
       is_active: defaultValues?.is_active ?? true,
       min_rank_required: defaultValues?.min_rank_required ?? "",
+      min_rank_tier: defaultValues?.min_rank_tier ?? "",
       min_streak_required: defaultValues?.min_streak_required ?? "",
       pathway: defaultValues?.pathway ?? "",
       category: defaultValues?.category ?? "",
+      access_override: defaultValues?.access_override ?? "none",
     },
   });
 
@@ -93,6 +105,7 @@ export function ResourceModal({
   const tags = watch("tags") ?? [];
   const version = watch("version") ?? 1;
   const imageUrl = watch("image_url") ?? "";
+  const accessOverride = watch("access_override") ?? "none";
 
   useEffect(() => {
     if (open) {
@@ -106,9 +119,11 @@ export function ResourceModal({
         access_level: defaultValues?.access_level ?? "",
         is_active: defaultValues?.is_active ?? true,
         min_rank_required: defaultValues?.min_rank_required ?? "",
+        min_rank_tier: defaultValues?.min_rank_tier ?? "",
         min_streak_required: defaultValues?.min_streak_required ?? "",
         pathway: defaultValues?.pathway ?? "",
         category: defaultValues?.category ?? "",
+        access_override: defaultValues?.access_override ?? "none",
       });
     } else {
       reset();
@@ -302,6 +317,17 @@ export function ResourceModal({
               <Input placeholder="e.g. gold" {...register("min_rank_required")} />
             </FormField>
 
+            <FormField label="Minimum Rank Tier">
+              <Select aria-label="Minimum rank tier" {...register("min_rank_tier")}>
+                <option value="">No tier requirement</option>
+                {RANK_TIER_OPTIONS.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+
             <FormField label="Access Level">
               <Input placeholder="e.g. member" {...register("access_level")} />
             </FormField>
@@ -313,6 +339,35 @@ export function ResourceModal({
                 placeholder="0"
                 {...register("min_streak_required")}
               />
+            </FormField>
+
+            <FormField label="Access Override">
+              <div
+                role="radiogroup"
+                aria-label="Access override"
+                className="grid grid-cols-3 overflow-hidden rounded-lg border border-slate-200"
+              >
+                {ACCESS_OVERRIDE_OPTIONS.map((value) => {
+                  const active = accessOverride === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      aria-label={`Access override: ${value}`}
+                      onClick={() => setValue("access_override", value)}
+                      className={`h-10 text-xs font-medium capitalize transition-colors ${
+                        active
+                          ? "bg-primary text-white"
+                          : "bg-white text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {value}
+                    </button>
+                  );
+                })}
+              </div>
             </FormField>
 
             <FormField label="Pathway">

@@ -25,12 +25,14 @@ const RESOURCE = {
   xp_reward: 10,
   is_active: true,
   min_rank_required: null,
+  min_rank_tier: null,
   min_streak_required: 0,
   pathway: null,
   category: "toolkit",
   tags: ["leadership"],
   version: 1,
   access_level: null,
+  access_override: "none",
   created_at: "2026-09-01T00:00:00.000Z",
   updated_at: "2026-09-01T00:00:00.000Z",
 };
@@ -128,6 +130,9 @@ describe("ResourcesClient", () => {
     await userEvent.clear(screen.getByPlaceholderText("0"));
     await userEvent.type(screen.getByPlaceholderText("0"), "3");
 
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Minimum rank tier" }), "3");
+    await userEvent.click(screen.getByRole("radio", { name: "Access override: closed" }));
+
     await userEvent.click(screen.getByRole("button", { name: /Bump version/i }));
     await userEvent.click(screen.getByRole("button", { name: "Save Changes" }));
 
@@ -145,7 +150,9 @@ describe("ResourcesClient", () => {
         version: 2,
         category: "toolkit",
         min_rank_required: "gold",
+        min_rank_tier: 3,
         min_streak_required: 3,
+        access_override: "closed",
         pathway: null,
         image_url: null,
         access_level: null,

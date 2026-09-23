@@ -10,10 +10,12 @@ export interface Resource {
   xp_reward: number;
   is_active: boolean;
   min_rank_required: string | null;
+  min_rank_tier?: number | null;
   min_streak_required: number;
   pathway: "leadership" | "public_speaking" | null;
   category: string | null;
   access_level: string | null;
+  access_override?: "none" | "open" | "closed" | null;
   tags: string[];
   version: number;
   created_at: string;

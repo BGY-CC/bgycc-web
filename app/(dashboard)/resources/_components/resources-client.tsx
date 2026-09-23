@@ -131,6 +131,10 @@ export function ResourcesClient() {
         slug: formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         tags: formData.tags,
         version: formData.version,
+        min_rank_tier: formData.min_rank_tier
+          ? parseInt(formData.min_rank_tier, 10)
+          : undefined,
+        access_override: formData.access_override ?? "none",
       });
 
       if (result.success) {
@@ -158,11 +162,15 @@ export function ResourcesClient() {
         tags: formData.tags,
         version: formData.version,
         min_rank_required: formData.min_rank_required,
+        min_rank_tier: formData.min_rank_tier
+          ? parseInt(formData.min_rank_tier, 10)
+          : undefined,
         min_streak_required: formData.min_streak_required
           ? parseInt(formData.min_streak_required, 10)
           : undefined,
         pathway: formData.pathway || null,
         category: formData.category,
+        access_override: formData.access_override ?? "none",
       });
 
       if (result.success) {
@@ -387,11 +395,16 @@ export function ResourcesClient() {
                 tags: editTarget.tags ?? [],
                 version: editTarget.version ?? 1,
                 min_rank_required: editTarget.min_rank_required || "",
+                min_rank_tier: editTarget.min_rank_tier
+                  ? String(editTarget.min_rank_tier)
+                  : "",
                 min_streak_required: editTarget.min_streak_required
                   ? String(editTarget.min_streak_required)
                   : "",
                 pathway: (editTarget.pathway ?? "") as ResourceFormData["pathway"],
                 category: editTarget.category || "",
+                access_override: (editTarget.access_override ??
+                  "none") as ResourceFormData["access_override"],
               }
             : undefined
         }
