@@ -16,6 +16,8 @@ vi.mock("@/lib/services/analytics", () => ({
   analyticsService: {
     getFunnelCsv: vi.fn(),
     exportCsv: vi.fn(),
+    getEscalations: vi.fn(),
+    getPredictiveAtRisk: vi.fn(),
   },
 }));
 
@@ -27,6 +29,8 @@ vi.mock("@/lib/services/clubs", () => ({
 
 const mockedGetFunnelCsv = vi.mocked(analyticsService.getFunnelCsv);
 const mockedClubsList = vi.mocked(clubsService.list);
+const mockedGetEscalations = vi.mocked(analyticsService.getEscalations);
+const mockedGetPredictiveAtRisk = vi.mocked(analyticsService.getPredictiveAtRisk);
 
 const ROWS = [
   { step: "1. Welcome", started: 120, completed: 100, dropRate: 16.7 },
@@ -46,6 +50,30 @@ beforeEach(() => {
       ],
       total: 2,
     },
+  } as never);
+  mockedGetEscalations.mockReset();
+  mockedGetEscalations.mockResolvedValue({
+    summary: { total: 3, by_severity: { yellow: 2, red: 1 },
+      by_rule: [
+        { rule_id: "r1", rule: "24h_no_checklist", severity: "yellow", count: 2 },
+        { rule_id: "r2", rule: "3_streak_miss", severity: "red", count: 1 },
+      ] },
+    trend: [
+      { date: "2026-09-21", total: 1 },
+      { date: "2026-09-22", total: 2 },
+    ],
+    logs: [
+      { id: "l1", user_id: "u1", rule: "24h_no_checklist", severity: "yellow", escalated_on: "2026-09-22", full_name: "Parent One", email: "p1@test.dev" },
+      { id: "l2", user_id: "u1", rule: "3_streak_miss", severity: "red", escalated_on: "2026-09-22", full_name: "Parent One", email: "p1@test.dev" },
+    ],
+  } as never);
+  mockedGetPredictiveAtRisk.mockReset();
+  mockedGetPredictiveAtRisk.mockResolvedValue({
+    horizon: 7,
+    members: [
+      { user_id: "u1", full_name: "Member One", email: "m1@test.dev", missed_days: 2, current_streak: 5, leadership_missed_days: 2, speaking_missed_days: 0, projected_red_in_days: 1 },
+      { user_id: "u2", full_name: "Member Two", email: "m2@test.dev", missed_days: 3, current_streak: 0, leadership_missed_days: 3, speaking_missed_days: 0, projected_red_in_days: null },
+    ],
   } as never);
 });
 
@@ -186,5 +214,26 @@ describe("AnalyticsClient filters", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /print/i }));
     expect(printSpy).toHaveBeenCalled();
+  });
+});
+
+describe("AnalyticsClient escalation + predictive-at-risk cards", () => {
+  it("renders the escalation summary (total + red), trend bars, and calls getEscalations()", async () => {
+    renderClient();
+
+    expect(await screen.findByText("Escalations (30d)")).toBeTruthy();
+    expect(screen.getByText("3", { selector: "span" })).toBeTruthy();
+    // red severity count + label present
+    expect(await screen.findByText("Red")).toBeTruthy();
+    expect(mockedGetEscalations).toHaveBeenCalledWith(30);
+  });
+
+  it("renders the predictive at-risk members with projected days to red and calls getPredictiveAtRisk()", async () => {
+    renderClient();
+
+    expect(await screen.findByText("Predictive At-Risk")).toBeTruthy();
+    expect(screen.getByText("Member One")).toBeTruthy();
+    expect(screen.getByText("Member Two")).toBeTruthy();
+    expect(mockedGetPredictiveAtRisk).toHaveBeenCalledWith(7);
   });
 });

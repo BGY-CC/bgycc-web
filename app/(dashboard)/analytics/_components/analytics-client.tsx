@@ -1,13 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Download, Printer, UserPlus, CheckCircle2 } from "lucide-react";
+import {
+  Download,
+  Printer,
+  UserPlus,
+  CheckCircle2,
+  Siren,
+  TrendingUp,
+} from "lucide-react";
 import { Button, Select, useToast } from "@/components/ui";
 import { StatCard, StatCardSkeleton } from "@/components/shared";
 import {
   analyticsService,
   FunnelRow,
   FunnelQueryParams,
+  EscalationData,
+  PredictiveAtRiskData,
 } from "@/lib/services/analytics";
 import { clubsService } from "@/lib/services/clubs";
 // @ts-expect-error – no types bundled
@@ -41,6 +50,9 @@ export function AnalyticsClient() {
   const [filters, setFilters] = useState<FunnelFilters>(EMPTY_FILTERS);
   const [clubs, setClubs] = useState<Array<{ id: string; name: string }>>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [escalations, setEscalations] = useState<EscalationData | null>(null);
+  const [predictive, setPredictive] = useState<PredictiveAtRiskData | null>(null);
+  const [auxError, setAuxError] = useState<string | null>(null);
 
   const activeParams = useMemo(() => {
     const params: FunnelQueryParams = {};
@@ -86,6 +98,33 @@ export function AnalyticsClient() {
         setClubs(data?.clubs ?? []);
       })
       .catch(() => setClubs([]));
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAuxError(null);
+    analyticsService
+      .getEscalations(30)
+      .then((data) => {
+        if (!cancelled) setEscalations(data as EscalationData);
+      })
+      .catch((e: unknown) => {
+        if (!cancelled)
+          setAuxError(e instanceof Error ? e.message : "Failed to load escalations");
+      });
+    analyticsService
+      .getPredictiveAtRisk(7)
+      .then((data) => {
+        if (!cancelled) setPredictive(data as PredictiveAtRiskData);
+      })
+      .catch((e: unknown) => {
+        if (!cancelled)
+          setAuxError(e instanceof Error ? e.message : "Failed to load predictive at-risk");
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const updateFilter = (key: keyof FunnelFilters, value: string) => {
@@ -310,6 +349,17 @@ export function AnalyticsClient() {
         </div>
       )}
 
+      {auxError && (
+        <div className="rounded-2xl border border-amber-100 bg-amber-50 px-5 py-3 text-sm text-amber-700">
+          {auxError}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <EscalationsCard escalations={escalations} />
+        <PredictiveAtRiskCard predictive={predictive} />
+      </div>
+
       <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
         <div className="hidden px-5 pt-5 print:block">
           <h2 className="text-sm font-semibold text-gray-900">
@@ -352,5 +402,139 @@ export function AnalyticsClient() {
         </table>
       </div>
     </div>
+  );
+}
+
+function EscalationsCard({ escalations }: { escalations: EscalationData | null }) {
+  const summary = escalations?.summary;
+  const maxTrend = Math.max(...(escalations?.trend ?? []).map((t) => t.total), 1);
+  const byRule = summary?.by_rule ?? [];
+
+  return (
+    <section
+      aria-label="Escalations (30d)"
+      className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+    >
+      <div className="mb-4 flex items-center gap-2">
+        <Siren className="h-4 w-4 text-amber-600" />
+        <h3 className="text-sm font-semibold text-gray-900">
+          Escalations (30d)
+        </h3>
+      </div>
+      {!summary ? (
+        <p className="text-sm text-gray-400">Loading escalation summary…</p>
+      ) : (
+        <>
+          <div className="mb-4 grid grid-cols-3 gap-3">
+            <div className="rounded-xl bg-gray-50 p-3 text-center">
+              <p className="text-2xl font-bold text-gray-900">
+                <span className="tabular-nums">{summary.total}</span>
+              </p>
+              <p className="text-xs text-gray-500">Total</p>
+            </div>
+            <div className="rounded-xl bg-amber-50 p-3 text-center">
+              <p className="text-2xl font-bold text-amber-700 tabular-nums">
+                {summary.by_severity.yellow}
+              </p>
+              <p className="text-xs text-amber-600">Yellow</p>
+            </div>
+            <div className="rounded-xl bg-red-50 p-3 text-center">
+              <p className="text-2xl font-bold text-red-600 tabular-nums">
+                {summary.by_severity.red}
+              </p>
+              <p className="text-xs text-red-500">Red</p>
+            </div>
+          </div>
+
+          <div className="mb-4 flex items-end gap-1">
+            {(escalations?.trend ?? []).map((entry) => (
+              <div
+                key={entry.date}
+                title={`${entry.date}: ${entry.total}`}
+                className="w-full rounded-t bg-amber-200/70"
+                style={{
+                  height: `${Math.max(4, Math.round((entry.total / maxTrend) * 48))}px`,
+                }}
+              />
+            ))}
+          </div>
+
+          {byRule.length > 0 && (
+            <ul className="space-y-1 text-sm">
+              {byRule.map((rule) => (
+                <li
+                  key={rule.rule_id}
+                  className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
+                >
+                  <span className="text-gray-700">{rule.rule}</span>
+                  <span className="font-medium text-gray-900 tabular-nums">
+                    {rule.count}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+function PredictiveAtRiskCard({ predictive }: { predictive: PredictiveAtRiskData | null }) {
+  const members = predictive?.members ?? [];
+
+  return (
+    <section
+      aria-label="Predictive At-Risk"
+      className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+    >
+      <div className="mb-4 flex items-center gap-2">
+        <TrendingUp className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold text-gray-900">
+          Predictive At-Risk
+        </h3>
+        <span className="ml-auto text-xs text-gray-400">
+          Projected days to 3-miss red threshold
+        </span>
+      </div>
+      {!predictive ? (
+        <p className="text-sm text-gray-400">Loading at-risk projection…</p>
+      ) : members.length === 0 ? (
+        <p className="text-sm text-gray-500">No at-risk members projected.</p>
+      ) : (
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-gray-100 text-xs text-gray-500">
+            <tr>
+              <th className="py-2 pr-3 font-medium">Member</th>
+              <th className="py-2 pr-3 font-medium">Missed</th>
+              <th className="py-2 pr-3 font-medium">Days to Red</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {members.map((member) => (
+              <tr key={member.user_id}>
+                <td className="py-2 pr-3 text-gray-900">
+                  {member.full_name ?? member.email ?? member.user_id}
+                </td>
+                <td className="py-2 pr-3 tabular-nums text-gray-600">
+                  {member.missed_days}
+                </td>
+                <td className="py-2 pr-3 tabular-nums">
+                  {member.projected_red_in_days === null ? (
+                    <span className="text-gray-400">
+                      {member.missed_days >= 3 ? "Already red" : "—"}
+                    </span>
+                  ) : (
+                    <span className="font-medium text-amber-700">
+                      {member.projected_red_in_days}
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
   );
 }

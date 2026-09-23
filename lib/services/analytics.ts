@@ -18,6 +18,54 @@ export interface FunnelQueryParams {
   role?: string;
 }
 
+export interface EscalationRuleSummary {
+  rule_id: string;
+  rule: string;
+  severity: string;
+  count: number;
+}
+
+export interface EscalationTrendEntry {
+  date: string;
+  total: number;
+}
+
+export interface EscalationLogEntry {
+  id: string;
+  user_id: string;
+  rule: string;
+  severity: string;
+  escalated_on: string;
+  full_name: string | null;
+  email: string | null;
+}
+
+export interface EscalationData {
+  summary: {
+    total: number;
+    by_severity: { yellow: number; red: number };
+    by_rule: EscalationRuleSummary[];
+  };
+  trend: EscalationTrendEntry[];
+  logs: EscalationLogEntry[];
+}
+
+export interface PredictiveAtRiskMember {
+  user_id: string;
+  full_name: string | null;
+  email: string | null;
+  missed_days: number;
+  current_streak: number | null;
+  leadership_missed_days: number;
+  speaking_missed_days: number;
+  projected_red_in_days: number | null;
+}
+
+export interface PredictiveAtRiskData {
+  horizon: number;
+  members: PredictiveAtRiskMember[];
+}
+
 const getAuthHeaders = () => {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("bgycc-token") : null;
@@ -109,5 +157,29 @@ export const analyticsService = {
     }
     const csv = await response.text();
     return { csv, rows: parseFunnelCsv(csv) };
+  },
+
+  getEscalations: async (days: number = 30) => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/analytics/escalations?days=${days}`,
+      { method: "GET", headers: getAuthHeaders() }
+    );
+    if (!response.ok) {
+      throw new Error(`Escalations fetch failed (${response.status})`);
+    }
+    const body = await response.json();
+    return body?.data ?? body;
+  },
+
+  getPredictiveAtRisk: async (horizon: number = 7) => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/analytics/predictive-at-risk?horizon=${horizon}`,
+      { method: "GET", headers: getAuthHeaders() }
+    );
+    if (!response.ok) {
+      throw new Error(`Predictive at-risk fetch failed (${response.status})`);
+    }
+    const body = await response.json();
+    return body?.data ?? body;
   },
 };
