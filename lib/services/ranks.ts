@@ -46,6 +46,49 @@ const getAuthHeaders = () => {
   return { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
 };
 
+export interface PromotionLogEntry {
+  id: string;
+  memberId: string;
+  fromRankKey: string | null;
+  toRankKey: string;
+  status: string;
+  actor: string | null;
+  actorRole: string | null;
+  verifiedAt: string | null;
+  createdAt: string;
+  memberName: string | null;
+  memberAvatar: string | null;
+  fromRankName: string | null;
+  toRankName: string | null;
+}
+
+export interface PromotionsPage {
+  total: number;
+  page: number;
+  limit: number;
+  items: PromotionLogEntry[];
+}
+
+export const getAllPromotions = async (
+  options: { page?: number; limit?: number; status?: string; search?: string } = {}
+): Promise<PromotionsPage> => {
+  const params = new URLSearchParams();
+  if (options.page) params.set("page", String(options.page));
+  if (options.limit) params.set("limit", String(options.limit));
+  if (options.status) params.set("status", options.status);
+  if (options.search) params.set("search", options.search);
+  const qs = params.toString();
+
+  const response = await fetch(`${API_CONFIG.BASE_URL}/admin/promotions${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
+  const result = await readJson<{ success?: boolean; error?: string; message?: string; data?: PromotionsPage }>(response);
+  if (!response.ok) throw new Error(result.error || result.message || "Failed to fetch promotions");
+  if (!result.data) throw new Error("Failed to fetch promotions");
+  return result.data;
+};
+
 export const leaderRanksService = {
   confirm: async (memberId: string, targetRankKey: string) => {
     const response = await fetch(`${API_CONFIG.BASE_URL}/admin/ranks/confirm`, {

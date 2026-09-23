@@ -2,6 +2,7 @@
 
 import { PageHeader } from "@/components/shared";
 import { PendingApprovals } from "./_components/pending-approvals";
+import { PromotionsFeed } from "./_components/promotions-feed";
 import { RankDistribution } from "./_components/rank-distribution";
 import { WeeklyCelebrations } from "./_components/weekly-celebrations";
 
@@ -19,6 +20,7 @@ export default function LeadershipPage() {
           <div className="min-w-0 space-y-6 xl:col-span-2">
             <PendingApprovals />
             <RankDistribution />
+            <PromotionsFeed />
           </div>
 
           {/* Weekly celebrations feed */}
