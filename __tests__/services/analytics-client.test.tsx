@@ -18,6 +18,8 @@ vi.mock("@/lib/services/analytics", () => ({
     exportCsv: vi.fn(),
     getEscalations: vi.fn(),
     getPredictiveAtRisk: vi.fn(),
+    getFaithfulParents: vi.fn(),
+    awardFaithfulParent: vi.fn(),
   },
 }));
 
@@ -30,7 +32,13 @@ vi.mock("@/lib/services/clubs", () => ({
 const mockedGetFunnelCsv = vi.mocked(analyticsService.getFunnelCsv);
 const mockedClubsList = vi.mocked(clubsService.list);
 const mockedGetEscalations = vi.mocked(analyticsService.getEscalations);
-const mockedGetPredictiveAtRisk = vi.mocked(analyticsService.getPredictiveAtRisk);
+const mockedGetPredictiveAtRisk = vi.mocked(
+  analyticsService.getPredictiveAtRisk,
+);
+const mockedGetFaithfulParents = vi.mocked(analyticsService.getFaithfulParents);
+const mockedAwardFaithfulParent = vi.mocked(
+  analyticsService.awardFaithfulParent,
+);
 
 const ROWS = [
   { step: "1. Welcome", started: 120, completed: 100, dropRate: 16.7 },
@@ -53,27 +61,98 @@ beforeEach(() => {
   } as never);
   mockedGetEscalations.mockReset();
   mockedGetEscalations.mockResolvedValue({
-    summary: { total: 3, by_severity: { yellow: 2, red: 1 },
+    summary: {
+      total: 3,
+      by_severity: { yellow: 2, red: 1 },
       by_rule: [
-        { rule_id: "r1", rule: "24h_no_checklist", severity: "yellow", count: 2 },
+        {
+          rule_id: "r1",
+          rule: "24h_no_checklist",
+          severity: "yellow",
+          count: 2,
+        },
         { rule_id: "r2", rule: "3_streak_miss", severity: "red", count: 1 },
-      ] },
+      ],
+    },
     trend: [
       { date: "2026-09-21", total: 1 },
       { date: "2026-09-22", total: 2 },
     ],
     logs: [
-      { id: "l1", user_id: "u1", rule: "24h_no_checklist", severity: "yellow", escalated_on: "2026-09-22", full_name: "Parent One", email: "p1@test.dev" },
-      { id: "l2", user_id: "u1", rule: "3_streak_miss", severity: "red", escalated_on: "2026-09-22", full_name: "Parent One", email: "p1@test.dev" },
+      {
+        id: "l1",
+        user_id: "u1",
+        rule: "24h_no_checklist",
+        severity: "yellow",
+        escalated_on: "2026-09-22",
+        full_name: "Parent One",
+        email: "p1@test.dev",
+      },
+      {
+        id: "l2",
+        user_id: "u1",
+        rule: "3_streak_miss",
+        severity: "red",
+        escalated_on: "2026-09-22",
+        full_name: "Parent One",
+        email: "p1@test.dev",
+      },
     ],
   } as never);
   mockedGetPredictiveAtRisk.mockReset();
   mockedGetPredictiveAtRisk.mockResolvedValue({
     horizon: 7,
     members: [
-      { user_id: "u1", full_name: "Member One", email: "m1@test.dev", missed_days: 2, current_streak: 5, leadership_missed_days: 2, speaking_missed_days: 0, projected_red_in_days: 1 },
-      { user_id: "u2", full_name: "Member Two", email: "m2@test.dev", missed_days: 3, current_streak: 0, leadership_missed_days: 3, speaking_missed_days: 0, projected_red_in_days: null },
+      {
+        user_id: "u1",
+        full_name: "Member One",
+        email: "m1@test.dev",
+        missed_days: 2,
+        current_streak: 5,
+        leadership_missed_days: 2,
+        speaking_missed_days: 0,
+        projected_red_in_days: 1,
+      },
+      {
+        user_id: "u2",
+        full_name: "Member Two",
+        email: "m2@test.dev",
+        missed_days: 3,
+        current_streak: 0,
+        leadership_missed_days: 3,
+        speaking_missed_days: 0,
+        projected_red_in_days: null,
+      },
     ],
+  } as never);
+  mockedGetFaithfulParents.mockReset();
+  mockedGetFaithfulParents.mockResolvedValue({
+    parents: [
+      {
+        id: "p1",
+        full_name: "Faithful Mum",
+        username: "fmum",
+        child_count: 3,
+        consistent_child_count: 3,
+        min_child_streak: 9,
+        is_eligible: true,
+      },
+      {
+        id: "p2",
+        full_name: "Almost Dad",
+        username: "adad",
+        child_count: 2,
+        consistent_child_count: 1,
+        min_child_streak: 4,
+        is_eligible: false,
+      },
+    ],
+  } as never);
+  mockedAwardFaithfulParent.mockReset();
+  mockedAwardFaithfulParent.mockResolvedValue({
+    awarded: true,
+    message: "Faithful Parent badge awarded",
+    signal: { child_count: 3, consistent_child_count: 3, min_child_streak: 9 },
   } as never);
 });
 
@@ -81,7 +160,7 @@ const renderClient = () =>
   render(
     <ToastProvider>
       <AnalyticsClient />
-    </ToastProvider>
+    </ToastProvider>,
   );
 
 describe("AnalyticsClient filters", () => {
@@ -102,9 +181,9 @@ describe("AnalyticsClient filters", () => {
     expect(screen.getByRole("option", { name: "admin" })).toBeTruthy();
     expect(screen.getByRole("option", { name: "parent" })).toBeTruthy();
 
-    expect(
-      mockedClubsList
-    ).toHaveBeenCalledWith(expect.objectContaining({ page_size: 1000 }));
+    expect(mockedClubsList).toHaveBeenCalledWith(
+      expect.objectContaining({ page_size: 1000 }),
+    );
   });
 
   it("refetches the funnel with the selected clubId when the club filter changes", async () => {
@@ -114,7 +193,7 @@ describe("AnalyticsClient filters", () => {
 
     await userEvent.selectOptions(
       screen.getByRole("combobox", { name: "Club" }),
-      "club-1"
+      "club-1",
     );
 
     await waitFor(() => {
@@ -129,22 +208,22 @@ describe("AnalyticsClient filters", () => {
 
     await userEvent.selectOptions(
       screen.getByRole("combobox", { name: "Region" }),
-      "Lagos"
+      "Lagos",
     );
     await waitFor(() => {
       expect(mockedGetFunnelCsv).toHaveBeenCalledWith(
-        expect.objectContaining({ region: "Lagos" })
+        expect.objectContaining({ region: "Lagos" }),
       );
     });
 
     mockedGetFunnelCsv.mockClear();
     await userEvent.selectOptions(
       screen.getByRole("combobox", { name: "Role" }),
-      "parent"
+      "parent",
     );
     await waitFor(() => {
       expect(mockedGetFunnelCsv).toHaveBeenCalledWith(
-        expect.objectContaining({ role: "parent" })
+        expect.objectContaining({ role: "parent" }),
       );
     });
   });
@@ -156,14 +235,16 @@ describe("AnalyticsClient filters", () => {
 
     await userEvent.selectOptions(
       screen.getByRole("combobox", { name: "Club" }),
-      "club-1"
+      "club-1",
     );
     await waitFor(() => {
       expect(mockedGetFunnelCsv).toHaveBeenCalledWith({ clubId: "club-1" });
     });
 
     mockedGetFunnelCsv.mockClear();
-    await userEvent.click(screen.getByRole("button", { name: /clear filters/i }));
+    await userEvent.click(
+      screen.getByRole("button", { name: /clear filters/i }),
+    );
 
     await waitFor(() => {
       expect(mockedGetFunnelCsv).toHaveBeenCalledWith({});
@@ -176,7 +257,7 @@ describe("AnalyticsClient filters", () => {
 
     await userEvent.selectOptions(
       screen.getByRole("combobox", { name: "Club" }),
-      "club-1"
+      "club-1",
     );
     await waitFor(() => {
       expect(mockedGetFunnelCsv).toHaveBeenCalledWith({ clubId: "club-1" });
@@ -197,7 +278,9 @@ describe("AnalyticsClient filters", () => {
       .mockImplementation(() => {});
 
     mockedGetFunnelCsv.mockClear();
-    await userEvent.click(screen.getByRole("button", { name: /download funnel/i }));
+    await userEvent.click(
+      screen.getByRole("button", { name: /download funnel/i }),
+    );
 
     await waitFor(() => {
       expect(mockedGetFunnelCsv).toHaveBeenCalledWith({ clubId: "club-1" });
@@ -235,5 +318,31 @@ describe("AnalyticsClient escalation + predictive-at-risk cards", () => {
     expect(screen.getByText("Member One")).toBeTruthy();
     expect(screen.getByText("Member Two")).toBeTruthy();
     expect(mockedGetPredictiveAtRisk).toHaveBeenCalledWith(7);
+  });
+});
+
+describe("AnalyticsClient Faithful Parents card", () => {
+  it("lists faithful-parent signals with eligibility and calls getFaithfulParents()", async () => {
+    renderClient();
+
+    expect(await screen.findByText("Faithful Parents")).toBeTruthy();
+    expect(screen.getByText("Faithful Mum")).toBeTruthy();
+    expect(screen.getByText("Almost Dad")).toBeTruthy();
+    expect(mockedGetFaithfulParents).toHaveBeenCalled();
+    expect(screen.getByText("Eligible")).toBeTruthy();
+  });
+
+  it("awards the badge for an eligible parent and refreshes the row status", async () => {
+    renderClient();
+    await screen.findByText("Faithful Parents");
+
+    await userEvent.click(
+      screen.getAllByRole("button", { name: "Award Badge" })[0],
+    );
+
+    await waitFor(() => {
+      expect(mockedAwardFaithfulParent).toHaveBeenCalledWith("p1");
+    });
+    expect(await screen.findByText("Awarded")).toBeTruthy();
   });
 });

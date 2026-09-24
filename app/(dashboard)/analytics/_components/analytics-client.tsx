@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Siren,
   TrendingUp,
+  Award,
 } from "lucide-react";
 import { Button, Select, useToast } from "@/components/ui";
 import { StatCard, StatCardSkeleton } from "@/components/shared";
@@ -17,6 +18,7 @@ import {
   FunnelQueryParams,
   EscalationData,
   PredictiveAtRiskData,
+  FaithfulParentSignal,
 } from "@/lib/services/analytics";
 import { clubsService } from "@/lib/services/clubs";
 // @ts-expect-error – no types bundled
@@ -51,7 +53,12 @@ export function AnalyticsClient() {
   const [clubs, setClubs] = useState<Array<{ id: string; name: string }>>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [escalations, setEscalations] = useState<EscalationData | null>(null);
-  const [predictive, setPredictive] = useState<PredictiveAtRiskData | null>(null);
+  const [predictive, setPredictive] = useState<PredictiveAtRiskData | null>(
+    null,
+  );
+  const [faithfulParents, setFaithfulParents] = useState<
+    FaithfulParentSignal[] | null
+  >(null);
   const [auxError, setAuxError] = useState<string | null>(null);
 
   const activeParams = useMemo(() => {
@@ -111,7 +118,9 @@ export function AnalyticsClient() {
       })
       .catch((e: unknown) => {
         if (!cancelled)
-          setAuxError(e instanceof Error ? e.message : "Failed to load escalations");
+          setAuxError(
+            e instanceof Error ? e.message : "Failed to load escalations",
+          );
       });
     analyticsService
       .getPredictiveAtRisk(7)
@@ -120,7 +129,22 @@ export function AnalyticsClient() {
       })
       .catch((e: unknown) => {
         if (!cancelled)
-          setAuxError(e instanceof Error ? e.message : "Failed to load predictive at-risk");
+          setAuxError(
+            e instanceof Error
+              ? e.message
+              : "Failed to load predictive at-risk",
+          );
+      });
+    analyticsService
+      .getFaithfulParents()
+      .then((data) => {
+        if (!cancelled) setFaithfulParents(data.parents);
+      })
+      .catch((e: unknown) => {
+        if (!cancelled)
+          setAuxError(
+            e instanceof Error ? e.message : "Failed to load faithful parents",
+          );
       });
     return () => {
       cancelled = true;
@@ -324,19 +348,11 @@ export function AnalyticsClient() {
             <Download className="h-4 w-4" />
             {funnelExporting ? "Exporting…" : "Download Funnel"}
           </Button>
-          <Button
-            variant="secondary"
-            onClick={handlePrint}
-            className="gap-2"
-          >
+          <Button variant="secondary" onClick={handlePrint} className="gap-2">
             <Printer className="h-4 w-4" />
             Print / PDF
           </Button>
-          <Button
-            onClick={handleExport}
-            disabled={exporting}
-            className="gap-2"
-          >
+          <Button onClick={handleExport} disabled={exporting} className="gap-2">
             <Download className="h-4 w-4" />
             {exporting ? "Exporting…" : "Export CSV"}
           </Button>
@@ -359,6 +375,11 @@ export function AnalyticsClient() {
         <EscalationsCard escalations={escalations} />
         <PredictiveAtRiskCard predictive={predictive} />
       </div>
+
+      <FaithfulParentsCard
+        parents={faithfulParents}
+        onAwarded={setFaithfulParents}
+      />
 
       <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
         <div className="hidden px-5 pt-5 print:block">
@@ -386,7 +407,7 @@ export function AnalyticsClient() {
                       style={{
                         width: Math.max(
                           8,
-                          Math.round((row.started / maxStarted) * 120)
+                          Math.round((row.started / maxStarted) * 120),
                         ),
                       }}
                     />
@@ -405,9 +426,16 @@ export function AnalyticsClient() {
   );
 }
 
-function EscalationsCard({ escalations }: { escalations: EscalationData | null }) {
+function EscalationsCard({
+  escalations,
+}: {
+  escalations: EscalationData | null;
+}) {
   const summary = escalations?.summary;
-  const maxTrend = Math.max(...(escalations?.trend ?? []).map((t) => t.total), 1);
+  const maxTrend = Math.max(
+    ...(escalations?.trend ?? []).map((t) => t.total),
+    1,
+  );
   const byRule = summary?.by_rule ?? [];
 
   return (
@@ -480,7 +508,11 @@ function EscalationsCard({ escalations }: { escalations: EscalationData | null }
   );
 }
 
-function PredictiveAtRiskCard({ predictive }: { predictive: PredictiveAtRiskData | null }) {
+function PredictiveAtRiskCard({
+  predictive,
+}: {
+  predictive: PredictiveAtRiskData | null;
+}) {
   const members = predictive?.members ?? [];
 
   return (
@@ -529,6 +561,113 @@ function PredictiveAtRiskCard({ predictive }: { predictive: PredictiveAtRiskData
                       {member.projected_red_in_days}
                     </span>
                   )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
+}
+
+function FaithfulParentsCard({
+  parents,
+  onAwarded,
+}: {
+  parents: FaithfulParentSignal[] | null;
+  onAwarded: (parents: FaithfulParentSignal[] | null) => void;
+}) {
+  const { toast } = useToast();
+  const [awarding, setAwarding] = useState<Record<string, boolean>>({});
+
+  const handleAward = async (parent: FaithfulParentSignal) => {
+    setAwarding((prev) => ({ ...prev, [parent.id]: true }));
+    try {
+      const result = await analyticsService.awardFaithfulParent(parent.id);
+      toast(result.message, result.awarded ? "success" : "error");
+      if (result.awarded && parents) {
+        onAwarded(
+          parents.map((p) =>
+            p.id === parent.id ? { ...p, is_eligible: false } : p,
+          ),
+        );
+      }
+    } catch (e: unknown) {
+      toast(e instanceof Error ? e.message : "Award failed", "error");
+    } finally {
+      setAwarding((prev) => ({ ...prev, [parent.id]: false }));
+    }
+  };
+
+  return (
+    <section
+      aria-label="Faithful Parents"
+      className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+    >
+      <div className="mb-4 flex items-center gap-2">
+        <Award className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold text-gray-900">
+          Faithful Parents
+        </h3>
+        <span className="ml-auto text-xs text-gray-400">
+          Child-streak consistency signals
+        </span>
+      </div>
+      {!parents ? (
+        <p className="text-sm text-gray-400">
+          Loading faithful parent signals…
+        </p>
+      ) : parents.length === 0 ? (
+        <p className="text-sm text-gray-500">
+          No parents with active children.
+        </p>
+      ) : (
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-gray-100 text-xs text-gray-500">
+            <tr>
+              <th className="py-2 pr-3 font-medium">Parent</th>
+              <th className="py-2 pr-3 font-medium">Children</th>
+              <th className="py-2 pr-3 font-medium">Min Streak</th>
+              <th className="py-2 pr-3 font-medium">Status</th>
+              <th className="py-2 pr-3 font-medium" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {parents.map((parent) => (
+              <tr key={parent.id}>
+                <td className="py-2 pr-3 text-gray-900">
+                  {parent.full_name ??
+                    (parent.username ? `@${parent.username}` : parent.id)}
+                </td>
+                <td className="py-2 pr-3 tabular-nums text-gray-600">
+                  {parent.consistent_child_count}/{parent.child_count}
+                </td>
+                <td className="py-2 pr-3 tabular-nums text-gray-600">
+                  {parent.min_child_streak}
+                </td>
+                <td className="py-2 pr-3">
+                  {parent.is_eligible ? (
+                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                      Eligible
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                      {parent.consistent_child_count === parent.child_count
+                        ? "Awarded"
+                        : "Below threshold"}
+                    </span>
+                  )}
+                </td>
+                <td className="py-2 pr-3 text-right">
+                  <Button
+                    variant={parent.is_eligible ? "primary" : "outline"}
+                    size="sm"
+                    disabled={!parent.is_eligible || !!awarding[parent.id]}
+                    onClick={() => handleAward(parent)}
+                  >
+                    {awarding[parent.id] ? "Awarding…" : "Award Badge"}
+                  </Button>
                 </td>
               </tr>
             ))}

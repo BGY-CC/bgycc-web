@@ -61,6 +61,26 @@ export interface PredictiveAtRiskMember {
   projected_red_in_days: number | null;
 }
 
+export interface FaithfulParentSignal {
+  id: string;
+  full_name: string | null;
+  username: string | null;
+  child_count: number;
+  consistent_child_count: number;
+  min_child_streak: number;
+  is_eligible: boolean;
+}
+
+export interface AwardFaithfulParentResult {
+  awarded: boolean;
+  message: string;
+  signal?: {
+    child_count: number;
+    consistent_child_count: number;
+    min_child_streak: number;
+  };
+}
+
 export interface PredictiveAtRiskData {
   horizon: number;
   members: PredictiveAtRiskMember[];
@@ -112,7 +132,7 @@ const parseFunnelCsv = (csv: string): FunnelRow[] => {
     .filter(Boolean);
 
   const headerIndex = rows.findIndex((row) =>
-    /^step,started,completed,drop_rate$/i.test(row.trim())
+    /^step,started,completed,drop_rate$/i.test(row.trim()),
   );
   if (headerIndex === -1) return [];
 
@@ -134,7 +154,7 @@ export const analyticsService = {
   exportCsv: async (period: string = "month") => {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/analytics/export?period=${period}&format=csv`,
-      { method: "GET", headers: getAuthHeaders() }
+      { method: "GET", headers: getAuthHeaders() },
     );
     if (!response.ok) {
       throw new Error(`Analytics export failed (${response.status})`);
@@ -150,7 +170,7 @@ export const analyticsService = {
     const queryString = query.toString();
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/analytics/funnel?format=csv${queryString ? `&${queryString}` : ""}`,
-      { method: "GET", headers: getAuthHeaders() }
+      { method: "GET", headers: getAuthHeaders() },
     );
     if (!response.ok) {
       throw new Error(`Funnel export failed (${response.status})`);
@@ -162,7 +182,7 @@ export const analyticsService = {
   getEscalations: async (days: number = 30) => {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/analytics/escalations?days=${days}`,
-      { method: "GET", headers: getAuthHeaders() }
+      { method: "GET", headers: getAuthHeaders() },
     );
     if (!response.ok) {
       throw new Error(`Escalations fetch failed (${response.status})`);
@@ -174,12 +194,44 @@ export const analyticsService = {
   getPredictiveAtRisk: async (horizon: number = 7) => {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/analytics/predictive-at-risk?horizon=${horizon}`,
-      { method: "GET", headers: getAuthHeaders() }
+      { method: "GET", headers: getAuthHeaders() },
     );
     if (!response.ok) {
       throw new Error(`Predictive at-risk fetch failed (${response.status})`);
     }
     const body = await response.json();
     return body?.data ?? body;
+  },
+
+  getFaithfulParents: async () => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/analytics/faithful-parents`,
+      { method: "GET", headers: getAuthHeaders() },
+    );
+    const body = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        (body as { error?: string; message?: string })?.error ??
+          (body as { message?: string })?.message ??
+          `Faithful parents fetch failed (${response.status})`,
+      );
+    }
+    return (body?.data ?? body) as { parents: FaithfulParentSignal[] };
+  },
+
+  awardFaithfulParent: async (parentId: string) => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/analytics/faithful-parents/${parentId}/award`,
+      { method: "POST", headers: getAuthHeaders() },
+    );
+    const body = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        (body as { error?: string; message?: string })?.error ??
+          (body as { message?: string })?.message ??
+          `Faithful parent award failed (${response.status})`,
+      );
+    }
+    return (body?.data ?? body) as AwardFaithfulParentResult;
   },
 };
