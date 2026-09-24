@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Plus, ExternalLink, Pencil, Trash2, FolderOpen, Link2, History, Download } from "lucide-react";
+import {
+  Plus,
+  ExternalLink,
+  Pencil,
+  Trash2,
+  FolderOpen,
+  Link2,
+  History,
+  Download,
+} from "lucide-react";
 import { Button, ConfirmDialog, Skeleton, useToast } from "@/components/ui";
 import { SearchInput, StatCard, StatCardSkeleton } from "@/components/shared";
 import { ResourceModal, type ResourceFormData } from "./resource-modal";
@@ -13,7 +22,6 @@ import {
   ResourceCategoryOption,
   ResourceCompletionCount,
 } from "@/lib/services/resources";
-
 
 function ResourcesSkeleton() {
   return (
@@ -85,14 +93,17 @@ export function ResourcesClient() {
 
   const totalCompletions = useMemo(
     () => completions.reduce((sum, row) => sum + row.completions, 0),
-    [completions]
+    [completions],
   );
 
   type ResourcesRawData =
-    | Resource[]
-    | { resources?: Resource[]; data?: { resources?: Resource[] } };
+    Resource[] | { resources?: Resource[]; data?: { resources?: Resource[] } };
 
-  const { data: rawData, isLoading, refetch } = useQuery<ResourcesRawData>(`/resources`);
+  const {
+    data: rawData,
+    isLoading,
+    refetch,
+  } = useQuery<ResourcesRawData>(`/resources`);
 
   const resources: Resource[] = useMemo(() => {
     if (Array.isArray(rawData)) return rawData;
@@ -100,9 +111,10 @@ export function ResourcesClient() {
   }, [rawData]);
 
   const filteredResources = useMemo(() => {
-    return resources.filter(r => 
-      r.title.toLowerCase().includes(search.toLowerCase()) ||
-      r.description?.toLowerCase().includes(search.toLowerCase())
+    return resources.filter(
+      (r) =>
+        r.title.toLowerCase().includes(search.toLowerCase()) ||
+        r.description?.toLowerCase().includes(search.toLowerCase()),
     );
   }, [resources, search]);
 
@@ -114,7 +126,7 @@ export function ResourcesClient() {
     },
     {
       label: "Drive Links",
-      value: resources.filter(r => Boolean(r.link?.trim())).length,
+      value: resources.filter((r) => Boolean(r.link?.trim())).length,
       icon: <Link2 className="h-5 w-5 text-blue-600" />,
     },
   ];
@@ -128,12 +140,18 @@ export function ResourcesClient() {
         image_url: formData.image_url || null,
         access_level: formData.access_level || null,
         is_active: formData.is_active,
-        slug: formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        slug: formData.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
         tags: formData.tags,
         version: formData.version,
+        min_rank_required: formData.min_rank_required,
         min_rank_tier: formData.min_rank_tier
           ? parseInt(formData.min_rank_tier, 10)
           : undefined,
+        min_streak_required: formData.min_streak_required
+          ? parseInt(formData.min_streak_required, 10)
+          : undefined,
+        pathway: formData.pathway || null,
+        category: formData.category,
         access_override: formData.access_override ?? "none",
       });
 
@@ -145,7 +163,10 @@ export function ResourcesClient() {
         toast(result.error || "Failed to add resource", "error");
       }
     } catch (error: unknown) {
-      toast(error instanceof Error ? error.message : "An error occurred", "error");
+      toast(
+        error instanceof Error ? error.message : "An error occurred",
+        "error",
+      );
     }
   };
 
@@ -181,7 +202,10 @@ export function ResourcesClient() {
         toast(result.error || "Failed to update resource", "error");
       }
     } catch (error: unknown) {
-      toast(error instanceof Error ? error.message : "An error occurred", "error");
+      toast(
+        error instanceof Error ? error.message : "An error occurred",
+        "error",
+      );
     }
   };
 
@@ -197,7 +221,10 @@ export function ResourcesClient() {
         toast(result.error || "Failed to delete resource", "error");
       }
     } catch (error: unknown) {
-      toast(error instanceof Error ? error.message : "An error occurred", "error");
+      toast(
+        error instanceof Error ? error.message : "An error occurred",
+        "error",
+      );
     }
   };
 
@@ -265,7 +292,9 @@ export function ResourcesClient() {
       {/* Completions export */}
       <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">Resource completions</h3>
+          <h3 className="text-sm font-semibold text-slate-900">
+            Resource completions
+          </h3>
           <p className="mt-1 text-sm text-slate-500">
             {totalCompletions} completions across {completions.length} resources
           </p>
@@ -361,7 +390,11 @@ export function ResourcesClient() {
           <div className="rounded-3xl border-2 border-dashed border-gray-200 bg-white px-4 py-14 text-center sm:py-20">
             <p className="text-slate-500 font-normal">No resources found.</p>
             {search && (
-              <Button variant="secondary" className="mt-4" onClick={() => setSearch("")}>
+              <Button
+                variant="secondary"
+                className="mt-4"
+                onClick={() => setSearch("")}
+              >
                 Clear Search
               </Button>
             )}
@@ -401,7 +434,8 @@ export function ResourcesClient() {
                 min_streak_required: editTarget.min_streak_required
                   ? String(editTarget.min_streak_required)
                   : "",
-                pathway: (editTarget.pathway ?? "") as ResourceFormData["pathway"],
+                pathway: (editTarget.pathway ??
+                  "") as ResourceFormData["pathway"],
                 category: editTarget.category || "",
                 access_override: (editTarget.access_override ??
                   "none") as ResourceFormData["access_override"],
