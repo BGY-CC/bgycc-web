@@ -6,6 +6,7 @@ export const STEP_TYPES: { value: string; label: string }[] = [
   { value: "video", label: "Video" },
   { value: "consent", label: "Consent" },
   { value: "vision", label: "Vision" },
+  { value: "goals", label: "Goals" },
 ];
 
 /**
