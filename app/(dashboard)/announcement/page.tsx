@@ -7,11 +7,11 @@ import { PageHeader } from "@/components/shared";
 import { AnnouncementsClient } from "./_components/announcements-client";
 import { NotificationsClient } from "./_components/notifications-client";
 import { AnnouncementModal } from "./_components/announcement-modal";
+import type { AnnouncementFormData } from "./_components/announcement-modal";
 import { useToast } from "@/components/ui";
 import { announcementsService } from "@/lib/services/announcements";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
-
 
 export default function AnnouncementPage() {
   const { toast } = useToast();
@@ -22,19 +22,28 @@ export default function AnnouncementPage() {
     notificationsOnly ? "notifications" : "announcements",
   );
 
-  const handleAdd = async (formData: {
-    title: string;
-    content: string;
-    deliveryOptions: string[];
-    targetAudience: "all" | "specific";
-    selectedClubs?: string[];
-  }) => {
+  const handleAdd = async (formData: AnnouncementFormData) => {
     try {
+      const eventFields =
+        formData.type === "event"
+          ? {
+              event_topic: formData.event_topic ?? null,
+              event_sub_topic: formData.event_sub_topic ?? null,
+              event_date: formData.event_date ?? null,
+              event_time: formData.event_time ?? null,
+              event_location: formData.event_location ?? null,
+            }
+          : {};
       const result = await announcementsService.create({
         title: formData.title,
         content: formData.content,
-        type: "announcement",
+        type: formData.type,
         is_active: true,
+        club_id:
+          formData.targetAudience === "specific"
+            ? (formData.selectedClubs?.[0] ?? null)
+            : null,
+        ...eventFields,
         metadata: {
           delivery: formData.deliveryOptions,
           target:
@@ -63,22 +72,27 @@ export default function AnnouncementPage() {
       />
 
       <div className="flex-1 px-4 py-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto w-full space-y-6">
-        <div className={cn("grid gap-1 border-b border-gray-100", notificationsOnly ? "grid-cols-1" : "grid-cols-2")}>
+        <div
+          className={cn(
+            "grid gap-1 border-b border-gray-100",
+            notificationsOnly ? "grid-cols-1" : "grid-cols-2",
+          )}
+        >
           {!notificationsOnly && (
-          <button
-            onClick={() => setActiveTab("announcements")}
-            className={cn(
-              "relative min-h-11 px-3 py-3 text-center text-sm font-medium transition-colors sm:px-6",
-              activeTab === "announcements"
-                ? "text-primary"
-                : "text-slate-500 hover:text-slate-700"
-            )}
-          >
-            Announcements
-            {activeTab === "announcements" && (
-              <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary sm:left-0 sm:right-0" />
-            )}
-          </button>
+            <button
+              onClick={() => setActiveTab("announcements")}
+              className={cn(
+                "relative min-h-11 px-3 py-3 text-center text-sm font-medium transition-colors sm:px-6",
+                activeTab === "announcements"
+                  ? "text-primary"
+                  : "text-slate-500 hover:text-slate-700",
+              )}
+            >
+              Announcements
+              {activeTab === "announcements" && (
+                <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary sm:left-0 sm:right-0" />
+              )}
+            </button>
           )}
           <button
             onClick={() => setActiveTab("notifications")}
@@ -86,7 +100,7 @@ export default function AnnouncementPage() {
               "relative min-h-11 px-3 py-3 text-center text-sm font-medium transition-colors sm:px-6",
               activeTab === "notifications"
                 ? "text-primary"
-                : "text-slate-500 hover:text-slate-700"
+                : "text-slate-500 hover:text-slate-700",
             )}
           >
             My Notifications
@@ -101,7 +115,6 @@ export default function AnnouncementPage() {
             {/* Info card */}
             <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-8">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                
                 {/* Left content */}
                 <div className="flex min-w-0 items-start gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-600">

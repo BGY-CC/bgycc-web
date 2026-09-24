@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
-import { Megaphone, Pencil, Trash2 } from "lucide-react";
+import { Megaphone, Pencil, Trash2, CalendarDays } from "lucide-react";
 import { ConfirmDialog, Badge } from "@/components/ui";
 import { SearchInput } from "@/components/shared";
-import { AnnouncementModal } from "./announcement-modal";
+import { AnnouncementModal, AnnouncementFormData } from "./announcement-modal";
 import { useToast } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
 import {
@@ -80,26 +80,34 @@ export function AnnouncementsClient() {
     }));
   };
 
-  const { data: rawData, isLoading, refetch } =
-    useQuery<unknown>(`/community/announcements`);
+  const {
+    data: rawData,
+    isLoading,
+    refetch,
+  } = useQuery<unknown>(`/community/announcements`);
 
   const { data: clubsData } = useQuery<PaginatedClubs>("/clubs?page_size=100");
-  
+
   const clubsMap = useMemo(() => {
-    const clubs = filterAndNormalizeClubs((clubsData?.clubs as unknown as Record<string, unknown>[]) || []);
-    return new Map(clubs.map(c => [c.id, c.name]));
+    const clubs = filterAndNormalizeClubs(
+      (clubsData?.clubs as unknown as Record<string, unknown>[]) || [],
+    );
+    return new Map(clubs.map((c) => [c.id, c.name]));
   }, [clubsData]);
 
   const announcements: Announcement[] = useMemo(() => {
     const source = rawData as
       | Announcement[]
-      | { announcements?: Announcement[]; data?: { announcements?: Announcement[] } }
+      | {
+          announcements?: Announcement[];
+          data?: { announcements?: Announcement[] };
+        }
       | null
       | undefined;
 
     const list: Announcement[] = Array.isArray(source)
       ? source
-      : source?.announcements ?? source?.data?.announcements ?? [];
+      : (source?.announcements ?? source?.data?.announcements ?? []);
 
     return list.map((a) => {
       let metadata: Record<string, unknown> | null | undefined = a.metadata;
@@ -128,8 +136,7 @@ export function AnnouncementsClient() {
         if (!el) return;
 
         // temporarily force mobile constraint measurement
-        const isOverflowing =
-          el.scrollHeight > el.clientHeight + 1;
+        const isOverflowing = el.scrollHeight > el.clientHeight + 1;
 
         map[a.id] = isOverflowing;
       });
@@ -161,19 +168,35 @@ export function AnnouncementsClient() {
     }
   };
 
-  const handleEdit = async (formData: {
-    title: string;
-    content: string;
-    deliveryOptions: string[];
-    targetAudience: "all" | "specific";
-    selectedClubs?: string[];
-  }) => {
+  const handleEdit = async (formData: AnnouncementFormData) => {
     if (!editTarget) return;
 
     try {
+      const eventFields =
+        formData.type === "event"
+          ? {
+              event_topic: formData.event_topic ?? null,
+              event_sub_topic: formData.event_sub_topic ?? null,
+              event_date: formData.event_date ?? null,
+              event_time: formData.event_time ?? null,
+              event_location: formData.event_location ?? null,
+            }
+          : {
+              event_topic: null,
+              event_sub_topic: null,
+              event_date: null,
+              event_time: null,
+              event_location: null,
+            };
       const result = await announcementsService.update(editTarget.id, {
         title: formData.title,
         content: formData.content,
+        type: formData.type,
+        club_id:
+          formData.targetAudience === "specific"
+            ? (formData.selectedClubs?.[0] ?? null)
+            : null,
+        ...eventFields,
         metadata: {
           delivery: formData.deliveryOptions,
           target:
@@ -208,6 +231,21 @@ export function AnnouncementsClient() {
     }
   };
 
+  const formatEventDate = (dateString?: string | null) => {
+    if (!dateString) return "Event";
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateString);
+    if (match) {
+      const [, y, m, d] = match;
+      const label = new Date(Number(y), Number(m) - 1, Number(d));
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }).format(label);
+    }
+    return formatDate(dateString);
+  };
+
   if (isLoading && !rawData) {
     return <AnnouncementsSkeleton />;
   }
@@ -230,12 +268,25 @@ export function AnnouncementsClient() {
           announcements.map((a) => {
             const content = a.content ?? "";
             const isExpanded = !!expanded[a.id];
-            const delivery = (Array.isArray(a.metadata?.delivery) ? a.metadata.delivery : []) as string[];
-            const targets: string[] = Array.isArray(a.metadata?.target) 
-              ? (a.metadata.target as string[]).map((t: string) => clubsMap.get(t) || t)
-              : a.metadata?.target 
-                ? [clubsMap.get(a.metadata.target as string) || (a.metadata.target as string)] 
+            const delivery = (
+              Array.isArray(a.metadata?.delivery) ? a.metadata.delivery : []
+            ) as string[];
+            const targets: string[] = Array.isArray(a.metadata?.target)
+              ? (a.metadata.target as string[]).map(
+                  (t: string) => clubsMap.get(t) || t,
+                )
+              : a.metadata?.target
+                ? [
+                    clubsMap.get(a.metadata.target as string) ||
+                      (a.metadata.target as string),
+                  ]
                 : ["All Members"];
+            const scopedClubName = a.club_id
+              ? clubsMap.get(a.club_id)
+              : undefined;
+            const displayTargets = scopedClubName
+              ? targets.filter((t) => t !== scopedClubName)
+              : targets;
 
             return (
               <div
@@ -246,7 +297,11 @@ export function AnnouncementsClient() {
                   <div className="flex min-w-0 flex-1 items-start gap-4">
                     {/* Icon */}
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                      <Megaphone className="h-6 w-6" />
+                      {a.type === "event" ? (
+                        <CalendarDays className="h-6 w-6" />
+                      ) : (
+                        <Megaphone className="h-6 w-6" />
+                      )}
                     </div>
 
                     {/* Content */}
@@ -256,13 +311,18 @@ export function AnnouncementsClient() {
                           {a.title}
                         </h3>
                         {delivery.map((d: string) => (
-                          <Badge 
-                            key={d} 
+                          <Badge
+                            key={d}
                             className="bg-[#EEF2FF] text-[#4F46E5] border-none px-2 rounded-md text-[10px] uppercase font-semibold tracking-wider"
                           >
                             {d}
                           </Badge>
                         ))}
+                        {a.type === "event" && (
+                          <Badge className="bg-amber-50 text-amber-700 border-none px-2 rounded-md text-[10px] uppercase font-semibold tracking-wider">
+                            Event · {formatEventDate(a.event_date)}
+                          </Badge>
+                        )}
                       </div>
 
                       <p
@@ -287,9 +347,14 @@ export function AnnouncementsClient() {
 
                       {/* Footer Info */}
                       <div className="mt-4 flex flex-wrap items-center gap-2">
-                        {targets.map((t: string) => (
-                          <Badge 
-                            key={t} 
+                        {scopedClubName && (
+                          <Badge className="bg-emerald-50 text-emerald-700 border-none font-medium px-3 py-1">
+                            {scopedClubName}
+                          </Badge>
+                        )}
+                        {displayTargets.map((t: string) => (
+                          <Badge
+                            key={t}
                             className="bg-slate-100 text-slate-600 border-none font-medium px-3 py-1"
                           >
                             {t}
