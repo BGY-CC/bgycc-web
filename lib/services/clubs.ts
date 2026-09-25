@@ -65,6 +65,16 @@ export interface PaginatedClubs {
   total_pages: number;
 }
 
+export interface ImportMemberEntry {
+  email?: string;
+  user_id?: string;
+}
+
+export interface ImportMembersResult {
+  imported: number;
+  skipped: number;
+}
+
 const getAuthHeaders = () => {
   const token = typeof window !== 'undefined' ? localStorage.getItem("bgycc-token") : null;
   return {
@@ -167,6 +177,21 @@ export const clubsService = {
       headers: getAuthHeaders(),
       body: JSON.stringify({ userIds }),
     });
+    return readJson(response);
+  },
+
+  importMembers: async (
+    clubId: string,
+    members: ImportMemberEntry[],
+  ): Promise<ServiceResult<ImportMembersResult>> => {
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/clubs/${clubId}/members/import`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ members }),
+      },
+    );
     return readJson(response);
   },
 

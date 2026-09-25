@@ -14,6 +14,10 @@ interface UseQueryOptions<T> {
 const QUERY_CACHE_TTL = 30_000;
 const queryCache = new Map<string, { data: unknown; timestamp: number }>();
 
+export function clearQueryCache() {
+  queryCache.clear();
+}
+
 export function useQuery<T = unknown>(endpoint: string, options: UseQueryOptions<T> = {}) {
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(options.enabled !== false);

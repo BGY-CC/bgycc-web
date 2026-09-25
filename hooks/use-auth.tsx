@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from "rea
 import { useRouter, usePathname } from "next/navigation";
 import { ROUTES } from "@/lib/constants";
 import { API_CONFIG, readJson, ServiceResult } from "@/lib/api";
+import { clearQueryCache } from "@/hooks/use-query";
 
 interface AuthUser {
   id: string;
@@ -43,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const permissionKey = user?.permissions?.join(",") ?? "";
 
   const logout = useCallback(() => {
+    clearQueryCache();
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem("bgycc-auth");

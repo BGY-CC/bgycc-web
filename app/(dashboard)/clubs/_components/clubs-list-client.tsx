@@ -7,6 +7,7 @@ import { SearchInput } from "@/components/shared";
 import { ClubsTable } from "./clubs-table";
 import { ClubModal } from "./club-modal";
 import { SuccessModal } from "./success-modal";
+import { ImportMembersModal } from "./import-members-modal";
 import { useQuery } from "@/hooks/use-query";
 import { clubsService, Club, PaginatedClubs } from "@/lib/services/clubs";
 import { filterAndNormalizeClubs } from "@/lib/services/club-utils";
@@ -39,13 +40,19 @@ function ClubsTableSkeleton() {
   );
 }
 
+export type ClubSortField = "name" | "member_count" | "created_at";
+export type ClubSortDir = "asc" | "desc";
+
 export function ClubsListClient() {
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
   const [showCreate, setShowCreate] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [editingClub, setEditingClub] = useState<Club | null>(null);
+  const [importClub, setImportClub] = useState<Club | null>(null);
   const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState<ClubSortField>("name");
+  const [sortDir, setSortDir] = useState<ClubSortDir>("asc");
   const [search, setSearch] = useState("");
   const [filterState, setFilterState] = useState("");
   const [filterCity, setFilterCity] = useState("");
@@ -77,6 +84,8 @@ export function ClubsListClient() {
 
   const params = new URLSearchParams();
   params.set("page", page.toString());
+  params.set("sort_by", sortBy);
+  params.set("sort_dir", sortDir);
   if (search) params.set("name", search);
   if (filterState) params.set("state", filterState);
   if (filterCity) params.set("city", filterCity);
@@ -86,10 +95,18 @@ export function ClubsListClient() {
     { enabled: true },
   );
 
-  // Sort clubs alphabetically by name
-  const validClubs = filterAndNormalizeClubs((data?.clubs as unknown as Record<string, unknown>[]) || []).sort((a, b) =>
-    a.name.localeCompare(b.name)
+  const validClubs = filterAndNormalizeClubs(
+    (data?.clubs as unknown as Record<string, unknown>[]) || [],
   );
+
+  const handleSort = (field: ClubSortField) => {
+    if (sortBy === field) {
+      setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(field);
+      setSortDir("asc");
+    }
+  };
 
   interface ClubFormPayload {
     name: string;
@@ -323,6 +340,10 @@ export function ClubsListClient() {
             onPageChange={setPage}
             onDelete={handleDelete}
             onEdit={setEditingClub}
+            onImport={setImportClub}
+            sortBy={sortBy}
+            sortDir={sortDir}
+            onSort={handleSort}
           />
         )}
       </div>
@@ -355,6 +376,12 @@ export function ClubsListClient() {
         onClose={() => setShowSuccess(false)}
         title="Club Successfully Created"
         description="You have successfully created your club. Leaders will be able to edit this post and republish changes."
+      />
+      <ImportMembersModal
+        key={importClub?.id ?? "closed"}
+        club={importClub}
+        onClose={() => setImportClub(null)}
+        onSuccess={() => refetch()}
       />
     </>
   );

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, Pencil, PowerOff } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Eye, Pencil, PowerOff, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   Badge,
@@ -14,22 +14,66 @@ import { ConfirmDialog } from "@/components/ui";
 import { useToast } from "@/components/ui";
 import { Club } from "@/lib/services/clubs";
 
+type ClubSortField = "name" | "member_count" | "created_at";
+type ClubSortDir = "asc" | "desc";
+
 interface ClubsTableProps {
   clubs: Club[];
   currentPage: number;
   totalPages: number;
+  sortBy?: ClubSortField;
+  sortDir?: ClubSortDir;
   onPageChange: (page: number) => void;
+  onSort?: (field: ClubSortField) => void;
   onDelete?: (id: string) => void;
   onEdit?: (club: Club) => void;
+  onImport?: (club: Club) => void;
+}
+
+function SortableTh({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: ClubSortDir;
+  onClick: () => void;
+}) {
+  return (
+    <th className="px-4 py-5 whitespace-nowrap">
+      <button
+        type="button"
+        onClick={onClick}
+        className="inline-flex items-center gap-1 rounded text-[11px] font-semibold uppercase tracking-[0.1em] text-muted transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
+        {label}
+        {active ? (
+          dir === "asc" ? (
+            <ArrowUp className="h-3 w-3 text-primary" />
+          ) : (
+            <ArrowDown className="h-3 w-3 text-primary" />
+          )
+        ) : (
+          <ArrowUpDown className="h-3 w-3 opacity-40" />
+        )}
+      </button>
+    </th>
+  );
 }
 
 export function ClubsTable({
   clubs,
   currentPage,
   totalPages,
+  sortBy = "name",
+  sortDir = "asc",
   onPageChange,
+  onSort,
   onDelete,
   onEdit,
+  onImport,
 }: ClubsTableProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -66,6 +110,11 @@ export function ClubsTable({
                 label: "Edit Club",
                 icon: <Pencil className="h-4 w-4" />,
                 onClick: () => onEdit && onEdit(club),
+              },
+              {
+                label: "Import Members",
+                icon: <UserPlus className="h-4 w-4" />,
+                onClick: () => onImport && onImport(club),
               },
               {
                 label: "Deactivate",
@@ -148,23 +197,36 @@ export function ClubsTable({
           <table className="w-full text-sm font-sans">
             <thead>
               <tr className="border-b border-border text-left">
-                {[
-                  "Club",
-                  "Region",
-                  "Leader",
-                  "Members",
-                  "Report Rate",
-                  "Score",
-                  "Status",
-                  "Actions",
-                ].map((col) => (
-                  <th
-                    key={col}
-                    className="px-4 py-5 text-[11px] font-semibold text-muted uppercase tracking-[0.1em] whitespace-nowrap"
-                  >
-                    {col}
-                  </th>
-                ))}
+                <SortableTh
+                  label="Club"
+                  active={sortBy === "name"}
+                  dir={sortDir}
+                  onClick={() => onSort?.("name")}
+                />
+                <th className="px-4 py-5 text-[11px] font-semibold text-muted uppercase tracking-[0.1em] whitespace-nowrap">
+                  Region
+                </th>
+                <th className="px-4 py-5 text-[11px] font-semibold text-muted uppercase tracking-[0.1em] whitespace-nowrap">
+                  Leader
+                </th>
+                <SortableTh
+                  label="Members"
+                  active={sortBy === "member_count"}
+                  dir={sortDir}
+                  onClick={() => onSort?.("member_count")}
+                />
+                <th className="px-4 py-5 text-[11px] font-semibold text-muted uppercase tracking-[0.1em] whitespace-nowrap">
+                  Report Rate
+                </th>
+                <th className="px-4 py-5 text-[11px] font-semibold text-muted uppercase tracking-[0.1em] whitespace-nowrap">
+                  Score
+                </th>
+                <th className="px-4 py-5 text-[11px] font-semibold text-muted uppercase tracking-[0.1em] whitespace-nowrap">
+                  Status
+                </th>
+                <th className="px-4 py-5 text-[11px] font-semibold text-muted uppercase tracking-[0.1em] whitespace-nowrap">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -191,6 +253,11 @@ export function ClubsTable({
                     label: "Edit Club",
                     icon: <Pencil className="h-4 w-4" />,
                     onClick: () => onEdit && onEdit(club),
+                  },
+                  {
+                    label: "Import Members",
+                    icon: <UserPlus className="h-4 w-4" />,
+                    onClick: () => onImport && onImport(club),
                   },
                   {
                     label: "Deactivate",

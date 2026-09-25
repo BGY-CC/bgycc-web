@@ -59,10 +59,9 @@ export function AuditLogsClient() {
   const [to, setTo] = useState("");
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
-  const hasDateFilter = Boolean(from || to);
   const params = new URLSearchParams({
-    page: hasDateFilter ? "1" : page.toString(),
-    page_size: hasDateFilter ? "100" : "20",
+    page: page.toString(),
+    page_size: "20",
   });
   if (action) params.set("action", action);
   if (resourceType) params.set("resource_type", resourceType);
@@ -85,7 +84,7 @@ export function AuditLogsClient() {
   }, [refetch]);
 
   const logs = (data?.audit_logs ?? []).filter((log) => isAuditDateInRange(log.created_at, from, to));
-  const totalPages = hasDateFilter ? 1 : data?.meta.total_pages ?? 1;
+  const totalPages = data?.meta.total_pages ?? 1;
 
   const updateFilter = (setter: (value: string) => void, value: string) => {
     setter(value);
@@ -101,7 +100,7 @@ export function AuditLogsClient() {
               <ShieldCheck className="h-5 w-5" />
             </span>
             <div>
-              <p className="text-xl font-semibold text-primary">{(hasDateFilter ? logs.length : data?.meta.total_count ?? 0).toLocaleString()}</p>
+              <p className="text-xl font-semibold text-primary">{(data?.meta.total_count ?? 0).toLocaleString()}</p>
               <p className="text-sm text-muted">Recorded administrative actions</p>
             </div>
           </div>

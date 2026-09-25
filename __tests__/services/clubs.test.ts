@@ -234,6 +234,51 @@ describe("clubsService.reassignMembers", () => {
   });
 });
 
+describe("clubsService.importMembers", () => {
+  it("calls POST /clubs/{clubId}/members/import with email and user_id entries", async () => {
+    const fetchMock = mockFetch({
+      success: true,
+      data: { imported: 2, skipped: 1 },
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await clubsService.importMembers("club-123", [
+      { email: "alice@example.com" },
+      { user_id: "3f8a0e21-7b2d-4f1e-9c8a-0d2f6b1a3c4d" },
+    ]);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/clubs/club-123/members/import`,
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ "Content-Type": "application/json" }),
+        body: JSON.stringify({
+          members: [
+            { email: "alice@example.com" },
+            { user_id: "3f8a0e21-7b2d-4f1e-9c8a-0d2f6b1a3c4d" },
+          ],
+        }),
+      })
+    );
+    expect(result).toEqual({ success: true, data: { imported: 2, skipped: 1 } });
+  });
+
+  it("returns the error result on failure", async () => {
+    const errorBody = { success: false, error: "members array exceeds the 500-item limit" };
+    const fetchMock = mockFetch(errorBody, 400);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await clubsService.importMembers("club-123", [
+      { email: "nope@example.com" },
+    ]);
+
+    expect(result).toEqual({
+      success: false,
+      error: "members array exceeds the 500-item limit",
+    });
+  });
+});
+
 describe("clubsService.broadcastAlert", () => {
   it("calls POST /clubs/{clubId}/broadcast-alert with the target userId", async () => {
     const fetchMock = mockFetch({

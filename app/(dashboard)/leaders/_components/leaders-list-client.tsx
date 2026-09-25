@@ -8,6 +8,7 @@ import { LeadersTable } from "./leaders-table";
 import { LeaderStats } from "./leader-stats";
 import { useQuery } from "@/hooks/use-query";
 import { profilesService, UserProfile } from "@/lib/services/profiles";
+import { filterUsers } from "@/lib/leaders-filter";
 import { cn } from "@/lib/utils";
 
 export function LeadersListClient() {
@@ -33,15 +34,7 @@ export function LeadersListClient() {
     { enabled: true }
   );
 
-  const filteredUsers = (data?.users || []).filter(user => {
-    if (user.role === "super_admin" || user.role === "admin") return false;
-    if (roleFilter === "leader") return user.role === "leader";
-    if (roleFilter === "member") return user.role !== "leader";
-    
-    if (statusFilter !== "all" && user.status !== statusFilter) return false;
-    
-    return true;
-  });
+  const filteredUsers = filterUsers(data?.users || [], roleFilter, statusFilter);
 
   const handleUpdateRole = async (userId: string, newRole: string) => {
     try {
