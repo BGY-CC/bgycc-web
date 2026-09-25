@@ -69,6 +69,85 @@ export interface PromotionsPage {
   items: PromotionLogEntry[];
 }
 
+export interface VerificationRow {
+  id?: string;
+  member_id: string;
+  member_name: string | null;
+  member_avatar: string | null;
+  username?: string | null;
+  target_rank_key: string;
+  rank_name: string | null;
+  rank_symbol: string | null;
+  tier?: number | null;
+  status: RankStatus;
+  updated_at: string | null;
+}
+
+export interface PendingPayload {
+  verifications: VerificationRow[];
+}
+
+export const mapPendingApproval = (r: VerificationRow): PendingApproval => ({
+  memberId: r.member_id,
+  memberName: r.member_name,
+  username: r.username ?? null,
+  profilePictureUrl: r.member_avatar,
+  targetRank: {
+    key: r.target_rank_key,
+    name: r.rank_name ?? r.target_rank_key,
+    symbol: r.rank_symbol ?? "",
+    tier: r.tier ?? 0,
+  },
+  status: r.status,
+  updatedAt: r.updated_at ?? null,
+});
+
+export interface DistributionRow {
+  rank_key: string;
+  tier: number | null;
+  name: string;
+  symbol: string | null;
+  count: number;
+}
+
+export interface DistributionPayload {
+  distribution: DistributionRow[];
+}
+
+export const mapDistributionItem = (r: DistributionRow): RankDistributionItem => ({
+  key: r.rank_key,
+  name: r.name,
+  symbol: r.symbol ?? "",
+  count: r.count,
+});
+
+export interface CelebrationRow {
+  id: string;
+  member_id: string;
+  member_name: string | null;
+  profile_picture_url: string | null;
+  from_rank_key: string | null;
+  to_rank_key: string;
+  to_rank_name: string | null;
+  to_rank_symbol: string | null;
+  promoted_at: string | null;
+}
+
+export interface CelebrationsPayload {
+  week_start: string;
+  week_end: string;
+  celebrations: CelebrationRow[];
+}
+
+export const mapCelebration = (r: CelebrationRow): CelebrationItem => ({
+  memberId: r.member_id,
+  memberName: r.member_name,
+  username: null,
+  profilePictureUrl: r.profile_picture_url,
+  rank: { key: r.to_rank_key, name: r.to_rank_name ?? r.to_rank_key, symbol: r.to_rank_symbol ?? "", tier: 0 },
+  promotedAt: r.promoted_at ?? null,
+});
+
 export const getAllPromotions = async (
   options: { page?: number; limit?: number; status?: string; search?: string } = {}
 ): Promise<PromotionsPage> => {
@@ -79,7 +158,7 @@ export const getAllPromotions = async (
   if (options.search) params.set("search", options.search);
   const qs = params.toString();
 
-  const response = await fetch(`${API_CONFIG.BASE_URL}/admin/promotions${qs ? `?${qs}` : ""}`, {
+  const response = await fetch(`${API_CONFIG.BASE_URL}/promotions${qs ? `?${qs}` : ""}`, {
     method: "GET",
     headers: getAuthHeaders(),
   });
@@ -91,7 +170,7 @@ export const getAllPromotions = async (
 
 export const leaderRanksService = {
   confirm: async (memberId: string, targetRankKey: string) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/admin/ranks/confirm`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/ranks/confirm`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify({ memberId, targetRankKey }),
@@ -102,7 +181,7 @@ export const leaderRanksService = {
   },
 
   revert: async (memberId: string, targetRankKey: string) => {
-    const response = await fetch(`${API_CONFIG.BASE_URL}/admin/ranks/revert`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/ranks/revert`, {
       method: "POST",
       headers: getAuthHeaders(),
       body: JSON.stringify({ memberId, targetRankKey }),

@@ -66,7 +66,7 @@ describe("getAllPromotions", () => {
     const result = await getAllPromotions({ page: 1, limit: 2, status: "CONFIRMED", search: "Ada" });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      `${BASE_URL}/admin/promotions?page=1&limit=2&status=CONFIRMED&search=Ada`,
+      `${BASE_URL}/promotions?page=1&limit=2&status=CONFIRMED&search=Ada`,
       expect.objectContaining({
         method: "GET",
         headers: expect.objectContaining({ Authorization: `Bearer ${TOKEN}` }),
@@ -83,7 +83,7 @@ describe("getAllPromotions", () => {
     await getAllPromotions();
 
     expect(fetchMock).toHaveBeenCalledWith(
-      `${BASE_URL}/admin/promotions`,
+      `${BASE_URL}/promotions`,
       expect.objectContaining({ method: "GET" })
     );
   });
