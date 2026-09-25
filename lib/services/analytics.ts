@@ -179,6 +179,18 @@ export const analyticsService = {
     return { csv, rows: parseFunnelCsv(csv) };
   },
 
+  downloadFunnelCsv: async (params?: FunnelQueryParams): Promise<void> => {
+    const { csv } = await analyticsService.getFunnelCsv(params);
+    if (!csv) return;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `drop-off-funnel-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  },
+
   getEscalations: async (days: number = 30) => {
     const response = await fetch(
       `${API_CONFIG.BASE_URL}/analytics/escalations?days=${days}`,

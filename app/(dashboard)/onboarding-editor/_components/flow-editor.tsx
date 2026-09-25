@@ -5,6 +5,7 @@ import {
   ArrowDown,
   ArrowUp,
   Check,
+  Download,
   Eye,
   History,
   Pencil,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui";
 import { useQuery } from "@/hooks/use-query";
 import { onboardingService, OnboardingFlow, OnboardingStep } from "@/lib/services/onboarding";
+import { analyticsService } from "@/lib/services/analytics";
 import { OnboardingPreviewModal } from "./onboarding-preview-modal";
 import { OnboardingHistoryDrawer } from "./onboarding-history-drawer";
 import { StepEditorModal } from "./step-editor-modal";
@@ -38,6 +40,7 @@ export function FlowEditor() {
   const { toast } = useToast();
   const [welcomeVideoUrl, setWelcomeVideoUrl] = useState("");
   const [consentText, setConsentText] = useState("");
+  const [exporting, setExporting] = useState(false);
   const [visionText, setVisionText] = useState("");
   const [steps, setSteps] = useState<OnboardingStep[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -117,6 +120,19 @@ export function FlowEditor() {
     }
   };
 
+  const handleExportCsv = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      await analyticsService.downloadFunnelCsv();
+      toast("Drop-off CSV exported", "success");
+    } catch (error: unknown) {
+      toast(error instanceof Error ? error.message : "Export failed", "error");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const handleSaveStep = (next: OnboardingStep) => {
     if (editing?.mode === "add") {
       const created: OnboardingStep = {
@@ -189,6 +205,15 @@ export function FlowEditor() {
               onClick={() => setHistoryOpen(true)}
             >
               Version history
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              leftIcon={<Download className="h-4 w-4" />}
+              onClick={handleExportCsv}
+              disabled={exporting}
+            >
+              {exporting ? "Exporting…" : "Export drop-off CSV"}
             </Button>
             <Button
               variant="secondary"

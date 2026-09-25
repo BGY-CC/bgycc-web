@@ -7,6 +7,7 @@ import {
   onboardingService,
   type OnboardingVersion,
 } from "@/lib/services/onboarding";
+import { analyticsService } from "@/lib/services/analytics";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -339,6 +340,25 @@ describe("FlowEditor step editing", () => {
 
     expect(screen.queryByRole("button", { name: "Delete step" })).toBeNull();
     expect(screen.getByText("Consent")).toBeTruthy();
+  });
+
+  it("exports the drop-off CSV from the header action", async () => {
+    const exportSpy = vi
+      .spyOn(analyticsService, "downloadFunnelCsv")
+      .mockResolvedValue(undefined);
+    vi.stubGlobal("fetch", mockFetch(flowBody));
+
+    renderFlowEditor();
+
+    await screen.findByDisplayValue("https://cdn.example.com/welcome.mp4");
+    await userEvent.click(
+      screen.getByRole("button", { name: "Export drop-off CSV" }),
+    );
+
+    await waitFor(() => {
+      expect(exportSpy).toHaveBeenCalledTimes(1);
+    });
+    expect(await screen.findByText("Drop-off CSV exported")).toBeTruthy();
   });
 });
 
