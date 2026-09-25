@@ -4,10 +4,11 @@ import { BarChart3 } from "lucide-react";
 import { Skeleton } from "@/components/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@/hooks/use-query";
-import type { RankDistributionItem } from "@/lib/services/ranks";
+import { mapDistributionItem, type DistributionPayload } from "@/lib/services/ranks";
 
 export function RankDistribution() {
-  const { data: distribution, isLoading, error, refetch } = useQuery<RankDistributionItem[]>("/admin/ranks/distribution");
+  const { data, isLoading, error, refetch } = useQuery<DistributionPayload>("/ranks/distribution");
+  const distribution = data?.distribution?.map(mapDistributionItem) ?? [];
 
   const total = distribution?.reduce((sum, item) => sum + (item.count ?? 0), 0) ?? 0;
   const sorted = [...(distribution ?? [])].sort((a, b) => (b.count ?? 0) - (a.count ?? 0));

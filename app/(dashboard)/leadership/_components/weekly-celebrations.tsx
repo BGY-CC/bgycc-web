@@ -5,23 +5,23 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui";
 import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@/hooks/use-query";
-import type { CelebrationItem } from "@/lib/services/ranks";
+import {
+  mapCelebration,
+  type CelebrationsPayload,
+} from "@/lib/services/ranks";
 
-const getWeekKey = (date: Date): string => {
+const getWeekStart = (date: Date): string => {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  const week = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
-  return `${d.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
 };
 
 export function WeeklyCelebrations() {
-  const weekKey = getWeekKey(new Date());
-  const { data, isLoading, error, refetch } = useQuery<CelebrationItem[]>(
-    `/admin/ranks/celebrations?week=${weekKey}`
+  const weekStart = getWeekStart(new Date());
+  const { data, isLoading, error, refetch } = useQuery<CelebrationsPayload>(
+    `/ranks/celebrations?week=${weekStart}`
   );
-  const celebrations = data ?? [];
+  const celebrations = data?.celebrations?.map(mapCelebration) ?? [];
 
   const handleExport = () => {
     if (celebrations.length === 0) return;
@@ -36,7 +36,7 @@ export function WeeklyCelebrations() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `celebrations-${weekKey}.csv`;
+    a.download = `celebrations-${weekStart}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };

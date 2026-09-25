@@ -6,7 +6,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge, Button, useToast } from "@/components/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@/hooks/use-query";
-import { leaderRanksService, type PendingApproval } from "@/lib/services/ranks";
+import {
+  leaderRanksService,
+  mapPendingApproval,
+  type PendingApproval,
+  type PendingPayload,
+} from "@/lib/services/ranks";
 
 const statusVariant = (
   status: string
@@ -32,7 +37,8 @@ const statusLabel = (status: string) =>
 
 export function PendingApprovals() {
   const { toast } = useToast();
-  const { data: pending, isLoading, error, refetch } = useQuery<PendingApproval[]>("/admin/ranks/pending");
+  const { data, isLoading, error, refetch } = useQuery<PendingPayload>("/ranks/pending");
+  const pending = data?.verifications?.map(mapPendingApproval) ?? [];
   const [action, setAction] = useState<{ key: string; type: "confirm" | "revert" } | null>(null);
 
   const itemKey = (item: PendingApproval) => `${item.memberId}:${item.targetRank.key}`;

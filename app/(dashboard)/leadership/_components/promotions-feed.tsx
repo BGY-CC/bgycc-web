@@ -18,7 +18,7 @@ const formatDate = (value: string | null): string =>
 
 export function PromotionsFeed() {
   const { data, isLoading, error, refetch } = useQuery<PromotionsPage>(
-    "/admin/promotions?page=1&limit=10"
+    "/promotions?page=1&limit=10"
   );
 
   const items = data?.items ?? [];
